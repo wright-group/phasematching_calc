@@ -1,0 +1,21 @@
+Metadata-Version: 2.1
+Name: phasematching-calc
+Version: 0.1.0
+Summary: A simulation package for simulating phasematching effects in discrete layer isotropic samples.
+Home-page: https://github.com/wright-group/phasematching_calc
+Author: phasematching_calc Developers
+License: MIT
+Keywords: spectroscopy science multidimensional simulation
+Platform: UNKNOWN
+Classifier: Development Status :: 1 - Planning
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Natural Language :: English
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Topic :: Scientific/Engineering
+License-File: LICENSE
+
+UNKNOWN
+
