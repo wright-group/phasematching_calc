@@ -242,7 +242,7 @@ def Mcalc(Iso, Las):
             kouty=0.00
             koutx=0.00
             # NOTE: due to specific geometries used so far, it is unnecessary
-            # to perform Eulerian decompositions
+            # r, theta, phi conversions
             #
             if (anglex1temp==0.00):
                 anglez=np.pi/2-angley1temp
@@ -309,13 +309,13 @@ def Mcalc(Iso, Las):
         angleoutytemp=angleouty[m]
         nouttemp=nout[m]
                 
-        kout=2*np.pi*freqout*nouttemp
+        kout=2.00*np.pi*freqout*nouttemp
         koutx=kout*np.sin(angleoutxtemp)
         kouty=kout*np.sin(angleoutytemp)
         koutz=np.sqrt(kout**2-koutx**2-kouty**2)
 
         dk=koutz-(kcoeffs[0]*kztemp[0]+kcoeffs[1]*kztemp[1]+kcoeffs[2]*kztemp[2])
-        da=0.5*(aouttemp-(avectemp[0]+avectemp[1]+avectemp[2]))
+        da=0.5*(aouttemp-(np.abs(kcoeffs[0])*avectemp[0]+np.abs(kcoeffs[1])*avectemp[1]+np.abs(kcoeffs[2])*avectemp[2]))
         Mc1=np.exp(-0.5*aouttemp*tktemp)
         Mc2=np.complex(np.cos(dk*tktemp),np.sin(dk*tktemp))*np.exp(-da*tktemp)
         Mc3=np.complex(-da*tktemp/((dk**2+da**2)*tktemp**2), -tktemp*dk/((dk**2+da**2)*tktemp**2))
@@ -480,8 +480,7 @@ def EstimateAngle(Iso,Las,layernum,freqnum, frequency):
         for i in range(numfreqs):
             anglex1temp,angley1temp=Angle(Iso,Las,m+1,i+1)
             w,a,n=layertemp.estimate(freqs[i])
-            # NOTE: due to specific geometries used so far, it is unnecessary
-            # to perform Eulerian decompositions
+            # NOTE: see above
             #
             if (i+1 != freqnum):
                 if (anglex1temp==0.00):
@@ -640,8 +639,7 @@ def EstimateFrequency(Iso, Las, layernum, freqnum):
         for i in range(numfreqs):
             anglex1temp,angley1temp=Angle(Iso,Las,m+1,i+1)
             w,a,n=layertemp.estimate(freqs[i])
-            # NOTE: due to specific geometries used so far, it is unnecessary
-            # to perform Eulerian decompositions
+            # NOTE: see above
             #
         
             if (anglex1temp==0.00):
