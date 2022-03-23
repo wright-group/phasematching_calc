@@ -6,7 +6,7 @@ filepath=os.path.join(ROOT_DIR, 'tests')
 
 jsonfile=os.path.join(filepath, 'las.json')
 
-las=pc._lasers.Lasers()
+las=pc.Lasers.Lasers()
 arr1=[1500.0,3000.0,15000.0]
 las.addfrequencies(arr1)
 arr2=[0.0,-15.0, 15.0]
@@ -18,7 +18,7 @@ las.addpolarizations(arr4)
 las.changegeometry()
 las.save(jsonfile)
 
-las2=pc._lasers.Lasers()
+las2=pc.Lasers.Lasers()
 las2.load(jsonfile)
 
-assert (isinstance(las2, pc._lasers.Lasers))
+assert (isinstance(las2, pc.Lasers.Lasers))

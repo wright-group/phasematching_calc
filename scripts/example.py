@@ -9,20 +9,25 @@ manner and converted to a WrightTools data object.  Other methods can be employe
 in a WrightSim object or in other simulations.  The other methods found in the phasematching script
 are shown as well."""
 
+#NOTE it is important to note that Mcalc does not multiply by thickness^2 currently.  This
+# may be added later but may slightly limit the capability of the calculator as then l^4 dependencies
+# such as cascades will not be estimatable.
 
 filepath=os.path.join(ROOT_DIR, 'tests')
 
 lay1file=os.path.join(filepath, 'sapphire1.txt')
 lay2file=os.path.join(filepath, 'H2O_1.txt')
 
+tksapph=0.02 #cm
+tkwater=0.01 #cm
 
 # generation of a IsoSample
 samp1=pc.IsoSample.IsoSample()
 desc="FWM cell"
 samp1.description=desc
-samp1.loadlayer(lay1file, 0.02, label="sapphirefw")
-samp1.loadlayer(lay2file, 0.01, label="water")
-samp1.loadlayer(lay1file, 0.02, label="sapphirebw")
+samp1.loadlayer(lay1file, tksapph, label="sapphirefw")
+samp1.loadlayer(lay2file, tkwater, label="water")
+samp1.loadlayer(lay1file, tksapph, label="sapphirebw")
 
 #generation of a Lasers object.
 las=pc.Lasers.Lasers()
@@ -62,7 +67,8 @@ for m in range(len(var1)):
         las.changefreq(1,var1[m])
         las.changefreq(2,var2a[n])
         Mlist,Tlist=pc.phasematch.Mcalc(samp1,las)
-        ch1[m,n]=np.abs(Mlist[2])**2
+        ch1[m,n]=(np.abs(Mlist[2])**2)*tkwater**2  #final multiplier to get the M factor into a result 
+                            # where values can be readily understood
 
 
 data=wt.Data(name="example")
