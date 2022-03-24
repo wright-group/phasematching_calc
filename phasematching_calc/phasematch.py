@@ -2,6 +2,7 @@ import numpy as np
 from ._lasers import Lasers
 from ._isosample import IsoSample
 from ._isosample import Layer
+from sympy import S, FiniteSet
 
 Iso=IsoSample()
 Las=Lasers()
@@ -255,8 +256,8 @@ def Mcalc(Iso, Las):
                 koutx=2*np.pi*n*w*np.sin(anglex1temp)*kcoeffs[i]+koutx
                 
 
-            angleoutxtemp=np.arctan(koutx/koutz)
-            angleoutytemp=np.arctan(kouty/koutz)
+#            angleoutxtemp=np.arctan(koutx/koutz)
+#            angleoutytemp=np.arctan(kouty/koutz)
 
             kx1=2*np.pi*n*w*np.sin(anglex1temp)
             ky1=2*np.pi*n*w*np.sin(angley1temp)
@@ -269,6 +270,8 @@ def Mcalc(Iso, Las):
             nvectemp[i]=n
             atemp[i]=a
 
+        angleoutxtemp=np.arctan(koutx/koutz)
+        angleoutytemp=np.arctan(kouty/koutz)
         anglex.append(anglextemp)
         angley.append(angleytemp)      
         kx.append(kxtemp)
@@ -374,6 +377,8 @@ def Angle(Iso,Las,layernum,freqnum, frequency=None):
     lasfreq=Las.frequencies[freqnum-1]
     lasanglex=Las.anglesxrad[freqnum-1]
     lasangley=Las.anglesyrad[freqnum-1]
+    lasanglexin=lasanglex
+    lasangleyin=lasangley
 
     if (frequency is not None):
         lasfreq=frequency
@@ -410,9 +415,11 @@ def EstimateAngle(Iso,Las,layernum,freqnum, frequency):
 
     Output
     ----
-    theta = (deg) float of original angle in air needed for that PM condition.  Returns NaN if a real solution
-    cannot be found.
-
+    Output
+    ----
+    Sympy: FiniteSet : theta = (deg) float of original angle in air needed for that PM condition.
+           EmptySet if a solution cannot be found
+           Reals if all real frequencies greater than zero are found.
     '''
     if (isinstance (Iso,IsoSample)== False):
         return ValueError("first argument not an object of class IsotropicSample")
@@ -449,16 +456,17 @@ def EstimateAngle(Iso,Las,layernum,freqnum, frequency):
     angleouty=list()
 
     anglex1=anglexrad
-    anglex.append(anglex1)
+    #anglex.append(anglex1)
 
     angley1=angleyrad
-    angley.append(angley1)
+    #angley.append(angley1)
  
     freqs[freqnum-1]=frequency
 
     for i in range(numfreqs):
         freqout=freqout+kcoeffs[i]*freqs[i]
 
+    flag=int(0)
     for m in range(layernum):
         anglextemp=np.zeros(numfreqs)
         angleytemp=np.zeros(numfreqs)
@@ -487,20 +495,24 @@ def EstimateAngle(Iso,Las,layernum,freqnum, frequency):
                     anglez=np.pi/2.000-angley1temp
                     koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
                     kouty=2*np.pi*n*w*np.sin(angley1temp)*kcoeffs[i]+kouty
+
                 else:
                     anglez=np.pi/2.000-anglex1temp
                     koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
                     koutx=2*np.pi*n*w*np.sin(anglex1temp)*kcoeffs[i]+koutx
 
-                angleoutxtemp=np.arctan(koutx/koutz)
-                angleoutytemp=np.arctan(kouty/koutz)
+#                angleoutxtemp=np.arctan(koutx/koutz)
+#                angleoutytemp=np.arctan(kouty/koutz)
             
             else:
                 anglex1temp=0.00
                 angley1temp=0.00
                 anglez=0.00
-                # this is put in as reminder that we are solving for this variable so the k's for this
-                # one have to be set to zero
+            
+            pass
+            
+            # this is put in as reminder that we are solving for this variable so the k's for this
+            # one have to be set to zero
 
             kx1=2*np.pi*n*w*np.sin(anglex1temp)
             ky1=2*np.pi*n*w*np.sin(angley1temp)
@@ -513,52 +525,69 @@ def EstimateAngle(Iso,Las,layernum,freqnum, frequency):
             nvectemp[i]=n
             atemp[i]=a
 
-        anglex.append(anglextemp)
-        angley.append(angleytemp)      
-        kx.append(kxtemp)
-        ky.append(kytemp)
-        kz.append(kztemp)
-        avec.append(atemp)
-        nvec.append(nvectemp)
+        angleoutxtemp=np.arctan(koutx/koutz)
+        angleoutytemp=np.arctan(kouty/koutz)
 
-        angleouty.append(angleoutytemp)
-        angleoutx.append(angleoutxtemp)
-        nout.append(nouttemp)
-
-    m = layernum-1
-    # Current code only utilizes projection along z.   In future other
-    # projections can be incorporated.  (kx and ky are thus unused.)
-
-    kztemp=kz[m]
-    kytemp=ky[m]
-    kxtemp=kx[m]
-    
-    angleoutxtemp=angleoutx[m]
-    angleoutytemp=angleouty[m]
-    nouttemp=nout[m]
-    nvectemp=nvec[m]
-
-    kout=2*np.pi*freqout*nouttemp
-    koutx=kout*np.sin(angleoutxtemp)
-    kouty=kout*np.sin(angleoutytemp)
-    koutz=np.sqrt(kout**2-koutx**2-kouty**2)
-
-    dk=koutz-(kcoeffs[0]*kztemp[0]+kcoeffs[1]*kztemp[1]+kcoeffs[2]*kztemp[2]) # one of these is zero
-    ksolve=dk
-    theta=np.arcsin(ksolve/(2*np.pi*nvectemp[freqnum-1]*frequency*kcoeffs[freqnum-1]))
-    
-    if np.isnan(theta):
-        return float("nan")
-    for m in range(layernum):
-        n1=nvec[layernum-1-m][freqnum-1]
-        if (layernum-1-m == 0):
-            n2=1.0000
+        if ((koutx==koutz) & (koutx==0.00)):
+            if (m==(layernum-1)):
+                flag=1
+                break
+        elif ((kouty==koutz) & (koutx==0.00)):
+            if (m==(layernum-1)):
+                flag=1
+                break
         else:
-            n2=nvec[layernum-2-m][freqnum-1]
-        theta=np.arcsin(n1/n2*np.sin(theta))
+            anglex.append(anglextemp)
+            angley.append(angleytemp)      
+            kx.append(kxtemp)
+            ky.append(kytemp)
+            kz.append(kztemp)
+            avec.append(atemp)
+            nvec.append(nvectemp)
+
+            angleouty.append(angleoutytemp)
+            angleoutx.append(angleoutxtemp)
+            nout.append(nouttemp)
+
+    if (flag==1):
+        return S.Reals
+
+    else:
+        m = layernum-1
+            # Current code only utilizes projection along z.   In future other
+            # projections can be incorporated.  (kx and ky are thus unused.)
+
+        kztemp=kz[m]
+        kytemp=ky[m]
+        kxtemp=kx[m]
     
-    thetadeg=theta/np.pi*180.00
-    return thetadeg
+        angleoutxtemp=angleoutx[m]
+        angleoutytemp=angleouty[m]
+        nouttemp=nout[m]
+        nvectemp=nvec[m]
+
+        kout=2*np.pi*freqout*nouttemp
+        koutx=kout*np.sin(angleoutxtemp)
+        kouty=kout*np.sin(angleoutytemp)
+        koutz=np.sqrt(kout**2-koutx**2-kouty**2)
+
+        dk=koutz-(kcoeffs[0]*kztemp[0]+kcoeffs[1]*kztemp[1]+kcoeffs[2]*kztemp[2]) # one of these is zero
+        ksolve=dk
+        theta=np.arcsin(ksolve/(2*np.pi*nvectemp[freqnum-1]*frequency*kcoeffs[freqnum-1]))
+    
+        if np.isnan(theta):
+            #print("No real solution found, empty set returned")
+            return S.EmptySet
+        for m in range(layernum):
+            n1=nvec[layernum-1-m][freqnum-1]
+            if (layernum-1-m == 0):
+                n2=1.0000
+            else:
+                n2=nvec[layernum-2-m][freqnum-1]
+            theta=np.arcsin(n1/n2*np.sin(theta))
+    
+        thetadeg=theta/np.pi*180.00
+        return FiniteSet(thetadeg)
 
 
 def EstimateFrequency(Iso, Las, layernum, freqnum):
@@ -575,8 +604,9 @@ def EstimateFrequency(Iso, Las, layernum, freqnum):
 
     Output
     ----
-    frequency = (cm-1) float of original angle in air needed for that PM condition.  Returns NaN if a solution
-    cannot be found.
+    Sympy: FiniteSet : frequency = (cm-1) float of frequency needed for that PM condition.
+           EmptySet if a solution cannot be found.
+           Reals if all real frequencies greater than zero are found.
     '''
     if (isinstance (Iso,IsoSample)== False):
         return ValueError("first argument not an object of class IsotropicSample")
@@ -611,10 +641,10 @@ def EstimateFrequency(Iso, Las, layernum, freqnum):
     angleouty=list()
 
     anglex1=anglexrad
-    anglex.append(anglex1)
+    #anglex.append(anglex1)
 
     angley1=angleyrad
-    angley.append(angley1)
+    #angley.append(angley1)
  
     for i in range(numfreqs):
         freqout=freqout+kcoeffs[i]*freqs[i]
@@ -641,18 +671,26 @@ def EstimateFrequency(Iso, Las, layernum, freqnum):
             w,a,n=layertemp.estimate(freqs[i])
             # NOTE: see above
             #
-        
-            if (anglex1temp==0.00):
-                anglez=np.pi/2-angley1temp
-                koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
-                kouty=2*np.pi*n*w*np.sin(angley1temp)*kcoeffs[i]+kouty
-            else:
-                anglez=np.pi/2-anglex1temp
-                koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
-                koutx=2*np.pi*n*w*np.sin(anglex1temp)*kcoeffs[i]+koutx
+            if (i+1 != freqnum):
+                if (anglex1temp==0.00):
+                    anglez=np.pi/2.000-angley1temp
+                    koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
+                    kouty=2*np.pi*n*w*np.sin(angley1temp)*kcoeffs[i]+kouty
 
-            angleoutxtemp=np.arctan(koutx/koutz)
-            angleoutytemp=np.arctan(kouty/koutz)
+                else:
+                    anglez=np.pi/2.000-anglex1temp
+                    koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
+                    koutx=2*np.pi*n*w*np.sin(anglex1temp)*kcoeffs[i]+koutx
+
+#                angleoutxtemp=np.arctan(koutx/koutz)
+#                angleoutytemp=np.arctan(kouty/koutz)
+            
+            else:
+                anglex1temp=0.00
+                angley1temp=0.00
+                anglez=0.00
+            # this is put in as reminder that we are solving for this variable so the k's for this
+            # one have to be set to zero
 
             kx1=2*np.pi*n*w*np.sin(anglex1temp)
             ky1=2*np.pi*n*w*np.sin(angley1temp)
@@ -665,58 +703,73 @@ def EstimateFrequency(Iso, Las, layernum, freqnum):
             nvectemp[i]=n
             atemp[i]=a
 
-        anglex.append(anglextemp)
-        angley.append(angleytemp)      
-        kx.append(kxtemp)
-        ky.append(kytemp)
-        kz.append(kztemp)
+        angleoutxtemp=np.arctan(koutx/koutz)
+        angleoutytemp=np.arctan(kouty/koutz)
+        
+        if ((koutx==koutz) & (koutx==0.00)):
+            if (m==(layernum-1)):
+                flag=1
+                break
+        elif ((kouty==koutz) & (koutx==0.00)):
+            if (m==(layernum-1)):
+                flag=1
+                break
+        else:       
+            anglex.append(anglextemp)
+            angley.append(angleytemp)      
+            kx.append(kxtemp)
+            ky.append(kytemp)
+            kz.append(kztemp)
 
-        nvec.append(nvectemp)
+            nvec.append(nvectemp)
 
-        angleouty.append(angleoutytemp)
-        angleoutx.append(angleoutxtemp)
-        nout.append(nouttemp)
+            angleouty.append(angleoutytemp)
+            angleoutx.append(angleoutxtemp)
+            nout.append(nouttemp)
 
-    m = layernum-1
-    # Current code only utilizes projection along z.   In future other
-    # projections can be incorporated.  (kx and ky are thus unused.)
-    layertemp=Iso['layers'][m]
+    if (flag==1):
+        return S.Reals
+    else:
+        m = layernum-1
+        # Current code only utilizes projection along z.   In future other
+        # projections can be incorporated.  (kx and ky are thus unused.)
+        layertemp=Iso['layers'][m]
 
-    kztemp=kz[m]
-    kytemp=ky[m]
-    kxtemp=kx[m]
-    anglextemp=anglex[m]
-    angleytemp=angley[m]
+        kztemp=kz[m]
+        kytemp=ky[m]
+        kxtemp=kx[m]
+        anglextemp=anglex[m]
+        angleytemp=angley[m]
 
-    angleoutxtemp=angleoutx[m]
-    angleoutytemp=angleouty[m]
-    nouttemp=nout[m]
-    nvectemp=nvec[m]
+        angleoutxtemp=angleoutx[m]
+        angleoutytemp=angleouty[m]
+        nouttemp=nout[m]
+        nvectemp=nvec[m]
 
-    kout=2*np.pi*freqout*nouttemp
-    koutx=kout*np.sin(angleoutxtemp)
-    kouty=kout*np.sin(angleoutytemp)
-    koutz=np.sqrt(kout**2-koutx**2-kouty**2)
+        kout=2*np.pi*freqout*nouttemp
+        koutx=kout*np.sin(angleoutxtemp)
+        kouty=kout*np.sin(angleoutytemp)
+        koutz=np.sqrt(kout**2-koutx**2-kouty**2)
 
-    dk=koutz-(kcoeffs[0]*kztemp[0]+kcoeffs[1]*kztemp[1]+kcoeffs[2]*kztemp[2]) 
-    maxiter=15
-    tol=0.1
-    wsolv1=freqs[freqnum-1]
-    wsolv2=0
-    i=0
+        dk=koutz-(kcoeffs[0]*kztemp[0]+kcoeffs[1]*kztemp[1]+kcoeffs[2]*kztemp[2]) 
+        maxiter=15
+        tol=0.1
+        wsolv1=freqs[freqnum-1]
+        wsolv2=0
+        i=0
 
-    while(np.abs(wsolv1-wsolv2)>tol):
-        wsolv2=wsolv1
-        w,a,ntemp=layertemp.estimate(wsolv2)
-        anglex1temp,angley1temp=Angle(Iso, Las, layernum, freqnum, frequency=wsolv1)
-       
-        if (anglex1temp != 0):
-            tempangle=anglex1temp
-        else:
-            tempangle=angley1temp
-        wsolv1=dk/(2*np.pi*ntemp*np.sin(tempangle)*kcoeffs[freqnum-1])
-        i=i+1
-        if (i >= maxiter):
-            return float("nan")
+        while(np.abs(wsolv1-wsolv2)>tol):
+            wsolv2=wsolv1
+            w,a,ntemp=layertemp.estimate(wsolv2)
+            anglex1temp,angley1temp=Angle(Iso, Las, layernum, freqnum, frequency=wsolv1)
+        
+            if (anglex1temp != 0):
+                tempangle=anglex1temp
+            else:
+                tempangle=angley1temp
+            wsolv1=dk/(2*np.pi*ntemp*np.sin(tempangle)*kcoeffs[freqnum-1])
+            i=i+1
+            if (i >= maxiter):
+                return S.EmptySet
 
-    return wsolv1
+        return FiniteSet(wsolv1)
