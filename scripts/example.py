@@ -48,11 +48,11 @@ Mlist,Tdict=pc.phasematch.Mcalc(samp1,las)
 
 # angle estimation for laser 1 in layer 2 with frequency 1750 cm-1
 # using default geometry
-angle=pc.phasematch.EstimateAngle(samp1,las,2,1,1750)
+angle=pc.phasematch.SolveAngle(samp1,las,2,1,1750)
 
 # frequency estimate for a laser 1 in layer 2 to allow for phasematching
 # with the angle in air shown in the Las object above.
-freq=pc.phasematch.EstimateFrequency(samp1, las, 2, 1)
+freq=pc.phasematch.SolveFrequency(samp1, las, 2, 1)
 
 
 # A method for creating a 2D array of "Mcalcs" and converting into a

@@ -397,7 +397,7 @@ def Angle(Iso,Las,layernum,freqnum, frequency=None):
     return lasanglex,lasangley
 
 
-def EstimateAngle(Iso,Las,layernum,freqnum, frequency):
+def SolveAngle(Iso,Las,layernum,freqnum, frequency):
     '''
     Given an Isotropic Sample, a layer number and frequency number used in a geometry defined in Las object,
     determine the input angle (in air) required for phasematching that frequency.  Return NaN if
@@ -418,7 +418,7 @@ def EstimateAngle(Iso,Las,layernum,freqnum, frequency):
     Output
     ----
     Sympy: FiniteSet : theta = (deg) float of original angle in air needed for that PM condition.
-           EmptySet if a solution cannot be found
+           FiniteSet is empty if a solution cannot be found
            Reals if all real frequencies greater than zero are found.
     '''
     if (isinstance (Iso,IsoSample)== False):
@@ -438,7 +438,8 @@ def EstimateAngle(Iso,Las,layernum,freqnum, frequency):
     
     numfreqs=len(freqs)
     freqout=float(0.00)
-
+    
+    flag=int(0)
     # These are 2D arrays where the 1st D is layer (1st and last are air) and 2nd are the input freqs
     anglex=list()
     angley=list()
@@ -466,7 +467,6 @@ def EstimateAngle(Iso,Las,layernum,freqnum, frequency):
     for i in range(numfreqs):
         freqout=freqout+kcoeffs[i]*freqs[i]
 
-    flag=int(0)
     for m in range(layernum):
         anglextemp=np.zeros(numfreqs)
         angleytemp=np.zeros(numfreqs)
@@ -569,28 +569,63 @@ def EstimateAngle(Iso,Las,layernum,freqnum, frequency):
         kout=2*np.pi*freqout*nouttemp
         koutx=kout*np.sin(angleoutxtemp)
         kouty=kout*np.sin(angleoutytemp)
+        
         koutz=np.sqrt(kout**2-koutx**2-kouty**2)
-
         dk=koutz-(kcoeffs[0]*kztemp[0]+kcoeffs[1]*kztemp[1]+kcoeffs[2]*kztemp[2]) # one of these is zero
         ksolve=dk
         theta=np.arcsin(ksolve/(2*np.pi*nvectemp[freqnum-1]*frequency*kcoeffs[freqnum-1]))
     
         if np.isnan(theta):
             #print("No real solution found, empty set returned")
-            return S.EmptySet
-        for m in range(layernum):
-            n1=nvec[layernum-1-m][freqnum-1]
-            if (layernum-1-m == 0):
-                n2=1.0000
-            else:
-                n2=nvec[layernum-2-m][freqnum-1]
-            theta=np.arcsin(n1/n2*np.sin(theta))
+            thetasolv1=float("nan")
+            flag=2
+        
+        if (flag==0):
+            for m in range(layernum):
+                n1=nvec[layernum-1-m][freqnum-1]
+                if (layernum-1-m == 0):
+                    n2=1.0000
+                else:
+                    n2=nvec[layernum-2-m][freqnum-1]
+                theta=np.arcsin(n1/n2*np.sin(theta))
+            thetasolv1=theta/np.pi*180.00
+
+        flag=0
+        koutz=np.sqrt(kout**2-koutx**2-kouty**2)*(-1)
+        dk=koutz-(kcoeffs[0]*kztemp[0]+kcoeffs[1]*kztemp[1]+kcoeffs[2]*kztemp[2]) # one of these is zero
+        ksolve=dk
+        theta=np.arcsin(ksolve/(2*np.pi*nvectemp[freqnum-1]*frequency*kcoeffs[freqnum-1]))
     
-        thetadeg=theta/np.pi*180.00
-        return FiniteSet(thetadeg)
+        if np.isnan(theta):
+            #print("No real solution found, empty set returned")
+            thetasolv2=float("nan")
+            flag=2
+        
+        if (flag==0):
+            for m in range(layernum):
+                n1=nvec[layernum-1-m][freqnum-1]
+                if (layernum-1-m == 0):
+                    n2=1.0000
+                else:
+                    n2=nvec[layernum-2-m][freqnum-1]
+                theta=np.arcsin(n1/n2*np.sin(theta))
+            thetasolv2=theta/np.pi*180.00
+        
+
+        if (np.isnan(thetasolv1)):
+            if (np.isnan(thetasolv2)):
+                return FiniteSet()
+            else:
+                return FiniteSet(thetasolv2)
+        else:
+            if (np.isnan(thetasolv2)):
+                return FiniteSet(thetasolv1)
+            else:
+                return FiniteSet(thetasolv1,thetasolv2)
 
 
-def EstimateFrequency(Iso, Las, layernum, freqnum):
+
+def SolveFrequency(Iso, Las, layernum, freqnum):
     '''Using the current frequency as first guess, solves for the nearest possible phasematching frequency
     at a fixed angle for that frequencynum in a given layer, using an iterative convergence.  Returns NaN
     if a solution cannot be found within the number of iterations internal to the procedure.
@@ -605,7 +640,7 @@ def EstimateFrequency(Iso, Las, layernum, freqnum):
     Output
     ----
     Sympy: FiniteSet : frequency = (cm-1) float of frequency needed for that PM condition.
-           EmptySet if a solution cannot be found.
+           FiniteSet is empty if a solution cannot be found.
            Reals if all real frequencies greater than zero are found.
     '''
     if (isinstance (Iso,IsoSample)== False):
@@ -622,6 +657,7 @@ def EstimateFrequency(Iso, Las, layernum, freqnum):
     anglexrad=Las.anglesxrad
     angleyrad=Las.anglesyrad
     
+    flag=int(0)
     numfreqs=len(freqs)
     freqout=float(0.00)
 
@@ -749,8 +785,8 @@ def EstimateFrequency(Iso, Las, layernum, freqnum):
         kout=2*np.pi*freqout*nouttemp
         koutx=kout*np.sin(angleoutxtemp)
         kouty=kout*np.sin(angleoutytemp)
+        
         koutz=np.sqrt(kout**2-koutx**2-kouty**2)
-
         dk=koutz-(kcoeffs[0]*kztemp[0]+kcoeffs[1]*kztemp[1]+kcoeffs[2]*kztemp[2]) 
         maxiter=15
         tol=0.1
@@ -770,6 +806,45 @@ def EstimateFrequency(Iso, Las, layernum, freqnum):
             wsolv1=dk/(2*np.pi*ntemp*np.sin(tempangle)*kcoeffs[freqnum-1])
             i=i+1
             if (i >= maxiter):
-                return S.EmptySet
+                wsolv1=0.000
+                break
 
-        return FiniteSet(wsolv1)
+
+        solv1=wsolv1
+
+        koutz=np.sqrt(kout**2-koutx**2-kouty**2)*(-1)
+        dk=koutz-(kcoeffs[0]*kztemp[0]+kcoeffs[1]*kztemp[1]+kcoeffs[2]*kztemp[2]) 
+        maxiter=15
+        tol=0.1
+        wsolv1=freqs[freqnum-1]
+        wsolv2=0
+        i=0
+
+        while(np.abs(wsolv1-wsolv2)>tol):
+            wsolv2=wsolv1
+            w,a,ntemp=layertemp.estimate(wsolv2)
+            anglex1temp,angley1temp=Angle(Iso, Las, layernum, freqnum, frequency=wsolv1)
+        
+            if (anglex1temp != 0):
+                tempangle=anglex1temp
+            else:
+                tempangle=angley1temp
+            wsolv1=dk/(2*np.pi*ntemp*np.sin(tempangle)*kcoeffs[freqnum-1])
+            i=i+1
+            if (i >= maxiter):
+                wsolv1=0.000
+                break
+
+        solv2=wsolv1
+
+        if (solv1==0.00):
+            if (solv2==0.00):
+                return FiniteSet()
+            else:
+                return FiniteSet(solv2)
+        else:
+            if (solv2==0.00):
+                return FiniteSet(solv1)
+            else:
+                return FiniteSet(solv1,solv2)
+    

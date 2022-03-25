@@ -3,6 +3,7 @@ import numpy as np
 import json
 from types import SimpleNamespace
 
+
 class IsoSample():
     def __init__(self):
         self.description=""
@@ -14,8 +15,9 @@ class IsoSample():
     def __setitem__(self,key):
         return setattr(self,key)
 
+
     def loadlayer(self, csvfile, thickness, label=""):
-        # load a layer from a tab-delimited spreadsheet file
+        ''' load a layer from a tab-delimited spreadsheet file
         # File must contain three columns (L-R):  freq (cm-1), absorption coeff (cm-1), n
         # Freqs should be in increasing order.
 
@@ -24,6 +26,7 @@ class IsoSample():
         # csvfile: spreadsheet file
         # thickness:  thickness of layer in cm
         # label:  description of layer (str)
+        '''
         data=np.loadtxt(csvfile)
         wp=np.asarray(data[:,0], dtype=float)
 
@@ -48,7 +51,7 @@ class IsoSample():
             out["layers"].append(k.as_vars())
         return out
 
-    
+
     def save(self, file):
         """Save the JSON representation into an open file."""
         class DictEncoder(json.JSONEncoder):
@@ -72,7 +75,6 @@ class IsoSample():
         f.close()
         obj=SimpleNamespace(**eval(str1))
         return self.to_IsoSample(obj)
-
         
 
     def to_IsoSample(self, nsp):
@@ -88,6 +90,8 @@ class IsoSample():
             self["layers"].append(m)
         return 0
 
+
+
 class Layer:
     def __init__(self):
         self=dict()
@@ -97,10 +101,8 @@ class Layer:
         self['n_points']=list()
         self['a_points']=list()
 
-
     def __getitem__(self,key):
         return getattr(self,key)
-
 
     def __setitem__(self,key,val):
         return setattr(self,key,val)
@@ -116,7 +118,7 @@ class Layer:
 
 
     def estimate(self, freq):
-        # using the points in the layer, interpolate to estimate the refractive index and 
+        ''' using the points in the layer, interpolate to estimate the refractive index and 
         # absorption coefficient for the specified frequency (cm-1)
         
         # Parameters:
@@ -124,9 +126,11 @@ class Layer:
         # freq: frequency (cm-1)
         #
         # Returns:
-        # tuple: {refractive index, absorption coefficient (cm-1)}
+        # tuple: {refractive index, absorption coefficient (cm-1)} 
+        '''
         freq1=float(freq)
         ncalc=np.interp(freq1,self.w_points,self.n_points)
         absorp=np.interp(freq1,self.w_points,self.a_points)
 
         return freq1, absorp, ncalc
+

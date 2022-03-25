@@ -45,7 +45,7 @@ print(testoutput)
 
 # angle estimation for laser 1 in layer 2 with frequency 2600 cm-1
 # using boxcars..test for all reals
-angle=pc.phasematch.EstimateAngle(samp1,las,2,1,2600)
+angle=pc.phasematch.SolveAngle(samp1,las,2,1,2600)
 if (angle.compare(S.Reals) ==0):
    print ("angles: all real numbers")
    pass
@@ -56,7 +56,7 @@ else:
 
 # frequency estimate for a laser 1 in layer 2 to allow for phasematching
 # with the angle in air shown in the Las object above...test for all reals >0
-freq=pc.phasematch.EstimateFrequency(samp1, las, 2, 1)
+freq=pc.phasematch.SolveFrequency(samp1, las, 2, 1)
 if (freq.compare(S.Reals) ==0):
    print ("freqs: all real numbers >0")
    pass
@@ -65,3 +65,40 @@ else:
     print(out)
 
 
+#new lasers object:  unphasematchable geometry TSF
+las2=pc.Lasers.Lasers()
+arr1=[2700.0,1800.0,25000.0]
+las2.addfrequencies(arr1)
+arr2=[15.0,5.0,10.0]
+las2.addangles(arr2)
+arr3=[1,1,1]
+las2.addkcoeffs(arr3)
+arr4=[1,1,1]
+las.addpolarizations(arr4)
+las.changegeometry()
+
+angle=pc.phasematch.SolveAngle(samp1,las2,2,1,2600)
+
+out=list(angle)
+print(out)
+
+
+#new lasers object:  planar geometry DOVE
+las2=pc.Lasers.Lasers()
+arr1=[2700.0,1500.0,38000.0]
+las2.addfrequencies(arr1)
+arr2=[15.0,5.0,10.0]
+las2.addangles(arr2)
+arr3=[1,-1,1]
+las2.addkcoeffs(arr3)
+arr4=[1,1,1]
+las.addpolarizations(arr4)
+las.changegeometry()
+
+angle=pc.phasematch.SolveAngle(samp1,las2,2,2,1600)
+out=list(angle)
+print(out)
+
+freq=pc.phasematch.SolveFrequency(samp1,las2,2,2)
+out=list(freq)
+print(out)
