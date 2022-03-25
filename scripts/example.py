@@ -31,7 +31,7 @@ samp1.loadlayer(lay1file, tksapph, label="sapphirebw")
 
 #generation of a Lasers object.
 las=pc.Lasers.Lasers()
-arr1=[1800.0,2700.0,43000.0]
+arr1=[1800.0,2700.0,30000.0]
 las.addfrequencies(arr1)
 arr2=[10.0,-10.0, 0.0]
 las.addangles(arr2)
@@ -39,7 +39,7 @@ arr3=[-1,1,1]
 las.addkcoeffs(arr3)
 arr4=[1,1,1]
 las.addpolarizations(arr4)
-las.changegeometry()
+las.changegeometry("planar")
 
 #Test scripts show how the above objects can be saved and loaded.
 
@@ -48,11 +48,11 @@ Mlist,Tdict=pc.phasematch.Mcalc(samp1,las)
 
 # angle estimation for laser 1 in layer 2 with frequency 1750 cm-1
 # using default geometry
-angle=pc.phasematch.SolveAngle(samp1,las,2,1,1750)
+#angle=pc.phasematch.SolveAngle(samp1,las,2,1,1750)
 
 # frequency estimate for a laser 1 in layer 2 to allow for phasematching
 # with the angle in air shown in the Las object above.
-freq=pc.phasematch.SolveFrequency(samp1, las, 2, 1)
+#freq=pc.phasematch.SolveFrequency(samp1, las, 2, 1)
 
 
 # A method for creating a 2D array of "Mcalcs" and converting into a

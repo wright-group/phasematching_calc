@@ -29,7 +29,7 @@ class Layer:
 
 
     def estimate(self, freq):
-        # using the points in the layer, interpolate to estimate the refractive index and 
+        """ using the points in the layer, interpolate to estimate the refractive index and 
         # absorption coefficient for the specified frequency (cm-1)
         
         # Parameters:
@@ -38,6 +38,7 @@ class Layer:
         #
         # Returns:
         # tuple: {refractive index, absorption coefficient (cm-1)}
+        """
         freq1=float(freq)
         ncalc=np.interp(freq1,self.w_points,self.n_points)
         absorp=np.interp(freq1,self.w_points,self.a_points)

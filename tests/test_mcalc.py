@@ -36,7 +36,7 @@ arr4=[1,1,1]
 las.addpolarizations(arr4)
 las.changegeometry("boxcars")
 
-#Test scripts show how the above objects can be saved and loaded.
+#Other test scripts show how the above objects can be saved and loaded.
 # single point Mcalc check
 Mlist,Tdict=pc.phasematch.Mcalc(samp1,las)
 testoutput=np.abs(Mlist[1])**2*tkwater**2
@@ -84,25 +84,24 @@ print(out)
 
 
 #new lasers object:  planar geometry DOVE
-las2=pc.Lasers.Lasers()
+las3=pc.Lasers.Lasers()
 arr1=[2700.0,1500.0,38000.0]
-las2.addfrequencies(arr1)
+las3.addfrequencies(arr1)
 arr2=[15.0,5.0,10.0]
-las2.addangles(arr2)
+las3.addangles(arr2)
 arr3=[1,-1,1]
-las2.addkcoeffs(arr3)
+las3.addkcoeffs(arr3)
 arr4=[1,1,1]
-las2.addpolarizations(arr4)
-las2.changegeometry("planar")
+las3.addpolarizations(arr4)
+las3.changegeometry("planar")
 
-angle=pc.phasematch.SolveAngle(samp1,las2,2,2,1600)
+angle=pc.phasematch.SolveAngle(samp1,las3,2,2,1600)
 out=list(angle)
 print(out)
 
 freq=pc.phasematch.SolveFrequency(samp1,las2,2,3)
 out=list(freq)
 print(out)
-
 
 
 #new IsoSample: sapphire: ACN: sapphire
@@ -121,21 +120,21 @@ samp1.loadlayer(lay4file, tkacn, label="ACN")
 samp1.loadlayer(lay3file, tksapph, label="sapphirebw")
 
 # new Lasers object
-las3=pc.Lasers.Lasers()
+las4=pc.Lasers.Lasers()
 arr1=[3150.0,2200.0,12500.0]
-las3.addfrequencies(arr1)
+las4.addfrequencies(arr1)
 arr2=[15.0,5.0,10.0]
-las3.addangles(arr2)
+las4.addangles(arr2)
 arr3=[1,-1,1]
-las3.addkcoeffs(arr3)
+las4.addkcoeffs(arr3)
 arr4=[1,1,1]
-las3.addpolarizations(arr4)
-las3.changegeometry("planar")
+las4.addpolarizations(arr4)
+las4.changegeometry("planar")
 
-angle=pc.phasematch.SolveAngle(samp1,las3,2,2,2200)
+angle=pc.phasematch.SolveAngle(samp1,las4,2,2,2200)
 out=list(angle)
 print(out)
 
-freq=pc.phasematch.SolveFrequency(samp1,las3,2,3)
+freq=pc.phasematch.SolveFrequency(samp1,las4,2,3)
 out=list(freq)
 print(out)

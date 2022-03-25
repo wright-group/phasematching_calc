@@ -495,22 +495,15 @@ def SolveAngle(Iso,Las,layernum,freqnum, frequency):
                     anglez=np.pi/2.000-angley1temp
                     koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
                     kouty=2*np.pi*n*w*np.sin(angley1temp)*kcoeffs[i]+kouty
-
                 else:
                     anglez=np.pi/2.000-anglex1temp
                     koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
                     koutx=2*np.pi*n*w*np.sin(anglex1temp)*kcoeffs[i]+koutx
-
-#                angleoutxtemp=np.arctan(koutx/koutz)
-#                angleoutytemp=np.arctan(kouty/koutz)
-            
             else:
                 anglex1temp=0.00
                 angley1temp=0.00
                 anglez=0.00
-            
             pass
-            
             # this is put in as reminder that we are solving for this variable so the k's for this
             # one have to be set to zero
 
@@ -551,7 +544,6 @@ def SolveAngle(Iso,Las,layernum,freqnum, frequency):
 
     if (flag==1):
         return S.Reals
-
     else:
         m = layernum-1
             # Current code only utilizes projection along z.   In future other
@@ -570,6 +562,7 @@ def SolveAngle(Iso,Las,layernum,freqnum, frequency):
         koutx=kout*np.sin(angleoutxtemp)
         kouty=kout*np.sin(angleoutytemp)
         
+        #solution one of the square root
         koutz=np.sqrt(kout**2-koutx**2-kouty**2)
         dk=koutz-(kcoeffs[0]*kztemp[0]+kcoeffs[1]*kztemp[1]+kcoeffs[2]*kztemp[2]) # one of these is zero
         ksolve=dk
@@ -590,6 +583,7 @@ def SolveAngle(Iso,Las,layernum,freqnum, frequency):
                 theta=np.arcsin(n1/n2*np.sin(theta))
             thetasolv1=theta/np.pi*180.00
 
+        #solution two of the square root
         flag=0
         koutz=np.sqrt(kout**2-koutx**2-kouty**2)*(-1)
         dk=koutz-(kcoeffs[0]*kztemp[0]+kcoeffs[1]*kztemp[1]+kcoeffs[2]*kztemp[2]) # one of these is zero
@@ -622,7 +616,6 @@ def SolveAngle(Iso,Las,layernum,freqnum, frequency):
                 return FiniteSet(thetasolv1)
             else:
                 return FiniteSet(thetasolv1,thetasolv2)
-
 
 
 def SolveFrequency(Iso, Las, layernum, freqnum):
@@ -717,10 +710,6 @@ def SolveFrequency(Iso, Las, layernum, freqnum):
                     anglez=np.pi/2.000-anglex1temp
                     koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
                     koutx=2*np.pi*n*w*np.sin(anglex1temp)*kcoeffs[i]+koutx
-
-#                angleoutxtemp=np.arctan(koutx/koutz)
-#                angleoutytemp=np.arctan(kouty/koutz)
-            
             else:
                 anglex1temp=0.00
                 angley1temp=0.00
@@ -770,7 +759,6 @@ def SolveFrequency(Iso, Las, layernum, freqnum):
         # Current code only utilizes projection along z.   In future other
         # projections can be incorporated.  (kx and ky are thus unused.)
         layertemp=Iso['layers'][m]
-
         kztemp=kz[m]
         kytemp=ky[m]
         kxtemp=kx[m]
@@ -785,7 +773,8 @@ def SolveFrequency(Iso, Las, layernum, freqnum):
         kout=2*np.pi*freqout*nouttemp
         koutx=kout*np.sin(angleoutxtemp)
         kouty=kout*np.sin(angleoutytemp)
-        
+
+        # solution one of the square rooot        
         koutz=np.sqrt(kout**2-koutx**2-kouty**2)
         dk=koutz-(kcoeffs[0]*kztemp[0]+kcoeffs[1]*kztemp[1]+kcoeffs[2]*kztemp[2]) 
         maxiter=15
@@ -793,12 +782,10 @@ def SolveFrequency(Iso, Las, layernum, freqnum):
         wsolv1=freqs[freqnum-1]
         wsolv2=0
         i=0
-
         while(np.abs(wsolv1-wsolv2)>tol):
             wsolv2=wsolv1
             w,a,ntemp=layertemp.estimate(wsolv2)
             anglex1temp,angley1temp=Angle(Iso, Las, layernum, freqnum, frequency=wsolv1)
-        
             if (anglex1temp != 0):
                 tempangle=anglex1temp
             else:
@@ -808,12 +795,12 @@ def SolveFrequency(Iso, Las, layernum, freqnum):
             if (i >= maxiter):
                 wsolv1=0.000
                 break
-
         if (wsolv1 >= 0.000):
             solv1=wsolv1
         else:
             solv1=0.000
 
+        # solution two of the square root
         koutz=np.sqrt(kout**2-koutx**2-kouty**2)*(-1)
         dk=koutz-(kcoeffs[0]*kztemp[0]+kcoeffs[1]*kztemp[1]+kcoeffs[2]*kztemp[2]) 
         maxiter=15
@@ -826,7 +813,6 @@ def SolveFrequency(Iso, Las, layernum, freqnum):
             wsolv2=wsolv1
             w,a,ntemp=layertemp.estimate(wsolv2)
             anglex1temp,angley1temp=Angle(Iso, Las, layernum, freqnum, frequency=wsolv1)
-        
             if (anglex1temp != 0):
                 tempangle=anglex1temp
             else:
@@ -841,7 +827,8 @@ def SolveFrequency(Iso, Las, layernum, freqnum):
             solv2=wsolv1
         else:
             solv2=0.000
-            
+
+
         if (solv1==0.00):
             if (solv2==0.00):
                 return FiniteSet()
