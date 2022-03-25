@@ -573,7 +573,7 @@ def SolveAngle(Iso,Las,layernum,freqnum, frequency):
         koutz=np.sqrt(kout**2-koutx**2-kouty**2)
         dk=koutz-(kcoeffs[0]*kztemp[0]+kcoeffs[1]*kztemp[1]+kcoeffs[2]*kztemp[2]) # one of these is zero
         ksolve=dk
-        theta=np.arcsin(ksolve/(2*np.pi*nvectemp[freqnum-1]*frequency*kcoeffs[freqnum-1]))
+        theta=np.pi/2.00-np.arcsin(ksolve/(2*np.pi*nvectemp[freqnum-1]*frequency*kcoeffs[freqnum-1]))
     
         if np.isnan(theta):
             #print("No real solution found, empty set returned")
@@ -594,7 +594,7 @@ def SolveAngle(Iso,Las,layernum,freqnum, frequency):
         koutz=np.sqrt(kout**2-koutx**2-kouty**2)*(-1)
         dk=koutz-(kcoeffs[0]*kztemp[0]+kcoeffs[1]*kztemp[1]+kcoeffs[2]*kztemp[2]) # one of these is zero
         ksolve=dk
-        theta=np.arcsin(ksolve/(2*np.pi*nvectemp[freqnum-1]*frequency*kcoeffs[freqnum-1]))
+        theta=np.pi/2.00-np.arcsin(ksolve/(2*np.pi*nvectemp[freqnum-1]*frequency*kcoeffs[freqnum-1]))
     
         if np.isnan(theta):
             #print("No real solution found, empty set returned")
@@ -803,14 +803,16 @@ def SolveFrequency(Iso, Las, layernum, freqnum):
                 tempangle=anglex1temp
             else:
                 tempangle=angley1temp
-            wsolv1=dk/(2*np.pi*ntemp*np.sin(tempangle)*kcoeffs[freqnum-1])
+            wsolv1=dk/(2*np.pi*ntemp*np.sin(np.pi/2.00-tempangle)*kcoeffs[freqnum-1])
             i=i+1
             if (i >= maxiter):
                 wsolv1=0.000
                 break
 
-
-        solv1=wsolv1
+        if (wsolv1 >= 0.000):
+            solv1=wsolv1
+        else:
+            solv1=0.000
 
         koutz=np.sqrt(kout**2-koutx**2-kouty**2)*(-1)
         dk=koutz-(kcoeffs[0]*kztemp[0]+kcoeffs[1]*kztemp[1]+kcoeffs[2]*kztemp[2]) 
@@ -829,14 +831,17 @@ def SolveFrequency(Iso, Las, layernum, freqnum):
                 tempangle=anglex1temp
             else:
                 tempangle=angley1temp
-            wsolv1=dk/(2*np.pi*ntemp*np.sin(tempangle)*kcoeffs[freqnum-1])
+            wsolv1=dk/(2*np.pi*ntemp*np.sin(np.pi/2-tempangle)*kcoeffs[freqnum-1])
             i=i+1
             if (i >= maxiter):
                 wsolv1=0.000
                 break
-
-        solv2=wsolv1
-
+        
+        if (wsolv1 >= 0.000):
+            solv2=wsolv1
+        else:
+            solv2=0.000
+            
         if (solv1==0.00):
             if (solv2==0.00):
                 return FiniteSet()
@@ -848,3 +853,4 @@ def SolveFrequency(Iso, Las, layernum, freqnum):
             else:
                 return FiniteSet(solv1,solv2)
     
+ 
