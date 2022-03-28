@@ -2,7 +2,7 @@ import numpy as np
 from ._lasers import Lasers
 from ._isosample import IsoSample
 from ._isosample import Layer
-from sympy import S, FiniteSet
+from sympy import S, FiniteSet, Interval, oo
 
 Iso=IsoSample()
 Las=Lasers()
@@ -142,6 +142,147 @@ def _calculatetrans(narr,anglexarr,angleyarr,polsvec,noutvec,angleoutxvec,angleo
             Touty.append(Ty)
 
     return Tinx, Tiny, Toutx, Touty
+
+
+def _calculatecriticalangle(Iso, Las, layernum, freqnum, frequency=None):
+    """  Determines the critical angle for the layernum-1: layernum boundary.  Replaces value at freqnum 
+    by frequency if not None.
+
+    Return
+    -----
+    n,crit float of refractive index, critical angle (radians) for the layernum-1:layernum boundary,
+    or numpy.pi/2 if no critical angle found.
+    """
+ 
+    if (isinstance (Iso,IsoSample)== False):
+        return ValueError("first argument not an object of class IsotropicSample")
+    if (isinstance (Las,Lasers)== False):
+        return ValueError("second argument not an object of class Lasers")
+    if (freqnum < 1):
+        return ValueError("freqnum cannot be less than 1")
+    if (layernum < 1):
+        return ValueError("layernum cannot be less than 1")
+    
+    if (frequency is not None):
+        Las.frequencies[freqnum-1]=frequency
+
+    freq=Las.frequencies[freqnum-1]
+
+    m = layernum-1
+    if (layernum==len(Iso['layers'])):
+        w,a,nold=Iso["layers"][m].estimate(freq)
+        n=float(1.000)
+    else:
+        w,a,nold=Iso["layers"][m].estimate(freq)
+        w,a,n=Iso["layers"][m+1].estimate(freq)
+    crit=np.arcsin(n/nold)
+    if np.isnan(crit):
+        crit=np.pi/2
+
+    return nold, crit
+
+
+def _calculateallcriticalangles(Iso, Las, freqnum=None, frequency=None):
+    """  Calculates all critical angles for all inputs at all layer boundaries.  Or returns
+    numpy pi/2 if there is no critical angle at that combination.  Replaces freqnum with 
+    frequency if specified.
+
+    Return
+    -----
+    out= 2D arrray (1st D is layers m, 2nd is laser inputs i with float of the critical angle
+    between m and m+1 for each element  or numpy.pi/2 if no critical angle found.
+    """
+ 
+    if (isinstance (Iso,IsoSample)== False):
+        return ValueError("first argument not an object of class IsotropicSample")
+    if (isinstance (Las,Lasers)== False):
+        return ValueError("second argument not an object of class Lasers")
+    if (freqnum < 1):
+        return ValueError("freqnum cannot be less than 1")
+    if (frequency < 0.00):
+        return ValueError("frequency cannot be less than 0")
+    
+    if (frequency is not None & freqnum is not None):
+        Las.frequencies[freqnum-1]=frequency
+
+    mt=len(Iso["layers"])
+    it=len(Las.frequencies)
+    critarr=np.zeros([mt,it])
+    narr=critarr
+
+    for m in range(mt):
+        for i in range(it):
+            n, crit = _calculatecriticalangle(Iso, Las, m-1, i-1)
+            critarr[mt,it]=crit
+            narr[mt,it]=n
+
+    return narr, critarr
+
+
+def _stackcriticalangles(narr, critarr, layernum, freqnum):
+    """  Up to a given layernum, finds the smallest of all critical angles of a freqnum and
+    returns it.  This is necessary for the SolveAngle result when a large solution of angles are possible.
+   
+
+    Return
+    -----
+    crit = float angle in air to result in the smallest critangle in critarr up to layernum for freqnum.
+    """
+
+    critvec=list()
+    nvec=list()
+
+    for m in range(layernum):
+        critvec.append(critarr[m][freqnum])
+        nvec.append(narr[m][freqnum])
+
+    crit=np.pi/2
+
+    for m in range(layernum):
+        ncurrent=nvec[layernum-m-1]    
+        critcurrent=critvec[layernum-m-1]
+        crit=np.minimum(crit,critcurrent)
+
+        if (m != layernum):
+            nnew=nvec[layernum-m-1]
+        else:
+            nnew=float(1.000)
+        
+        critnew=np.arcsin(nnew/ncurrent*np.sin(crit))
+
+        if (np.isnan(critnew)):
+            critnew=np.pi/2
+        
+        crit=critnew
+
+    return crit
+
+
+def calculateoriginalcritangle(Iso, Las, layernum, freqnum, frequency=None):
+    """calculates the maximum original angle in air to result in the critical angle at the
+    layernum : layernum+1 interface (or numpy pi/2 if there are no critical angles, or
+    the angle in air of the smallest of any critical angles for that freqnum in any previous layers, 
+    converted to its original angle in air)
+
+    Return
+    ----
+    angle:  float (radians) in air of critical angle
+    """
+
+    if (isinstance (Iso,IsoSample)== False):
+        return ValueError("first argument not an object of class IsotropicSample")
+    if (isinstance (Las,Lasers)== False):
+        return ValueError("second argument not an object of class Lasers")
+    if (freqnum < 1):
+        return ValueError("freqnum cannot be less than 1")
+    if (layernum < 1):
+        return ValueError("layernum cannot be less than 1")
+
+    narr,critarr= _calculateallcriticalangles(Iso, Las, freqnum, frequency)
+    angle= _stackcriticalangles(narr, critarr, layernum, freqnum)
+    angledeg=angle/np.pi*180.00
+
+    return angledeg
 
 
 def Mcalc(Iso, Las):
@@ -543,7 +684,8 @@ def SolveAngle(Iso,Las,layernum,freqnum, frequency):
             nout.append(nouttemp)
 
     if (flag==1):
-        return S.Reals
+        angle=calculateoriginalcritangle(Iso, Las, layernum, freqnum, frequency)
+        return Interval(0,angle)
     else:
         m = layernum-1
             # Current code only utilizes projection along z.   In future other
@@ -753,7 +895,7 @@ def SolveFrequency(Iso, Las, layernum, freqnum):
             nout.append(nouttemp)
 
     if (flag==1):
-        return S.Reals
+        return Interval(0,oo)
     else:
         m = layernum-1
         # Current code only utilizes projection along z.   In future other
@@ -797,9 +939,13 @@ def SolveFrequency(Iso, Las, layernum, freqnum):
                 break
         if (wsolv1 >= 0.000):
             solv1=wsolv1
+            angle=calculateoriginalcritangle(Iso, Las, layernum, freqnum, frequency=solv2)
+            if (Las.anglesairdeg[freqnum-1] > angle):
+                solv1=0.000
         else:
             solv1=0.000
-
+        
+        
         # solution two of the square root
         koutz=np.sqrt(kout**2-koutx**2-kouty**2)*(-1)
         dk=koutz-(kcoeffs[0]*kztemp[0]+kcoeffs[1]*kztemp[1]+kcoeffs[2]*kztemp[2]) 
@@ -825,6 +971,9 @@ def SolveFrequency(Iso, Las, layernum, freqnum):
         
         if (wsolv1 >= 0.000):
             solv2=wsolv1
+            angle=calculateoriginalcritangle(Iso, Las, layernum, freqnum, frequency=solv2)
+            if (Las.anglesairdeg[freqnum-1] > angle):
+                solv2=0.000
         else:
             solv2=0.000
 
