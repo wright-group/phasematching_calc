@@ -175,9 +175,11 @@ def _calculatecriticalangle(Iso, Las, layernum, freqnum, frequency=None):
     else:
         w,a,nold=Iso["layers"][m].estimate(freq)
         w,a,n=Iso["layers"][m+1].estimate(freq)
-    crit=np.arcsin(n/nold)
-    if np.isnan(crit):
+    
+    if (n/nold > 1):
         crit=np.pi/2
+    else:
+        crit=np.arcsin(n/nold)
 
     return nold, crit
 
@@ -265,7 +267,7 @@ def calculateoriginalcritangle(Iso, Las, layernum, freqnum, frequency=None):
 
     Return
     ----
-    angle:  float (radians) in air of critical angle
+    angle:  float (degrees) in air of critical angle
     """
 
     if (isinstance (Iso,IsoSample)== False):
@@ -423,9 +425,9 @@ def Mcalc(Iso, Las):
         nout.append(nouttemp)
 
     launchanglex=np.arcsin(nouttemp*np.sin(angleoutxtemp))
-    launchanglexdeg=launchanglex*180/np.pi
+    launchanglexdeg=launchanglex*180.00/np.pi
     launchangley=np.arcsin(nouttemp*np.sin(angleoutytemp))
-    launchangleydeg=launchangley*180/np.pi
+    launchangleydeg=launchangley*180.00/np.pi
 
     angleoutx.append(launchanglex)
     angleouty.append(launchangley)
@@ -644,9 +646,6 @@ def SolveAngle(Iso,Las,layernum,freqnum, frequency):
             nvectemp[i]=n
             atemp[i]=a
 
-        angleoutxtemp=np.arctan(koutx/koutz)
-        angleoutytemp=np.arctan(kouty/koutz)
-
         if ((koutx==koutz) & (koutx==0.00)):
             if (m==(layernum-1)):
                 flag=1
@@ -656,6 +655,8 @@ def SolveAngle(Iso,Las,layernum,freqnum, frequency):
                 flag=1
                 break
         else:
+            angleoutxtemp=np.arctan(koutx/koutz)
+            angleoutytemp=np.arctan(kouty/koutz)
             anglex.append(anglextemp)
             angley.append(angleytemp)      
             kx.append(kxtemp)
@@ -669,8 +670,7 @@ def SolveAngle(Iso,Las,layernum,freqnum, frequency):
             nout.append(nouttemp)
 
     if (flag==1):
-        angle=calculateoriginalcritangle(Iso, Las, layernum, freqnum, frequency)
-        angledeg=angle/np.pi*180.00
+        angledeg=calculateoriginalcritangle(Iso, Las, layernum, freqnum, frequency)
         return Interval(0,angledeg)
     else:
         m = layernum-1
@@ -694,7 +694,11 @@ def SolveAngle(Iso,Las,layernum,freqnum, frequency):
         koutz=np.sqrt(kout**2-koutx**2-kouty**2)
         dk=koutz-(kcoeffs[0]*kztemp[0]+kcoeffs[1]*kztemp[1]+kcoeffs[2]*kztemp[2]) # one of these is zero
         ksolve=dk
-        theta=np.pi/2.00-np.arcsin(ksolve/(2*np.pi*nvectemp[freqnum-1]*frequency*kcoeffs[freqnum-1]))
+        if (((ksolve/(2*np.pi*nvectemp[freqnum-1]*frequency*kcoeffs[freqnum-1])) > 1) | ((ksolve/(2*np.pi*nvectemp[freqnum-1]*frequency*kcoeffs[freqnum-1])) < -1)):
+            flag=2
+            theta=float("nan")
+        else:
+            theta=np.pi/2.00-np.arcsin(ksolve/(2*np.pi*nvectemp[freqnum-1]*frequency*kcoeffs[freqnum-1]))
     
         if np.isnan(theta):
             #print("No real solution found, empty set returned")
@@ -716,8 +720,11 @@ def SolveAngle(Iso,Las,layernum,freqnum, frequency):
         koutz=np.sqrt(kout**2-koutx**2-kouty**2)*(-1)
         dk=koutz-(kcoeffs[0]*kztemp[0]+kcoeffs[1]*kztemp[1]+kcoeffs[2]*kztemp[2]) # one of these is zero
         ksolve=dk
-        theta=np.pi/2.00-np.arcsin(ksolve/(2*np.pi*nvectemp[freqnum-1]*frequency*kcoeffs[freqnum-1]))
-    
+        if (((ksolve/(2*np.pi*nvectemp[freqnum-1]*frequency*kcoeffs[freqnum-1])) > 1) | ((ksolve/(2*np.pi*nvectemp[freqnum-1]*frequency*kcoeffs[freqnum-1])) < -1)):
+            flag=2
+            theta=float("nan")
+        else:
+            theta=np.pi/2.00-np.arcsin(ksolve/(2*np.pi*nvectemp[freqnum-1]*frequency*kcoeffs[freqnum-1]))
         if np.isnan(theta):
             #print("No real solution found, empty set returned")
             thetasolv2=float("nan")
@@ -850,9 +857,6 @@ def SolveFrequency(Iso, Las, layernum, freqnum):
             nvectemp[i]=n
             atemp[i]=a
 
-        angleoutxtemp=np.arctan(koutx/koutz)
-        angleoutytemp=np.arctan(kouty/koutz)
-        
         if ((koutx==koutz) & (koutx==0.00)):
             if (m==(layernum-1)):
                 flag=1
@@ -862,6 +866,8 @@ def SolveFrequency(Iso, Las, layernum, freqnum):
                 flag=1
                 break
         else:       
+            angleoutxtemp=np.arctan(koutx/koutz)
+            angleoutytemp=np.arctan(kouty/koutz)
             anglex.append(anglextemp)
             angley.append(angleytemp)      
             kx.append(kxtemp)
