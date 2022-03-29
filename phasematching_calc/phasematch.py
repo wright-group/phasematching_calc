@@ -445,21 +445,34 @@ def Mcalc(Iso, Las):
         kxtemp=kx[m]
         
         tktemp=tk[m]
+                
         aouttemp=aout[m]
         angleoutxtemp=angleoutx[m]
         angleoutytemp=angleouty[m]
         nouttemp=nout[m]
-                
-        kout=2.00*np.pi*freqout*nouttemp
-        koutx=kout*np.sin(angleoutxtemp)
-        kouty=kout*np.sin(angleoutytemp)
-        koutz=np.sqrt(kout**2-koutx**2-kouty**2)
 
-        dk=koutz-(kcoeffs[0]*kztemp[0]+kcoeffs[1]*kztemp[1]+kcoeffs[2]*kztemp[2])
+        if (angleoutxtemp==0):
+            tkeff=tktemp/np.cos(angleoutytemp)
+        else:
+            tkeff=tktemp/np.cos(angleoutxtemp)
+
+        kout=2.00*np.pi*freqout*nouttemp
+        #koutx=kout*np.sin(angleoutxtemp)
+        #kouty=kout*np.sin(angleoutytemp)
+        #koutz=np.sqrt(kout**2-koutx**2-kouty**2)
+        ksumx=ksumy=ksumz=0
+        
+        for i in range(numfreqs):
+            ksumx=kcoeffs[i]*kxtemp[i]+ksumx
+            ksumy=kcoeffs[i]*kytemp[i]+ksumy
+            ksumz=kcoeffs[i]*kztemp[i]+ksumz
+        k4=np.sqrt(ksumx**2+ksumy**2+ksumz**2)
+
+        dk=kout-k4
         da=0.5*(aouttemp-(np.abs(kcoeffs[0])*avectemp[0]+np.abs(kcoeffs[1])*avectemp[1]+np.abs(kcoeffs[2])*avectemp[2]))
-        Mc1=np.exp(-0.5*aouttemp*tktemp)
-        Mc2=np.complex(np.cos(dk*tktemp),np.sin(dk*tktemp))*np.exp(-da*tktemp)
-        Mc3=np.complex(-da*tktemp/((dk**2+da**2)*tktemp**2), -tktemp*dk/((dk**2+da**2)*tktemp**2))
+        Mc1=np.exp(-0.5*aouttemp*tkeff)
+        Mc2=np.complex(np.cos(dk*tkeff),np.sin(dk*tkeff))*np.exp(-da*tkeff)
+        Mc3=np.complex(-da*tkeff/((dk**2+da**2)*tkeff**2), -tkeff*dk/((dk**2+da**2)*tkeff**2))
         
         if (i==0):
             Mpre=1
@@ -618,26 +631,26 @@ def SolveAngle(Iso,Las,layernum,freqnum, frequency):
             w,a,n=layertemp.estimate(freqs[i])
             # NOTE: see above
             #
-            if (i+1 != freqnum):
-                if (anglex1temp==0.00):
-                    anglez=np.pi/2.000-angley1temp
-                    koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
-                    kouty=2*np.pi*n*w*np.sin(angley1temp)*kcoeffs[i]+kouty
-                else:
-                    anglez=np.pi/2.000-anglex1temp
-                    koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
-                    koutx=2*np.pi*n*w*np.sin(anglex1temp)*kcoeffs[i]+koutx
+            if (anglex1temp==0.00):
+                anglez=np.pi/2.000-angley1temp
+                koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
+                kouty=2*np.pi*n*w*np.sin(angley1temp)*kcoeffs[i]+kouty
             else:
-                anglex1temp=0.00
-                angley1temp=0.00
-                anglez=0.00
-            pass
+                anglez=np.pi/2.000-anglex1temp
+                koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
+                koutx=2*np.pi*n*w*np.sin(anglex1temp)*kcoeffs[i]+koutx
+
+            if (i+1==freqnum):
+                factor=0.00
+            else:
+                factor=1.00
+            
             # this is put in as reminder that we are solving for this variable so the k's for this
             # one have to be set to zero
 
-            kx1=2*np.pi*n*w*np.sin(anglex1temp)
-            ky1=2*np.pi*n*w*np.sin(angley1temp)
-            kz1=2*np.pi*n*w*np.sin(anglez)
+            kx1=2*np.pi*n*w*np.sin(anglex1temp)*factor
+            ky1=2*np.pi*n*w*np.sin(angley1temp)*factor
+            kz1=2*np.pi*n*w*np.sin(anglez)*factor
             anglextemp[i]=anglex1temp
             angleytemp[i]=angley1temp
             kxtemp[i]=kx1
@@ -680,20 +693,31 @@ def SolveAngle(Iso,Las,layernum,freqnum, frequency):
         kztemp=kz[m]
         kytemp=ky[m]
         kxtemp=kx[m]
-    
+        anglextemp=anglex[m]
+        angleytemp=angley[m]
+
         angleoutxtemp=angleoutx[m]
         angleoutytemp=angleouty[m]
         nouttemp=nout[m]
         nvectemp=nvec[m]
 
         kout=2*np.pi*freqout*nouttemp
-        koutx=kout*np.sin(angleoutxtemp)
-        kouty=kout*np.sin(angleoutytemp)
+        #koutx=kout*np.sin(angleoutxtemp)
+        #kouty=kout*np.sin(angleoutytemp)
         
-        #solution one of the square root
-        koutz=np.sqrt(kout**2-koutx**2-kouty**2)
-        dk=koutz-(kcoeffs[0]*kztemp[0]+kcoeffs[1]*kztemp[1]+kcoeffs[2]*kztemp[2]) # one of these is zero
+        for i in range(numfreqs):
+            ksumx=kcoeffs[i]*kxtemp[i]+ksumx
+            ksumy=kcoeffs[i]*kytemp[i]+ksumy
+            ksumz=kcoeffs[i]*kztemp[i]+ksumz
+        
+        # one of the ktemp[i] sets is zero
+        k4=np.sqrt(ksumx**2+ksumy**2+ksumz**2)
+        dk=kout-k4
         ksolve=dk
+
+        if (anglextemp[freqnum-1]==0):
+            theta=np.arctan(0)
+
         if (((ksolve/(2*np.pi*nvectemp[freqnum-1]*frequency*kcoeffs[freqnum-1])) > 1) | ((ksolve/(2*np.pi*nvectemp[freqnum-1]*frequency*kcoeffs[freqnum-1])) < -1)):
             flag=2
             theta=float("nan")

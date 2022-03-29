@@ -150,7 +150,7 @@ samp1.loadlayer(lay3file, tksapph, label="sapphirebw")
 las4=pc.Lasers.Lasers()
 arr1=[3150.0,2200.0,5000.0]
 las4.addfrequencies(arr1)
-arr2=[25.0,35.0,0.0]
+arr2=[80.0,15.0,0.0]
 las4.addangles(arr2)
 arr3=[1,-1,1]
 las4.addkcoeffs(arr3)
