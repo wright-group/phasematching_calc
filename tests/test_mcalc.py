@@ -46,23 +46,15 @@ print(testoutput)
 # angle estimation for laser 1 in layer 2 with frequency 2600 cm-1
 # using boxcars..test for all reals
 angle=pc.phasematch.SolveAngle(samp1,las,2,1,2600)
-if (angle.compare(S.Reals) ==0):
-   print ("angles: all real numbers")
-   pass
-else: 
-    out=list(angle)
-    print(out)
+out=angle
+print(out)
 
 
 # frequency estimate for a laser 1 in layer 2 to allow for phasematching
 # with the angle in air shown in the Las object above...test for all reals >0
 freq=pc.phasematch.SolveFrequency(samp1, las, 2, 1)
-if (freq.compare(S.Reals) ==0):
-   print ("freqs: all real numbers >0")
-   pass
-else: 
-    out=list(freq)
-    print(out)
+out=freq
+print(out)
 
 
 #new lasers object:  unphasematchable geometry TSF
@@ -78,8 +70,7 @@ las.addpolarizations(arr4)
 las.changegeometry()
 
 angle=pc.phasematch.SolveAngle(samp1,las2,2,1,2600)
-
-out=list(angle)
+out=angle
 print(out)
 
 
@@ -96,11 +87,11 @@ las3.addpolarizations(arr4)
 las3.changegeometry("planar")
 
 angle=pc.phasematch.SolveAngle(samp1,las3,2,2,1600)
-out=list(angle)
+out=angle
 print(out)
 
 freq=pc.phasematch.SolveFrequency(samp1,las2,2,3)
-out=list(freq)
+out=freq
 print(out)
 
 
@@ -132,9 +123,45 @@ las4.addpolarizations(arr4)
 las4.changegeometry("planar")
 
 angle=pc.phasematch.SolveAngle(samp1,las4,2,2,2200)
-out=list(angle)
+out=angle
 print(out)
 
 freq=pc.phasematch.SolveFrequency(samp1,las4,2,3)
-out=list(freq)
+out=freq
+print(out)
+
+lay3file=os.path.join(filepath, 'sapphire1.txt')
+lay4file=os.path.join(filepath, 'CH3CN_paste_1.txt')
+lay5file=os.path.join(filepath, 'Silicon_shk_ir.txt')
+
+tksapph=0.02 #cm
+tkacn=0.01 #cm
+tksi=0.02 
+
+# generation of a IsoSample
+samp1=pc.IsoSample.IsoSample()
+desc="FWM cell"
+samp1.description=desc
+samp1.loadlayer(lay5file, tksi, label="siliconfw")
+samp1.loadlayer(lay4file, tkacn, label="ACN")
+samp1.loadlayer(lay3file, tksapph, label="sapphirebw")
+
+# new Lasers object
+las4=pc.Lasers.Lasers()
+arr1=[3150.0,2200.0,5000.0]
+las4.addfrequencies(arr1)
+arr2=[25.0,35.0,0.0]
+las4.addangles(arr2)
+arr3=[1,-1,1]
+las4.addkcoeffs(arr3)
+arr4=[1,1,1]
+las4.addpolarizations(arr4)
+las4.changegeometry("planar")
+
+angle=pc.phasematch.SolveAngle(samp1,las4,2,2,2200)
+out=angle
+print(out)
+
+freq=pc.phasematch.SolveFrequency(samp1,las4,2,3)
+out=freq
 print(out)

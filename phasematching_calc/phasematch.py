@@ -202,7 +202,7 @@ def _calculateallcriticalangles(Iso, Las, freqnum=None, frequency=None):
     if (frequency < 0.00):
         return ValueError("frequency cannot be less than 0")
     
-    if (frequency is not None & freqnum is not None):
+    if ((frequency is not None) & (freqnum is not None)):
         Las.frequencies[freqnum-1]=frequency
 
     mt=len(Iso["layers"])
@@ -212,9 +212,9 @@ def _calculateallcriticalangles(Iso, Las, freqnum=None, frequency=None):
 
     for m in range(mt):
         for i in range(it):
-            n, crit = _calculatecriticalangle(Iso, Las, m-1, i-1)
-            critarr[mt,it]=crit
-            narr[mt,it]=n
+            n, crit = _calculatecriticalangle(Iso, Las, m+1, i+1)
+            critarr[m,i]=crit
+            narr[m,i]=n
 
     return narr, critarr
 
@@ -232,8 +232,8 @@ def _stackcriticalangles(narr, critarr, layernum, freqnum):
     nvec=list()
 
     for m in range(layernum):
-        critvec.append(critarr[m][freqnum])
-        nvec.append(narr[m][freqnum])
+        critvec.append(critarr[m][freqnum-1])
+        nvec.append(narr[m][freqnum-1])
 
     crit=np.pi/2
 
@@ -919,7 +919,7 @@ def SolveFrequency(Iso, Las, layernum, freqnum):
                 break
         if (wsolv1 >= 0.000):
             solv1=wsolv1
-            angle=calculateoriginalcritangle(Iso, Las, layernum, freqnum, frequency=solv2)
+            angle=calculateoriginalcritangle(Iso, Las, layernum, freqnum, frequency=solv1)
             if (Las.anglesairdeg[freqnum-1] > angle):
                 solv1=0.000
         else:
