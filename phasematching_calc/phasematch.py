@@ -223,10 +223,9 @@ def _stackcriticalangles(narr, critarr, layernum, freqnum):
     """  Up to a given layernum, finds the smallest of all critical angles of a freqnum and
     returns it.  This is necessary for the SolveAngle result when a large solution of angles are possible.
    
-
     Return
     -----
-    crit = float angle in air to result in the smallest critangle in critarr up to layernum for freqnum.
+    crit = float angle in air (radians) to result in the smallest critangle in critarr up to layernum for freqnum.
     """
 
     critvec=list()
@@ -383,7 +382,7 @@ def Mcalc(Iso, Las):
             koutz=0.00
             kouty=0.00
             koutx=0.00
-            # NOTE: due to specific geometries used so far, it is unnecessary
+            # NOTE: due to specific geometries used so far, it is unnecessary to have
             # r, theta, phi conversions
             #
             if (anglex1temp==0.00):
@@ -395,10 +394,6 @@ def Mcalc(Iso, Las):
                 anglez=np.pi/2-anglex1temp
                 koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
                 koutx=2*np.pi*n*w*np.sin(anglex1temp)*kcoeffs[i]+koutx
-                
-
-#            angleoutxtemp=np.arctan(koutx/koutz)
-#            angleoutytemp=np.arctan(kouty/koutz)
 
             kx1=2*np.pi*n*w*np.sin(anglex1temp)
             ky1=2*np.pi*n*w*np.sin(angley1temp)
@@ -498,12 +493,12 @@ def Angle(Iso,Las,layernum,freqnum, frequency=None):
     Las = Lasers object
     layernum = layer number
     freqnum = frequency number (index number)
-    (optional) frequency if not None replaces the frequency at that number with the given value
+    (optional) frequency =if not None replaces the frequency at that number with the given value
      prior to calculation
 
     Output
     ------
-    tuple {anglex,angley} decomposed angles for the selected frequency in that layer according
+    tuple: {anglex,angley} projected angles for the selected frequency in that layer according
     to the geometry found in the Lasers object
     '''
     if (isinstance (Iso,IsoSample)== False):
@@ -523,7 +518,6 @@ def Angle(Iso,Las,layernum,freqnum, frequency=None):
 
     if (frequency is not None):
         lasfreq=frequency
-
 
     for m in range(layernum):
         if (m==0):
@@ -556,11 +550,10 @@ def SolveAngle(Iso,Las,layernum,freqnum, frequency):
 
     Output
     ----
-    Output
-    ----
     Sympy: FiniteSet : theta = (deg) float of original angle in air needed for that PM condition.
            FiniteSet is empty if a solution cannot be found
-           Reals if all real frequencies greater than zero are found.
+           Interval(0,90) (deg) if all real angles greater than zero are found, or a more restricted
+           interval if restricted by a critical angle before the layernum
     '''
     if (isinstance (Iso,IsoSample)== False):
         return ValueError("first argument not an object of class IsotropicSample")
@@ -573,14 +566,12 @@ def SolveAngle(Iso,Las,layernum,freqnum, frequency):
 
     freqs=Las.frequencies
     kcoeffs=Las.k_coeffs
-
-    anglexrad=Las.anglesxrad
-    angleyrad=Las.anglesyrad
     
     numfreqs=len(freqs)
     freqout=float(0.00)
     
     flag=int(0)
+ 
     # These are 2D arrays where the 1st D is layer (1st and last are air) and 2nd are the input freqs
     anglex=list()
     angley=list()
@@ -596,12 +587,6 @@ def SolveAngle(Iso,Las,layernum,freqnum, frequency):
     nout=list()
     angleoutx=list()
     angleouty=list()
-
-    anglex1=anglexrad
-    #anglex.append(anglex1)
-
-    angley1=angleyrad
-    #angley.append(angley1)
  
     freqs[freqnum-1]=frequency
 
@@ -685,7 +670,8 @@ def SolveAngle(Iso,Las,layernum,freqnum, frequency):
 
     if (flag==1):
         angle=calculateoriginalcritangle(Iso, Las, layernum, freqnum, frequency)
-        return Interval(0,angle)
+        angledeg=angle/np.pi*180.00
+        return Interval(0,angledeg)
     else:
         m = layernum-1
             # Current code only utilizes projection along z.   In future other
@@ -747,7 +733,6 @@ def SolveAngle(Iso,Las,layernum,freqnum, frequency):
                 theta=np.arcsin(n1/n2*np.sin(theta))
             thetasolv2=theta/np.pi*180.00
         
-
         if (np.isnan(thetasolv1)):
             if (np.isnan(thetasolv2)):
                 return FiniteSet()
@@ -776,7 +761,8 @@ def SolveFrequency(Iso, Las, layernum, freqnum):
     ----
     Sympy: FiniteSet : frequency = (cm-1) float of frequency needed for that PM condition.
            FiniteSet is empty if a solution cannot be found.
-           Reals if all real frequencies greater than zero are found.
+           Interval(0,oo) if all real frequencies greater than zero are found, or a closed
+            interval if restricted via some critical angle before the layernum.
     '''
     if (isinstance (Iso,IsoSample)== False):
         return ValueError("first argument not an object of class IsotropicSample")
@@ -810,12 +796,6 @@ def SolveFrequency(Iso, Las, layernum, freqnum):
     nout=list()
     angleoutx=list()
     angleouty=list()
-
-    anglex1=anglexrad
-    #anglex.append(anglex1)
-
-    angley1=angleyrad
-    #angley.append(angley1)
  
     for i in range(numfreqs):
         freqout=freqout+kcoeffs[i]*freqs[i]
@@ -916,7 +896,7 @@ def SolveFrequency(Iso, Las, layernum, freqnum):
         koutx=kout*np.sin(angleoutxtemp)
         kouty=kout*np.sin(angleoutytemp)
 
-        # solution one of the square rooot        
+        # solution one of the square root        
         koutz=np.sqrt(kout**2-koutx**2-kouty**2)
         dk=koutz-(kcoeffs[0]*kztemp[0]+kcoeffs[1]*kztemp[1]+kcoeffs[2]*kztemp[2]) 
         maxiter=15
@@ -944,8 +924,7 @@ def SolveFrequency(Iso, Las, layernum, freqnum):
                 solv1=0.000
         else:
             solv1=0.000
-        
-        
+                
         # solution two of the square root
         koutz=np.sqrt(kout**2-koutx**2-kouty**2)*(-1)
         dk=koutz-(kcoeffs[0]*kztemp[0]+kcoeffs[1]*kztemp[1]+kcoeffs[2]*kztemp[2]) 
@@ -976,7 +955,6 @@ def SolveFrequency(Iso, Las, layernum, freqnum):
                 solv2=0.000
         else:
             solv2=0.000
-
 
         if (solv1==0.00):
             if (solv2==0.00):
