@@ -442,8 +442,6 @@ def Mcalc(Iso, Las):
     Txin, Tyin, Txout, Tyout = _calculatetrans(nvec,anglex,angley,pols,nout,angleoutx,angleouty,polout)
 
     for m in range(numlayers):
-        # Current code only utilizes projection along z.   In future other
-        # projections can be incorporated.  (kx and ky are thus unused.)
         avectemp=avec[m]
         kztemp=kz[m]
         kytemp=ky[m]
@@ -553,8 +551,9 @@ def Angle(Iso,Las,layernum,freqnum, frequency=None):
 def SolveAngle(Iso,Las,layernum,freqnum, frequency):
     '''
     Given an Isotropic Sample, a layer number and frequency number used in a geometry defined in Las object,
-    determine the input angle (in air) required for phasematching that frequency.  Return NaN if
-    a solution does not exist.
+    determine the input angle (in air) required for phasematching that frequency. Uses Sympy Set. 
+    Returns an empty FiniteSet if a solution cannot be found within an internal convergence iteration series,
+    usually meaning there is no solution.
     
     Parameters
     ----
@@ -700,11 +699,11 @@ def SolveAngle(Iso,Las,layernum,freqnum, frequency):
             return FiniteSet(angle)
 
 
-
-def SolveFrequency(Iso, Las, layernum, freqnum, amt):
+def SolveFrequency(Iso, Las, layernum, freqnum, amt=None):
     '''Using the current frequency as first guess, solves for the nearest possible phasematching frequency
-    at a fixed angle for that frequencynum in a given layer, using an iterative convergence.  Returns NaN
-    if a solution cannot be found within the number of iterations internal to the procedure.
+    at a fixed angle for that frequencynum in a given layer, using an iterative convergence.  Uses Sympy Set. 
+    Returns an empty FiniteSet if a solution cannot be found within an internal convergence iteration series,
+    usually meaning there is no solution.
     
     Parameters
     ----
@@ -712,7 +711,7 @@ def SolveFrequency(Iso, Las, layernum, freqnum, amt):
     Las = The Lasers object with only supportedgeometry list capable of solutions
     layernum = layer in which to solve for angle
     freqnum = laser position (defined by geometry)
-    amount = amount to change frequency by per convergence step
+    amount = amount to change frequency by per convergence step.  Approximates internally if set to None.
 
     Output
     ----
@@ -736,6 +735,9 @@ def SolveFrequency(Iso, Las, layernum, freqnum, amt):
     flag=int(0)
     numfreqs=len(freqs)
     freqout=float(0.00)
+
+    if amt is None:
+        amt = 0.01*freqs[freqnum-1]  # a guess
 
     for i in range(numfreqs):
         freqout=freqout+kcoeffs[i]*freqs[i]

@@ -12,7 +12,7 @@ filepath=os.path.join(ROOT_DIR, 'tests')
 
 
 #new IsoSample: sapphire: ACN: sapphire
-lay3file=os.path.join(filepath, 'sapphire1.txt')
+lay3file=os.path.join(filepath, 'CaF2_Malitson.txt')
 lay4file=os.path.join(filepath, 'CH3CN_paste_1.txt')
 
 tksapph=0.02 #cm
@@ -22,15 +22,15 @@ tkacn=0.01 #cm
 samp1=pc.IsoSample.IsoSample()
 desc="FWM cell"
 samp1.description=desc
-samp1.loadlayer(lay3file, tksapph, label="sapphirefw")
+samp1.loadlayer(lay3file, tksapph, label="caf2fw")
 samp1.loadlayer(lay4file, tkacn, label="ACN")
-samp1.loadlayer(lay3file, tksapph, label="sapphirebw")
+samp1.loadlayer(lay3file, tksapph, label="caf2bw")
 
 # new Lasers object
 las4=pc.Lasers.Lasers()
 arr1=[3150.0,2200.0,12500.0]
 las4.addfrequencies(arr1)
-arr2=[15.0,5.0,10.0]
+arr2=[6.0,-4.0,0.0]
 las4.addangles(arr2)
 arr3=[1,-1,1]
 las4.addkcoeffs(arr3)

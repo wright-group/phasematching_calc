@@ -9,11 +9,11 @@ from sympy import *
 
 filepath=os.path.join(ROOT_DIR, 'tests')
 
-lay3file=os.path.join(filepath, 'sapphire1.txt')
+lay3file=os.path.join(filepath, 'CaF2_Malitson.txt')
 lay4file=os.path.join(filepath, 'CH3CN_paste_1.txt')
 lay5file=os.path.join(filepath, 'Silicon_shk_ir.txt')
 
-tksapph=0.02 #cm
+tkcaf2=0.02 #cm
 tkacn=0.01 #cm
 tksi=0.02 
 
@@ -23,7 +23,7 @@ desc="FWM cell"
 samp1.description=desc
 samp1.loadlayer(lay5file, tksi, label="siliconfw")
 samp1.loadlayer(lay4file, tkacn, label="ACN")
-samp1.loadlayer(lay3file, tksapph, label="sapphirebw")
+samp1.loadlayer(lay3file, tkcaf2, label="caf2bw")
 
 # new Lasers object
 las4=pc.Lasers.Lasers()
