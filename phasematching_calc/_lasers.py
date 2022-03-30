@@ -128,7 +128,7 @@ class Lasers():
             if (self.geometry=="boxcars"):
                 self.anglesxrad[0]=angleairs[0]
                 self.anglesyrad[1]=angleairs[1]
-                self.anglesyrad[2]=-angleairs[2]  #NOTE
+                self.anglesyrad[2]=angleairs[2]  #NOTE
             elif (self.geometry=="planar"):
                 self.anglesxrad[0]=angleairs[0]
                 self.anglesxrad[1]=angleairs[1]

@@ -589,23 +589,7 @@ def SolveAngle(Iso,Las,layernum,freqnum, frequency):
     freqout=float(0.00)
     
     flag=int(0)
- 
-    # These are 2D arrays where the 1st D is layer (1st and last are air) and 2nd are the input freqs
-    anglex=list()
-    angley=list()
-    nvec=list()
 
-    # These are 2D arrays where the 1st D is layer (no air layers) and 2nd are the input freqs
-    kx=list()
-    ky=list()
-    kz=list()
-    avec=list()
-    
-    # These are 1D arrays where the D is layer (1st and last are air)
-    nout=list()
-    angleoutx=list()
-    angleouty=list()
- 
     freqs[freqnum-1]=frequency
 
     for i in range(numfreqs):
@@ -619,12 +603,8 @@ def SolveAngle(Iso,Las,layernum,freqnum, frequency):
         kztemp=np.zeros(numfreqs)
         atemp=np.zeros(numfreqs)
         nvectemp=np.zeros(numfreqs)
+        
         layertemp=Iso['layers'][m]
-                   
-        wout,aouttemp,nouttemp=layertemp.estimate(freqout)
-
-        angleoutytemp=0.00
-        angleoutxtemp=0.00
         koutz=0.00
         kouty=0.00
         koutx=0.00
@@ -642,12 +622,10 @@ def SolveAngle(Iso,Las,layernum,freqnum, frequency):
                 anglez=np.pi/2.000-anglex1temp
                 koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
                 koutx=2*np.pi*n*w*np.sin(anglex1temp)*kcoeffs[i]+koutx
-
             if (i+1==freqnum):
                 factor=0.00
             else:
                 factor=1.00
-            
             # this is put in as reminder that we are solving for this variable so the k's for this
             # one have to be set to zero
 
@@ -662,14 +640,20 @@ def SolveAngle(Iso,Las,layernum,freqnum, frequency):
             nvectemp[i]=n
             atemp[i]=a
 
-        if ((koutx==koutz) & (koutx==0.00)):
-            if (m==(layernum-1)):
-                flag=1
-                break
-        elif ((kouty==koutz) & (koutx==0.00)):
-            if (m==(layernum-1)):
-                flag=1
-                break
+        ksumx=ksumy=ksumz=0
+        
+        for i in range(numfreqs):
+            ksumx=kcoeffs[i]*kxtemp[i]+ksumx
+            ksumy=kcoeffs[i]*kytemp[i]+ksumy
+            ksumz=kcoeffs[i]*kztemp[i]+ksumz
+    
+        if ((ksumx==ksumz) & (ksumx==0.00)):
+            flag=1
+            break
+        elif ((ksumy==ksumz) & (ksumx==0.00)):
+            flag=1
+            break
+
 
     if (flag==1):
         angledeg=calculateoriginalcritangle(Iso, Las, layernum, freqnum, frequency)
@@ -679,15 +663,15 @@ def SolveAngle(Iso,Las,layernum,freqnum, frequency):
   
         Lastemp=Las
         Isotemp=Iso
-        tol=0.01
-        for m in range(layernum):
-            Isotemp.layers[m].suppressabs()
+        tol=0.0001
+        for k in range(layernum):
+            Isotemp.layers[k].suppressabs()
 
         dir=1.00
         amt= 1.00 #deg
         Mtest,tklist,Tdict=Mcalc(Isotemp, Lastemp)
 
-        magMtest=np.abs(Mtest[layernum-1])**2 * (tklist[layernum-1])**2
+        magMtest=np.abs(Mtest[m])**2 #(tklist[m])**2
         error1= 1-magMtest
         error2= error1
         iter=70
@@ -698,13 +682,13 @@ def SolveAngle(Iso,Las,layernum,freqnum, frequency):
             b=b+1
             if (error2 > error1):
                 dir=(-1.00)*dir
-            error1=error2
-            if (np.abs(error2) < 0.1*np.abs(error1)):
+            if (np.abs(error2) < 0.33*np.abs(error1)):
                 amt=0.1*amt
+            error1=error2
             angle=Lastemp.anglesairdeg[freqnum-1]+amt*dir
             Lastemp.changeangle(freqnum,angle)
             Mtest,tklist,Tdict=Mcalc(Isotemp, Lastemp)
-            magMtest=np.abs(Mtest[layernum-1])**2 * (tklist[layernum-1])**2
+            magMtest=np.abs(Mtest[m])**2  # * (tklist[m])**2
             error2=1-magMtest
             if (b > iter):
                 flag=2
@@ -717,7 +701,7 @@ def SolveAngle(Iso,Las,layernum,freqnum, frequency):
 
 
 
-def SolveFrequency(Iso, Las, layernum, freqnum):
+def SolveFrequency(Iso, Las, layernum, freqnum, amt):
     '''Using the current frequency as first guess, solves for the nearest possible phasematching frequency
     at a fixed angle for that frequencynum in a given layer, using an iterative convergence.  Returns NaN
     if a solution cannot be found within the number of iterations internal to the procedure.
@@ -728,6 +712,7 @@ def SolveFrequency(Iso, Las, layernum, freqnum):
     Las = The Lasers object with only supportedgeometry list capable of solutions
     layernum = layer in which to solve for angle
     freqnum = laser position (defined by geometry)
+    amount = amount to change frequency by per convergence step
 
     Output
     ----
@@ -747,28 +732,11 @@ def SolveFrequency(Iso, Las, layernum, freqnum):
 
     freqs=Las.frequencies
     kcoeffs=Las.k_coeffs
-    anglexrad=Las.anglesxrad
-    angleyrad=Las.anglesyrad
-    
+
     flag=int(0)
     numfreqs=len(freqs)
     freqout=float(0.00)
 
-    # These are 2D arrays where the 1st D is layer (1st and last are air) and 2nd are the input freqs
-    anglex=list()
-    angley=list()
-    nvec=list()
-
-    # These are 2D arrays where the 1st D is layer (no air layers) and 2nd are the input freqs
-    kx=list()
-    ky=list()
-    kz=list()
-      
-    # These are 1D arrays where the D is layer (1st and last are air)
-    nout=list()
-    angleoutx=list()
-    angleouty=list()
- 
     for i in range(numfreqs):
         freqout=freqout+kcoeffs[i]*freqs[i]
 
@@ -782,9 +750,6 @@ def SolveFrequency(Iso, Las, layernum, freqnum):
         nvectemp=np.zeros(numfreqs)
         layertemp=Iso['layers'][m]
                     
-        wout,aouttemp,nouttemp=layertemp.estimate(freqout)
-        angleoutytemp=0.00
-        angleoutxtemp=0.00
         koutx=0.00
         kouty=0.00
         koutz=0.00
@@ -799,7 +764,6 @@ def SolveFrequency(Iso, Las, layernum, freqnum):
                     anglez=np.pi/2.000-angley1temp
                     koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
                     kouty=2*np.pi*n*w*np.sin(angley1temp)*kcoeffs[i]+kouty
-
                 else:
                     anglez=np.pi/2.000-anglex1temp
                     koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
@@ -821,15 +785,21 @@ def SolveFrequency(Iso, Las, layernum, freqnum):
             kztemp[i]=kz1
             nvectemp[i]=n
             atemp[i]=a
+        
+        ksumx=ksumy=ksumz=0
 
-        if ((koutx==koutz) & (koutx==0.00)):
-            if (m==(layernum-1)):
-                flag=1
-                break
-        elif ((kouty==koutz) & (koutx==0.00)):
-            if (m==(layernum-1)):
-                flag=1
-                break
+        for i in range(numfreqs):
+            ksumx=kcoeffs[i]*kxtemp[i]+ksumx
+            ksumy=kcoeffs[i]*kytemp[i]+ksumy
+            ksumz=kcoeffs[i]*kztemp[i]+ksumz
+    
+        if ((ksumx==ksumz) & (ksumx==0.00)):
+            flag=1
+            break
+        elif ((ksumy==ksumz) & (ksumx==0.00)):
+            flag=1
+            break
+
 
     if (flag==1):
         return Interval(0,oo)
@@ -838,15 +808,16 @@ def SolveFrequency(Iso, Las, layernum, freqnum):
   
         Lastemp=Las
         Isotemp=Iso
-        tol=0.01
-        for m in range(layernum):
-            Isotemp.layers[m].suppressabs()
+        tol=0.0001
+        for k in range(layernum):
+            Isotemp.layers[k].suppressabs()
 
         dir=1.00
-        amt= 10.00 #cm-1
+
         Mtest,tklist,Tdict=Mcalc(Isotemp, Lastemp)
 
-        magMtest=np.abs(Mtest[layernum-1])**2 * (tklist[layernum-1])**2
+        magMtest=np.abs(Mtest[m])**2 #* (tklist[m])**2
+        freq=Lastemp.frequencies[freqnum-1]
         error1= 1-magMtest
         error2= error1
         iter=500
@@ -855,15 +826,15 @@ def SolveFrequency(Iso, Las, layernum, freqnum):
             b=b+1
             if (error2 > error1):
                 dir=(-1.00)*dir
-            error1=error2
-            if (np.abs(error2) < 0.1*np.abs(error1)):
+            if (np.abs(error2) < 0.33*np.abs(error1)):
                 amt=0.1*amt
+            error1=error2
             freq=Lastemp.frequencies[freqnum-1]+amt*dir
             Lastemp.changefreq(freqnum,freq)
             Mtest,tklist,Tdict=Mcalc(Isotemp, Lastemp)
-            magMtest=np.abs(Mtest[layernum-1])**2 * (tklist[layernum-1])**2
+            magMtest=np.abs(Mtest[m])**2 # (tklist[m])**2
             error2=1-magMtest
-            if (a > iter):
+            if (b > iter):
                 flag=2
                 break
 
