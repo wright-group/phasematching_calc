@@ -1,3 +1,4 @@
+from distutils.log import error
 import numpy as np
 from ._lasers import Lasers
 from ._isosample import IsoSample
@@ -298,10 +299,13 @@ def Mcalc(Iso, Las):
 
     Outputs
     ---
-    a tuple Mlist,Tdict consisting of:
+    a tuple Mlist, tklist, Tdict consisting of:
     
     Mlist :  a complex array of phasemismatching factors for wavemixing at the output,
     currently only supporting four wave mixing models with supportedgeometries shown in the Laser object.
+    
+    tklist : the effective thickness of each layer as pertaining to the launched output wave, i.e.
+            layer thickness / cosine(angleout)
     Tdict : a dictionary with entries related to transmission coefficients of the lasers and output
     through the sample layers.  NOTE:  This application has not been performed on the entries in Mlist.
     The coefficients rely on linear polarizations defined in the Laser object.  User must perform
@@ -356,6 +360,7 @@ def Mcalc(Iso, Las):
     tk=list()
     aout=list()
     Mlist=list()
+    tklist=list()
 
     anglex1=anglexrad
     anglex.append(anglex1)
@@ -457,9 +462,6 @@ def Mcalc(Iso, Las):
             tkeff=tktemp/np.cos(angleoutxtemp)
 
         kout=2.00*np.pi*freqout*nouttemp
-        #koutx=kout*np.sin(angleoutxtemp)
-        #kouty=kout*np.sin(angleoutytemp)
-        #koutz=np.sqrt(kout**2-koutx**2-kouty**2)
         ksumx=ksumy=ksumz=0
         
         for i in range(numfreqs):
@@ -481,6 +483,7 @@ def Mcalc(Iso, Las):
 
         Mctemp=Mpre*(Mc1)*(Mc2-1)*Mc3
         Mlist.append(Mctemp)
+        tklist.append(tkeff)
 
     #angleoutxtemp and angleoutytemp can be converted to launch angles via Snell's Law to calculate
     #launch angle in air afterwards
@@ -494,7 +497,7 @@ def Mcalc(Iso, Las):
     Tdict['Tyin']=Tyin
     Tdict['launchanglexdeg']=launchanglexdeg
     Tdict['launchangleydeg']=launchangleydeg
-    return Mlist, Tdict
+    return Mlist, tklist, Tdict
 
 
 def Angle(Iso,Las,layernum,freqnum, frequency=None):
@@ -667,113 +670,51 @@ def SolveAngle(Iso,Las,layernum,freqnum, frequency):
             if (m==(layernum-1)):
                 flag=1
                 break
-        else:
-            angleoutxtemp=np.arctan(koutx/koutz)
-            angleoutytemp=np.arctan(kouty/koutz)
-            anglex.append(anglextemp)
-            angley.append(angleytemp)      
-            kx.append(kxtemp)
-            ky.append(kytemp)
-            kz.append(kztemp)
-            avec.append(atemp)
-            nvec.append(nvectemp)
-
-            angleouty.append(angleoutytemp)
-            angleoutx.append(angleoutxtemp)
-            nout.append(nouttemp)
 
     if (flag==1):
         angledeg=calculateoriginalcritangle(Iso, Las, layernum, freqnum, frequency)
         return Interval(0,angledeg)
     else:
         m = layernum-1
-            # Current code only utilizes projection along z.   In future other
-            # projections can be incorporated.  (kx and ky are thus unused.)
+  
+        Lastemp=Las
+        Isotemp=Iso
+        tol=0.01
+        for m in range(layernum):
+            Isotemp.layers[m].suppressabs()
 
-        kztemp=kz[m]
-        kytemp=ky[m]
-        kxtemp=kx[m]
-        anglextemp=anglex[m]
-        angleytemp=angley[m]
+        dir=1.00
+        amt= 1.00 #deg
+        Mtest,tklist,Tdict=Mcalc(Isotemp, Lastemp)
 
-        angleoutxtemp=angleoutx[m]
-        angleoutytemp=angleouty[m]
-        nouttemp=nout[m]
-        nvectemp=nvec[m]
+        magMtest=np.abs(Mtest[layernum-1])**2 * (tklist[layernum-1])**2
+        error1= 1-magMtest
+        error2= error1
+        iter=70
+        angle=Lastemp.anglesairdeg[freqnum-1]
+        b=0
 
-        kout=2*np.pi*freqout*nouttemp
-        #koutx=kout*np.sin(angleoutxtemp)
-        #kouty=kout*np.sin(angleoutytemp)
-        
-        for i in range(numfreqs):
-            ksumx=kcoeffs[i]*kxtemp[i]+ksumx
-            ksumy=kcoeffs[i]*kytemp[i]+ksumy
-            ksumz=kcoeffs[i]*kztemp[i]+ksumz
-        
-        # one of the ktemp[i] sets is zero
-        k4=np.sqrt(ksumx**2+ksumy**2+ksumz**2)
-        dk=kout-k4
-        ksolve=dk
+        while( error2 > tol):
+            b=b+1
+            if (error2 > error1):
+                dir=(-1.00)*dir
+            error1=error2
+            if (np.abs(error2) < 0.1*np.abs(error1)):
+                amt=0.1*amt
+            angle=Lastemp.anglesairdeg[freqnum-1]+amt*dir
+            Lastemp.changeangle(freqnum,angle)
+            Mtest,tklist,Tdict=Mcalc(Isotemp, Lastemp)
+            magMtest=np.abs(Mtest[layernum-1])**2 * (tklist[layernum-1])**2
+            error2=1-magMtest
+            if (b > iter):
+                flag=2
+                break
 
-        if (anglextemp[freqnum-1]==0):
-            theta=np.arctan(0)
-
-        if (((ksolve/(2*np.pi*nvectemp[freqnum-1]*frequency*kcoeffs[freqnum-1])) > 1) | ((ksolve/(2*np.pi*nvectemp[freqnum-1]*frequency*kcoeffs[freqnum-1])) < -1)):
-            flag=2
-            theta=float("nan")
+        if (flag==2):
+            return FiniteSet()
         else:
-            theta=np.pi/2.00-np.arcsin(ksolve/(2*np.pi*nvectemp[freqnum-1]*frequency*kcoeffs[freqnum-1]))
-    
-        if np.isnan(theta):
-            #print("No real solution found, empty set returned")
-            thetasolv1=float("nan")
-            flag=2
-        
-        if (flag==0):
-            for m in range(layernum):
-                n1=nvec[layernum-1-m][freqnum-1]
-                if (layernum-1-m == 0):
-                    n2=1.0000
-                else:
-                    n2=nvec[layernum-2-m][freqnum-1]
-                theta=np.arcsin(n1/n2*np.sin(theta))
-            thetasolv1=theta/np.pi*180.00
+            return FiniteSet(angle)
 
-        #solution two of the square root
-        flag=0
-        koutz=np.sqrt(kout**2-koutx**2-kouty**2)*(-1)
-        dk=koutz-(kcoeffs[0]*kztemp[0]+kcoeffs[1]*kztemp[1]+kcoeffs[2]*kztemp[2]) # one of these is zero
-        ksolve=dk
-        if (((ksolve/(2*np.pi*nvectemp[freqnum-1]*frequency*kcoeffs[freqnum-1])) > 1) | ((ksolve/(2*np.pi*nvectemp[freqnum-1]*frequency*kcoeffs[freqnum-1])) < -1)):
-            flag=2
-            theta=float("nan")
-        else:
-            theta=np.pi/2.00-np.arcsin(ksolve/(2*np.pi*nvectemp[freqnum-1]*frequency*kcoeffs[freqnum-1]))
-        if np.isnan(theta):
-            #print("No real solution found, empty set returned")
-            thetasolv2=float("nan")
-            flag=2
-        
-        if (flag==0):
-            for m in range(layernum):
-                n1=nvec[layernum-1-m][freqnum-1]
-                if (layernum-1-m == 0):
-                    n2=1.0000
-                else:
-                    n2=nvec[layernum-2-m][freqnum-1]
-                theta=np.arcsin(n1/n2*np.sin(theta))
-            thetasolv2=theta/np.pi*180.00
-        
-        if (np.isnan(thetasolv1)):
-            if (np.isnan(thetasolv2)):
-                return FiniteSet()
-            else:
-                return FiniteSet(thetasolv2)
-        else:
-            if (np.isnan(thetasolv2)):
-                return FiniteSet(thetasolv1)
-            else:
-                return FiniteSet(thetasolv1,thetasolv2)
 
 
 def SolveFrequency(Iso, Las, layernum, freqnum):
@@ -889,112 +830,44 @@ def SolveFrequency(Iso, Las, layernum, freqnum):
             if (m==(layernum-1)):
                 flag=1
                 break
-        else:       
-            angleoutxtemp=np.arctan(koutx/koutz)
-            angleoutytemp=np.arctan(kouty/koutz)
-            anglex.append(anglextemp)
-            angley.append(angleytemp)      
-            kx.append(kxtemp)
-            ky.append(kytemp)
-            kz.append(kztemp)
-
-            nvec.append(nvectemp)
-
-            angleouty.append(angleoutytemp)
-            angleoutx.append(angleoutxtemp)
-            nout.append(nouttemp)
 
     if (flag==1):
         return Interval(0,oo)
     else:
         m = layernum-1
-        # Current code only utilizes projection along z.   In future other
-        # projections can be incorporated.  (kx and ky are thus unused.)
-        layertemp=Iso['layers'][m]
-        kztemp=kz[m]
-        kytemp=ky[m]
-        kxtemp=kx[m]
-        anglextemp=anglex[m]
-        angleytemp=angley[m]
+  
+        Lastemp=Las
+        Isotemp=Iso
+        tol=0.01
+        for m in range(layernum):
+            Isotemp.layers[m].suppressabs()
 
-        angleoutxtemp=angleoutx[m]
-        angleoutytemp=angleouty[m]
-        nouttemp=nout[m]
-        nvectemp=nvec[m]
+        dir=1.00
+        amt= 10.00 #cm-1
+        Mtest,tklist,Tdict=Mcalc(Isotemp, Lastemp)
 
-        kout=2*np.pi*freqout*nouttemp
-        koutx=kout*np.sin(angleoutxtemp)
-        kouty=kout*np.sin(angleoutytemp)
-
-        # solution one of the square root        
-        koutz=np.sqrt(kout**2-koutx**2-kouty**2)
-        dk=koutz-(kcoeffs[0]*kztemp[0]+kcoeffs[1]*kztemp[1]+kcoeffs[2]*kztemp[2]) 
-        maxiter=15
-        tol=0.1
-        wsolv1=freqs[freqnum-1]
-        wsolv2=0
-        i=0
-        while(np.abs(wsolv1-wsolv2)>tol):
-            wsolv2=wsolv1
-            w,a,ntemp=layertemp.estimate(wsolv2)
-            anglex1temp,angley1temp=Angle(Iso, Las, layernum, freqnum, frequency=wsolv1)
-            if (anglex1temp != 0):
-                tempangle=anglex1temp
-            else:
-                tempangle=angley1temp
-            wsolv1=dk/(2*np.pi*ntemp*np.sin(np.pi/2.00-tempangle)*kcoeffs[freqnum-1])
-            i=i+1
-            if (i >= maxiter):
-                wsolv1=0.000
+        magMtest=np.abs(Mtest[layernum-1])**2 * (tklist[layernum-1])**2
+        error1= 1-magMtest
+        error2= error1
+        iter=500
+        b=0
+        while( error2 > tol):
+            b=b+1
+            if (error2 > error1):
+                dir=(-1.00)*dir
+            error1=error2
+            if (np.abs(error2) < 0.1*np.abs(error1)):
+                amt=0.1*amt
+            freq=Lastemp.frequencies[freqnum-1]+amt*dir
+            Lastemp.changefreq(freqnum,freq)
+            Mtest,tklist,Tdict=Mcalc(Isotemp, Lastemp)
+            magMtest=np.abs(Mtest[layernum-1])**2 * (tklist[layernum-1])**2
+            error2=1-magMtest
+            if (a > iter):
+                flag=2
                 break
-        if (wsolv1 >= 0.000):
-            solv1=wsolv1
-            angle=calculateoriginalcritangle(Iso, Las, layernum, freqnum, frequency=solv1)
-            if (Las.anglesairdeg[freqnum-1] > angle):
-                solv1=0.000
-        else:
-            solv1=0.000
-                
-        # solution two of the square root
-        koutz=np.sqrt(kout**2-koutx**2-kouty**2)*(-1)
-        dk=koutz-(kcoeffs[0]*kztemp[0]+kcoeffs[1]*kztemp[1]+kcoeffs[2]*kztemp[2]) 
-        maxiter=15
-        tol=0.1
-        wsolv1=freqs[freqnum-1]
-        wsolv2=0
-        i=0
 
-        while(np.abs(wsolv1-wsolv2)>tol):
-            wsolv2=wsolv1
-            w,a,ntemp=layertemp.estimate(wsolv2)
-            anglex1temp,angley1temp=Angle(Iso, Las, layernum, freqnum, frequency=wsolv1)
-            if (anglex1temp != 0):
-                tempangle=anglex1temp
-            else:
-                tempangle=angley1temp
-            wsolv1=dk/(2*np.pi*ntemp*np.sin(np.pi/2-tempangle)*kcoeffs[freqnum-1])
-            i=i+1
-            if (i >= maxiter):
-                wsolv1=0.000
-                break
-        
-        if (wsolv1 >= 0.000):
-            solv2=wsolv1
-            angle=calculateoriginalcritangle(Iso, Las, layernum, freqnum, frequency=solv2)
-            if (Las.anglesairdeg[freqnum-1] > angle):
-                solv2=0.000
+        if (flag==2):
+            return FiniteSet()
         else:
-            solv2=0.000
-
-        if (solv1==0.00):
-            if (solv2==0.00):
-                return FiniteSet()
-            else:
-                return FiniteSet(solv2)
-        else:
-            if (solv2==0.00):
-                return FiniteSet(solv1)
-            else:
-                return FiniteSet(solv1,solv2)
-    
- 
+            return FiniteSet(freq)

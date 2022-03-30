@@ -44,7 +44,7 @@ las.changegeometry("planar")
 #Test scripts show how the above objects can be saved and loaded.
 
 # single point Mcalc check
-Mlist,Tdict=pc.phasematch.Mcalc(samp1,las)
+Mlist,tklist,Tdict=pc.phasematch.Mcalc(samp1,las)
 
 # angle estimation for laser 1 in layer 2 with frequency 1750 cm-1
 # using default geometry
@@ -66,7 +66,7 @@ for m in range(len(var1)):
     for n in range(len(var2a)):
         las.changefreq(1,var1[m])
         las.changefreq(2,var2a[n])
-        Mlist,Tlist=pc.phasematch.Mcalc(samp1,las)
+        Mlist,tklist,Tlist=pc.phasematch.Mcalc(samp1,las)
         ch1[m,n]=(np.abs(Mlist[2])**2)*tkwater**2  #final multiplier to get the M factor into a result 
                             # where values can be readily understood
 

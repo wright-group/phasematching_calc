@@ -134,3 +134,11 @@ class Layer:
 
         return freq1, absorp, ncalc
 
+
+    def suppressabs(self):
+        """ zero out all absorbance data in the layer."""
+ 
+        abszero=np.zeros(len(self.a_points))
+        self.a_points=abszero
+
+        return 0

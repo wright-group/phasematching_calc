@@ -38,7 +38,7 @@ las.changegeometry("boxcars")
 
 #Other test scripts show how the above objects can be saved and loaded.
 # single point Mcalc check
-Mlist,Tdict=pc.phasematch.Mcalc(samp1,las)
+Mlist,tklist,Tdict=pc.phasematch.Mcalc(samp1,las)
 testoutput=np.abs(Mlist[1])**2*tkwater**2
 print(testoutput)
 
