@@ -529,9 +529,7 @@ def Angle(Iso,Las,layernum,freqnum, frequency=None):
     lasfreq=Las.frequencies[freqnum-1]
     lasanglex=Las.anglesxrad[freqnum-1]
     lasangley=Las.anglesyrad[freqnum-1]
-    lasanglexin=lasanglex
-    lasangleyin=lasangley
-
+ 
     if (frequency is not None):
         lasfreq=frequency
 
@@ -804,7 +802,8 @@ def SolveFrequency(Iso, Las, layernum, freqnum, amt=None):
 
 
     if (flag==1):
-        return Interval(0,oo)
+        return Interval(0,oo)  #currently does not attempt a walkback of high frequencies
+                            # at the given angle to see if it is reflected at a critical angle
     else:
         m = layernum-1
   
