@@ -10,22 +10,27 @@ from sympy import *
 
 filepath=os.path.join(ROOT_DIR, 'tests')
 
-lay1file=os.path.join(filepath, 'CaF2_Malitson.txt')
+lay1file=os.path.join(filepath, 'CH3CN_paste_1.txt')
+lay2file=os.path.join(filepath, 'sapphire1.txt')
 
-tkcaf2=0.3 
+
+tksap=0.02
+tkacn=0.01 
 
 # generation of a IsoSample
 samp1=pc.IsoSample.IsoSample()
-desc="caf2window300um"
+desc="FWM cell"
 samp1.description=desc
-samp1.loadlayer(lay1file, tkcaf2, label="caf2")
+samp1.loadlayer(lay1file, tksap, label="sapphire")
+samp1.loadlayer(lay2file, tkacn, label="acn")
+samp1.loadlayer(lay1file, tksap, label="sapphire")
 
 
 #generation of a Lasers object.
 las=pc.Lasers.Lasers()
-arr1=[1800.0,2700.0,18400.0]
+arr1=[1800.0,2700.0,16000.0]
 las.addfrequencies(arr1)
-arr2=[5.0,5.0, 5.0]
+arr2=[10.0,-7.0, 0.0]
 las.addangles(arr2)
 arr3=[-1,1,1]
 las.addkcoeffs(arr3)
@@ -43,15 +48,20 @@ for m in range(len(var1)):
     for n in range(len(var2a)):
         las.changefreq(1,var1[m])
         las.changefreq(2,var2a[n])
-        Mlist,tklist,Tlist=pc.phasematch.Mcalc(samp1,las)
-        ch1[m,n]=(np.abs(Mlist[0])**2)  
-
-
-data=wt.Data(name="example")
+        angleair2=pc.phasematch.SolveFrequency(samp1,las,2,3)
+        if np.any(list(angleair2)):
+            ch1[m,n]=(list(angleair2)[0])  
+        else:
+            ValueError(f"error at {m,n}")
+        
+data=wt.Data(name="freq check for w3")
 data.create_variable(name="w1", units="wn", values= var1)
 data.create_variable(name="w2", units="wn", values= var2)
-data.create_channel(name='Mfactor', values=ch1)
+data.create_channel(name='w3freq', values=ch1)
 data.transform("w2","w1")
+data_channel = data.channels[0]
+data_channel.null=np.min(ch1)
+
 wt.artists.quick2D(data)
 plt.show()
 

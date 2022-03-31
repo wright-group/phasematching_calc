@@ -546,7 +546,7 @@ def Angle(Iso,Las,layernum,freqnum, frequency=None):
     return lasanglex,lasangley
 
 
-def SolveAngle(Iso,Las,layernum,freqnum, frequency):
+def SolveAngle(Iso,Las,layernum,freqnum, frequency=None):
     '''
     Given an Isotropic Sample, a layer number and frequency number used in a geometry defined in Las object,
     determine the input angle (in air) required for phasematching that frequency. Uses Sympy Set. 
@@ -576,8 +576,7 @@ def SolveAngle(Iso,Las,layernum,freqnum, frequency):
         return ValueError("second argument not an object of class Lasers")
     if (freqnum < 1):
         return ValueError("freqnum cannot be less than 1")
-    if (frequency < 0.00):
-        return ValueError("frequency cannot be less than 0")
+
 
     freqs=Las.frequencies
     kcoeffs=Las.k_coeffs
@@ -586,8 +585,11 @@ def SolveAngle(Iso,Las,layernum,freqnum, frequency):
     freqout=float(0.00)
     
     flag=int(0)
-
-    freqs[freqnum-1]=frequency
+    
+    if (frequency is not None):
+        freqs[freqnum-1]=frequency
+        if (frequency < 0.00):
+            return ValueError("frequency cannot be less than 0")
 
     for i in range(numfreqs):
         freqout=freqout+kcoeffs[i]*freqs[i]
