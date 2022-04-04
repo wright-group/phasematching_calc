@@ -118,6 +118,14 @@ class Lasers():
             return ValueError("unsupported geometry (see supportdgeometrylist for full list of supported geometries)")    
 
 
+    def changekcoeffs(self, vec):
+        """ Change kcoeffs of the input lasers."""
+        if (vec == len(self.frequencies)):
+            self.k_coeffs = vec
+        else:
+            return ValueError("vector must be of same length as frequencies vector")   
+
+
     def calculatecartesianangles(self):
         """Based on the geometry, convert the angles into x and y angles, in radians."""
         num=len(self.frequencies)
