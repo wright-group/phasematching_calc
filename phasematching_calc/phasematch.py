@@ -382,13 +382,14 @@ def Mcalc(Iso, Las):
 
         angleoutytemp=0.00
         angleoutxtemp=0.00
+        koutz=0.00
+        kouty=0.00
+        koutx=0.00
 
         for i in range(numfreqs):
             anglex1temp,angley1temp=Angle(Iso,Las,m+1,i+1)
             w,a,n=layertemp.estimate(freqs[i])
-            koutz=0.00
-            kouty=0.00
-            koutx=0.00
+
             # NOTE: due to specific geometries used so far, it is unnecessary to have
             # r, theta, phi conversions
             #
@@ -440,6 +441,7 @@ def Mcalc(Iso, Las):
     polout=_guessoutputpol(pols)
     
     Txin, Tyin, Txout, Tyout = _calculatetrans(nvec,anglex,angley,pols,nout,angleoutx,angleouty,polout)
+    Mctemp=1
 
     for m in range(numlayers):
         avectemp=avec[m]
@@ -454,32 +456,43 @@ def Mcalc(Iso, Las):
         angleoutytemp=angleouty[m]
         nouttemp=nout[m]
 
+        kout=2.00*np.pi*freqout*nouttemp
+
         if (angleoutxtemp==0):
             tkeff=tktemp/np.cos(angleoutytemp)
+            koutx=0
+            koutz=kout*np.cos(angleoutytemp)
+            koutx=kout*np.sin(angleoutxtemp)
         else:
             tkeff=tktemp/np.cos(angleoutxtemp)
+            kouty=0
+            koutz=kout*np.cos(angleoutytemp)
+            kouty=kout*np.sin(angleoutytemp)
 
-        kout=2.00*np.pi*freqout*nouttemp
+               
         ksumx=ksumy=ksumz=0
         
         for i in range(numfreqs):
             ksumx=kcoeffs[i]*kxtemp[i]+ksumx
             ksumy=kcoeffs[i]*kytemp[i]+ksumy
             ksumz=kcoeffs[i]*kztemp[i]+ksumz
-        k4=np.sqrt(ksumx**2+ksumy**2+ksumz**2)
+        #k4=np.sqrt(ksumx**2+ksumy**2+ksumz**2)
 
-        dk=kout-k4
-        da=0.5*(aouttemp-(np.abs(kcoeffs[0])*avectemp[0]+np.abs(kcoeffs[1])*avectemp[1]+np.abs(kcoeffs[2])*avectemp[2]))
+        dk=np.sqrt((koutx-ksumx)**2+(kouty-ksumy)**2+(koutz-ksumz)**2)
+        da=0.5*(aouttemp-(np.abs(kcoeffs[0])*avectemp[0]+np.abs(kcoeffs[1])*avectemp[1]+np.abs(kcoeffs[2])*avectemp[2])*tkeff)
         Mc1=np.exp(-0.5*aouttemp*tkeff)
-        Mc2=np.complex(np.cos(dk*tkeff),np.sin(dk*tkeff))*np.exp(-da*tkeff)
-        Mc3=np.complex(-da*tkeff/((dk**2+da**2)*tkeff**2), -tkeff*dk/((dk**2+da**2)*tkeff**2))
+        Mc2=((1-np.exp(da))**2+4*np.exp(da)*(np.sin(dk*tkeff/2))**2)/(da**2+(dk*tkeff)**2)
         
-        if (i==0):
-            Mpre=1
-        else:
-            Mpre=Mc1*Mc2    
+        #Mc2=np.complex(np.cos(dk*tkeff),np.sin(dk*tkeff))*np.exp(-da*tkeff))
+        #Mc3=np.complex(-da*tkeff/((dk**2+da**2)*tkeff**2), -tkeff*dk/((dk**2+da**2)*tkeff**2))
+        
+        #if (i==0):
+        #    Mpre=1
+        #else:
+        #    Mpre=Mc1*Mc2    
 
-        Mctemp=Mpre*(Mc1)*(Mc2-1)*Mc3
+        #Mctemp=Mpre*(Mc1)*(Mc2-1)*Mc3
+        Mctemp=Mc1*Mc2
         Mlist.append(Mctemp)
         tklist.append(tkeff)
 

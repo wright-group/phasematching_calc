@@ -25,7 +25,7 @@ samp1.loadlayer(lay1file, tkcaf2, label="caf2")
 las=pc.Lasers.Lasers()
 arr1=[1800.0,2700.0,20000.0]
 las.addfrequencies(arr1)
-arr2=[5.0,5.0, 5.0]
+arr2=[5.0,-5.0, 0.0]
 las.addangles(arr2)
 arr3=[-1,1,1]
 las.addkcoeffs(arr3)
