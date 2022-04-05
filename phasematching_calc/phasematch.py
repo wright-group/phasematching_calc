@@ -30,7 +30,7 @@ def _guessoutputpol(polsvec):
         return ValueError("Polarizations list not supported for current estimated output polarization")
     
 
-def _calculatetrans(narr,anglexarr,angleyarr,polsvec,noutvec,angleoutxvec,angleoutyvec,polout):
+def _calculatetrans(xmask,ymask,narr,anglexarr,angleyarr,polsvec,noutvec,angleoutxvec,angleoutyvec,polout):
     '''
     Uses Fresnel's equations to calculate transmission coefficients between layers in a sample,
     as well as after the last layer
@@ -39,6 +39,7 @@ def _calculatetrans(narr,anglexarr,angleyarr,polsvec,noutvec,angleoutxvec,angleo
     
     Parameters
     ---------
+    xmask, ymask =  "binary" masks actual float telling whether x or y operations are to be performed (ymask = NOT xmask)
     narr =     2D array of n where the 1st D is layer and 2nd are the input freqs
     anglexarr = "  of angles in x (radians) where 1st D is first input angles, THEN number of layers 
     angleyarr = "  of angles in y (radians) "
@@ -68,11 +69,8 @@ def _calculatetrans(narr,anglexarr,angleyarr,polsvec,noutvec,angleoutxvec,angleo
     Toutx is the x potion and Touty is y portion.
     '''
     
-    Tinx=list()
-    Tiny=list()
-    Toutx=list()
-    Touty=list()
-
+    Tin=list()
+    Tout=list()
 
     for m in range(len(noutvec)):
         if (m==0):
@@ -109,13 +107,17 @@ def _calculatetrans(narr,anglexarr,angleyarr,polsvec,noutvec,angleoutxvec,angleo
                 Tx=1-Rx
                 Ty=1-Ry
 
+            
             Tinxtemp[i]=Tx
             Tinytemp[i]=Ty
         
-        Tinx.append(Tinxtemp)
-        Tiny.append(Tinytemp)
+            if (xmask[i]==0):
+                Tin.append(Tinytemp)
+            else:
+                Tin.append(Tinxtemp)
 
-    
+    i=len(xmask)-1
+
     for m in range(len(noutvec)):
             n1=noutvec[m]
             anglex2=angleoutxvec[m+1]
@@ -139,10 +141,12 @@ def _calculatetrans(narr,anglexarr,angleyarr,polsvec,noutvec,angleoutxvec,angleo
                 Tx=1-Rx
                 Ty=1-Ry
 
-            Toutx.append(Tx)
-            Touty.append(Ty)
+            if (xmask[i]==0):
+                Tout.append(Ty)
+            else:
+                Tout.append(Ty)
 
-    return Tinx, Tiny, Toutx, Touty
+    return Tin, Tout
 
 
 def _calculatecriticalangle(Iso, Las, layernum, freqnum, frequency=None):
@@ -309,19 +313,16 @@ def Mcalc(Iso, Las):
     Tdict : a dictionary with entries related to transmission coefficients of the lasers and output
     through the sample layers.  NOTE:  This application has not been performed on the entries in Mlist.
     The coefficients rely on linear polarizations defined in the Laser object.  User must perform
-    the multiplication.
+    the multiplication.  User must determine whether the "x" or "y" values are relevant based on
+    the geometry.
 
     Keys in the Tdict are:
-    Tdict['Txin']= float(2Darr) Transmission coefficients of the x-coordinated laser inputs (those
-    geometries with beams along x=0 would then have 0 values in the entries), each element per layer
-    in the second dimension and each laser input in the 1st dimension
-    Tdict['Tyin']= " similar for the y-coordinated inputs
-    Tdict['Txout']= float (1D) Transmission coefficients of the x-coordinates of the output (those
-    geometries with outputs along x=0 would then have 0 values in the entries), each element per layer, with 
-    an additional value representing the final transmission coefficient back into air.
-    Tdict['Tyout'] = similar for the y-coordinates of the output
-    Tdict['launchanglexdeg']= launch angle of output in degrees in air, for xcoordinated output
-    Tdict['launchangleydeg']= similar for ycoordinated output
+    Tdict['Tin']= float(2Darr) Transmission coefficients of the laser inputs based on the geometry,
+    with 1st D as layer and 2nd as freqnum 
+    Tdict['Tout']= float (1D) Transmission coefficients of  the output based on the geometry .
+
+    Tdict['launchangledeg']= launch angle of output in degrees in air at cartesian coordinate specified by geometry
+ 
     '''
     if (isinstance (Iso,IsoSample)== False):
         return ValueError("first argument not an object of class IsotropicSample")
@@ -334,6 +335,8 @@ def Mcalc(Iso, Las):
     pols=Las.polarizations
     anglexrad=Las.anglesxrad
     angleyrad=Las.anglesyrad
+    xmask=Las.xmask
+    ymask=Las.ymask
     
     numfreqs=len(freqs)
     freqout=float(0.00)
@@ -393,12 +396,13 @@ def Mcalc(Iso, Las):
             # NOTE: due to specific geometries used so far, it is unnecessary to have
             # r, theta, phi conversions
             #
-            if (anglex1temp==0.00):
+            if (xmask[i]==0.00):
                 anglez=np.pi/2-angley1temp
                 koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
                 kouty=2*np.pi*n*w*np.sin(angley1temp)*kcoeffs[i]+kouty
-                
+                anglex1temp=0.00
             else:
+                angley1temp=0.00
                 anglez=np.pi/2-anglex1temp
                 koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
                 koutx=2*np.pi*n*w*np.sin(anglex1temp)*kcoeffs[i]+koutx
@@ -431,18 +435,19 @@ def Mcalc(Iso, Las):
         nout.append(nouttemp)
 
     launchanglex=np.arcsin(nouttemp*np.sin(angleoutxtemp))
-    launchanglexdeg=launchanglex*180.00/np.pi
     launchangley=np.arcsin(nouttemp*np.sin(angleoutytemp))
-    launchangleydeg=launchangley*180.00/np.pi
+
 
     angleoutx.append(launchanglex)
     angleouty.append(launchangley)
 
     polout=_guessoutputpol(pols)
     
-    Txin, Tyin, Txout, Tyout = _calculatetrans(nvec,anglex,angley,pols,nout,angleoutx,angleouty,polout)
+    Tin, Tout = _calculatetrans(xmask,ymask,nvec,anglex,angley,pols,nout,angleoutx,angleouty,polout)
     Mctemp=1
 
+
+    n=len(xmask)-1
     for m in range(numlayers):
         avectemp=avec[m]
         kztemp=kz[m]
@@ -458,19 +463,19 @@ def Mcalc(Iso, Las):
 
         kout=2.00*np.pi*freqout*nouttemp
 
-        if (angleoutxtemp==0):
+        if (xmask[n]==0.00):
             tkeff=tktemp/np.cos(angleoutytemp)
-            koutx=0
+            koutx=0.00
             koutz=kout*np.cos(angleoutytemp)
             koutx=kout*np.sin(angleoutxtemp)
         else:
             tkeff=tktemp/np.cos(angleoutxtemp)
-            kouty=0
+            kouty=0.00
             koutz=kout*np.cos(angleoutytemp)
             kouty=kout*np.sin(angleoutytemp)
 
                
-        ksumx=ksumy=ksumz=0
+        ksumx=ksumy=ksumz=0.0000
         
         for i in range(numfreqs):
             ksumx=kcoeffs[i]*kxtemp[i]+ksumx
@@ -479,8 +484,8 @@ def Mcalc(Iso, Las):
         k4=np.sqrt(ksumx**2+ksumy**2+ksumz**2)
         #dk=np.sqrt((koutx-ksumx)**2+(kouty-ksumy)**2+(koutz-ksumz)**2)
         dk=k4-kout        
-        da=0.5*(aouttemp-(np.abs(kcoeffs[0])*avectemp[0]+np.abs(kcoeffs[1])*avectemp[1]+np.abs(kcoeffs[2])*avectemp[2])*tkeff)
-        Mc1=np.exp(-0.5*aouttemp*tkeff)
+        da=0.5*(aouttemp-(np.abs(kcoeffs[0])*avectemp[0]+np.abs(kcoeffs[1])*avectemp[1]+np.abs(kcoeffs[2])*avectemp[2]))*tkeff
+        Mc1=np.exp(-aouttemp*tkeff)
         Mc2=((1-np.exp(da))**2+4*np.exp(da)*(np.sin(dk*tkeff/2))**2)/(da**2+(dk*tkeff)**2)
         
         #Mc2=np.complex(np.cos(dk*tkeff),np.sin(dk*tkeff))*np.exp(-da*tkeff))
@@ -498,16 +503,16 @@ def Mcalc(Iso, Las):
 
     #angleoutxtemp and angleoutytemp can be converted to launch angles via Snell's Law to calculate
     #launch angle in air afterwards
-    launchanglexdeg=np.arcsin(nouttemp*np.sin(angleoutxtemp))*180.00/np.pi
-    launchangleydeg=np.arcsin(nouttemp*np.sin(angleoutytemp))*180.00/np.pi
+    if (xmask[n]==0):
+        launchangledeg=np.arcsin(nouttemp*np.sin(angleoutytemp))*180.00/np.pi
+    else:
+        launchangledeg=np.arcsin(nouttemp*np.sin(angleoutxtemp))*180.00/np.pi
+    
 
     Tdict=dict()
-    Tdict['Txout']=Txout
-    Tdict['Tyout']=Tyout
-    Tdict['Txin']=Txin
-    Tdict['Tyin']=Tyin
-    Tdict['launchanglexdeg']=launchanglexdeg
-    Tdict['launchangleydeg']=launchangleydeg
+    Tdict['Tout']=Tout
+    Tdict['Tin']=Tin
+    Tdict['launchangledeg']=launchangledeg
     return Mlist, tklist, Tdict
 
 
@@ -592,6 +597,7 @@ def SolveAngle(Iso,Las,layernum,freqnum, frequency=None):
 
     freqs=Las.frequencies
     kcoeffs=Las.k_coeffs
+    xmask=Las.xmask
     
     numfreqs=len(freqs)
     freqout=float(0.00)
@@ -626,12 +632,14 @@ def SolveAngle(Iso,Las,layernum,freqnum, frequency=None):
             w,a,n=layertemp.estimate(freqs[i])
             # NOTE: see above
             #
-            if (anglex1temp==0.00):
+            if (xmask[i]==0.00):
                 anglez=np.pi/2.000-angley1temp
+                anglex1temp=0.00
                 koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
                 kouty=2*np.pi*n*w*np.sin(angley1temp)*kcoeffs[i]+kouty
             else:
                 anglez=np.pi/2.000-anglex1temp
+                angley1temp=0.00
                 koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
                 koutx=2*np.pi*n*w*np.sin(anglex1temp)*kcoeffs[i]+koutx
             if (i+1==freqnum):
@@ -652,7 +660,7 @@ def SolveAngle(Iso,Las,layernum,freqnum, frequency=None):
             nvectemp[i]=n
             atemp[i]=a
 
-        ksumx=ksumy=ksumz=0
+        ksumx=ksumy=ksumz=0.000
         
         for i in range(numfreqs):
             ksumx=kcoeffs[i]*kxtemp[i]+ksumx
@@ -744,7 +752,7 @@ def SolveFrequency(Iso, Las, layernum, freqnum, amt=None):
 
     freqs=Las.frequencies
     kcoeffs=Las.k_coeffs
-
+    xmask=Las.xmask
     flag=int(0)
     numfreqs=len(freqs)
     freqout=float(0.00)
@@ -776,12 +784,14 @@ def SolveFrequency(Iso, Las, layernum, freqnum, amt=None):
             # NOTE: see above
             #
             if (i+1 != freqnum):
-                if (anglex1temp==0.00):
+                if (xmask[i]==0.00):
                     anglez=np.pi/2.000-angley1temp
+                    anglex1temp=0.000
                     koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
                     kouty=2*np.pi*n*w*np.sin(angley1temp)*kcoeffs[i]+kouty
                 else:
                     anglez=np.pi/2.000-anglex1temp
+                    angley1temp=0.000
                     koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
                     koutx=2*np.pi*n*w*np.sin(anglex1temp)*kcoeffs[i]+koutx
             else:
@@ -802,7 +812,7 @@ def SolveFrequency(Iso, Las, layernum, freqnum, amt=None):
             nvectemp[i]=n
             atemp[i]=a
         
-        ksumx=ksumy=ksumz=0
+        ksumx=ksumy=ksumz=0.000
 
         for i in range(numfreqs):
             ksumx=kcoeffs[i]*kxtemp[i]+ksumx
@@ -889,6 +899,7 @@ def calculatedeltats(Iso, Las):
     freqs=Las.frequencies
     kcoeffs=Las.k_coeffs
     pols=Las.polarizations
+    xmask=Las.xmask
     anglexrad=Las.anglesxrad
     angleyrad=Las.anglesyrad
     cvac=29979245800  #cm/sec
@@ -940,13 +951,15 @@ def calculatedeltats(Iso, Las):
             # NOTE: due to specific geometries used so far, it is unnecessary to have
             # r, theta, phi conversions
             #
-            if (anglex1temp==0.00):
+            if (xmask[i]==0.00):
                 anglez=np.pi/2-angley1temp
+                anglex1temp=0.000
                 koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
                 kouty=2*np.pi*n*w*np.sin(angley1temp)*kcoeffs[i]+kouty
               
             else:
                 anglez=np.pi/2-anglex1temp
+                angley1temp=0.000
                 koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
                 koutx=2*np.pi*n*w*np.sin(anglex1temp)*kcoeffs[i]+koutx
 
@@ -1021,6 +1034,7 @@ def calculateabsorbances(Iso, Las):
     pols=Las.polarizations
     anglexrad=Las.anglesxrad
     angleyrad=Las.anglesyrad
+    xmask=Las.xmask
 
     numfreqs=len(freqs)
     freqout=float(0.00)
@@ -1072,13 +1086,15 @@ def calculateabsorbances(Iso, Las):
             # NOTE: due to specific geometries used so far, it is unnecessary to have
             # r, theta, phi conversions
             #
-            if (anglex1temp==0.00):
+            if (xmask[i]==0.00):
                 anglez=np.pi/2-angley1temp
+                anglex1temp=0.000
                 koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
                 kouty=2*np.pi*n*w*np.sin(angley1temp)*kcoeffs[i]+kouty
               
             else:
                 anglez=np.pi/2-anglex1temp
+                angley1temp=0.000
                 koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
                 koutx=2*np.pi*n*w*np.sin(anglex1temp)*kcoeffs[i]+koutx
 
@@ -1092,6 +1108,7 @@ def calculateabsorbances(Iso, Las):
         anglex.append(anglextemp)
         angley.append(angleytemp)      
         nvec.append(nvectemp)
+        avec.append(avectemp)
         tk.append(layertemp['thickness'])
         angleouty.append(angleoutytemp)
         angleoutx.append(angleoutxtemp)
@@ -1104,6 +1121,8 @@ def calculateabsorbances(Iso, Las):
     angleoutx.append(launchanglex)
     angleouty.append(launchangley)
 
+    n=len(xmask)-1
+
     for i in range(numfreqs):
         dttemp=float(0.00)
         for m in range(numlayers):
@@ -1112,7 +1131,7 @@ def calculateabsorbances(Iso, Las):
             ntemp=nvec[m][i]
             atemp=avec[m][i]
             thick=tk[m]
-            if (anglextemp==0):
+            if (xmask[i]==0):
                 tkeff=thick/np.cos(angleytemp)
                 abseff=atemp*tkeff
             else:
@@ -1122,11 +1141,11 @@ def calculateabsorbances(Iso, Las):
             Alist_in[m][i]=abseff
 
     for m in range(numlayers):
-        anglextemp=angleoutx[m][i]
-        angleytemp=angleouty[m][i]
+        anglextemp=angleoutx[m]
+        angleytemp=angleouty[m]
         ntemp=nout[m]
         thick=tk[m]
-        if (anglextemp==0):
+        if (xmask[n]==0):
             tkeff=thick/np.cos(angleytemp)
             abseff=atemp*tkeff/np.log(10)
         else:
@@ -1138,7 +1157,7 @@ def calculateabsorbances(Iso, Las):
 
 
 def applyabsorbances(Mlist, Alist_in, Alist_out=None):
-    """Applies absorbances to the Mfactors calculated per layer in the IsoSample.
+    """Applies absorbances to the Mfactors calculated per layer in the IsoSample, based on those absorbances preceding the layer.
 
        Parameters
        ------
@@ -1154,7 +1173,6 @@ def applyabsorbances(Mlist, Alist_in, Alist_out=None):
     
        """
     
-
     Mlistnew1=list()
     Mlistnew=list()
 
@@ -1169,7 +1187,11 @@ def applyabsorbances(Mlist, Alist_in, Alist_out=None):
     for m in range(numlayers):
         Mlistnewtemp=Mlist[m]
         for i in range(len(Alist_in[m])):
-            Mlistnewtemp=10**(-Alist_in[m][i])*10**(-Alist_in[m][i])*Mlistnewtemp #note the squaring by the double 
+            for n in range(m+1):
+                if (m==0):
+                    pass
+                else:
+                    Mlistnewtemp=10**(-Alist_in[n-1][i])*10**(-Alist_in[n-1][i])*Mlistnewtemp #note the squaring by the double 
             #multiplication as M factor is already a squared term
         Mlistnew1.append(Mlistnewtemp)   
     
@@ -1184,6 +1206,7 @@ def applyabsorbances(Mlist, Alist_in, Alist_out=None):
         Mlistnewtemp=Mlistnewtemp*Aouttemp
         Mlistnew.append(Mlistnewtemp)
     
+    Mlistnew.reverse()
     return Mlistnew
 
 
@@ -1209,26 +1232,16 @@ def applyfresneltrans(Mlist, Tdict=None):
     if ((Tdict is None)):
         return Mlist
 
-    Txin=Tdict['Txin']
-    Tyin=Tdict['Tyin']
-    Txout=Tdict['Txout']
-    Tyout=Tdict['Tyout']
+    Tin=Tdict['Tin']
+    Tout=Tdict['Tout']
+
     numlayers=len(Mlist)
 
     for m in range(numlayers):
         Mlistnewtemp=Mlist[m]
-        for i in range(len(Mlist[m])):
-            for n in range(m): #builds up including previous layers
-                Txintemp=Txin[n][i]
-                Tyintemp=Tyin[n][i]
-                if ((Txintemp==0.00) & (Tyintemp==0.00)):
-                    Ttemp=0.00
-                elif (Txintemp == 0.00):
-                    Ttemp=Tyintemp
-                elif (Txintemp == 0.00):
-                    Ttemp=Txintemp
-                else:
-                    return ValueError("Unable to compute on input due to presence of x and y terms ")    
+        for i in range(len(Tin[m])):
+            for n in range(m+1): #builds up including previous layers
+                Ttemp=Tin[n][i]
                 Mlistnewtemp=Ttemp*Ttemp*Mlistnewtemp #again squared
         Mlistnew1.append(Mlistnewtemp)    
     
@@ -1236,15 +1249,12 @@ def applyfresneltrans(Mlist, Tdict=None):
         Mlistnewtemp=Mlist[numlayers-m-1]
         Touttemp=float(1.00)
         for n in range(numlayers-m+1,numlayers,1):
-            if (Txout[n]==0):
-                Touttemp=Tyout[n]*Touttemp  #this is NOT squared.
-            elif (Tyout[n]==0):
-                Touttemp=Txout[n]*Touttemp
-            else:
-                return ValueError("Unable to compute on output due to presence of x and y terms")
+            Touttemp=Tout[n]*Touttemp
+
         Mlistnewtemp=Mlistnewtemp*Touttemp
         Mlistnew.append(Mlistnewtemp)
     
+    Mlistnew.reverse()
     return Mlistnew
         
 

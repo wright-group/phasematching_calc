@@ -20,9 +20,9 @@ tkwat=0.01
 samp1=pc.IsoSample.IsoSample()
 desc="sapphwatersapph"
 samp1.description=desc
-#samp1.loadlayer(lay1file, tksap, label="saphfw")
+samp1.loadlayer(lay1file, tksap, label="saphfw")
 samp1.loadlayer(lay2file, tkwat, label="h2o")
-#samp1.loadlayer(lay1file, tksap, label="saphfw")
+samp1.loadlayer(lay1file, tksap, label="saphfw")
 
 
 #generation of a Lasers object.
@@ -54,8 +54,11 @@ for m in range(len(var1)):
     for n in range(len(var2a)):
         las.changefreq(1,var1[m])
         las.changefreq(2,var2a[n])
-        Mlist,tklist,Tlist=pc.phasematch.Mcalc(samp1,las)
-        ch1[m,n]=Mlist[0]  
+        Mlist,tklist,Tdict=pc.phasematch.Mcalc(samp1,las)
+        Alist, Alistout=pc.phasematch.calculateabsorbances(samp1,las) 
+        Mlist1a=pc.phasematch.applyabsorbances(Mlist,Alist,Alistout)
+        Mlist1b=pc.phasematch.applyfresneltrans(Mlist1a, Tdict)
+        ch1[m,n]=Mlist[1]  
 
 vec2=[1,1,1]
 las.addkcoeffs(vec2)
@@ -66,7 +69,7 @@ for m in range(len(var1)):
         las.changefreq(1,var1[m])
         las.changefreq(2,var2a[n])
         Mlist2,tklist2,Tlist2=pc.phasematch.Mcalc(samp1,las)
-        ch2[m,n]=Mlist2[0]  
+        ch2[m,n]=Mlist2[1]  
 
 ch3=ch1/ch2
 

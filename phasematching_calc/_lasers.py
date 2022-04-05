@@ -8,9 +8,12 @@ class Lasers():
         self.anglesairdeg=list()
         self.k_coeffs=list()
         self.polarizations=list()
-        self.geometry=""
-        self.supportedgeometrylist={"boxcars","planar"}     
-        return
+        self.geometry="boxcars"
+        self.supportedgeometrylist={"boxcars","planar"}
+        self.xmask=[1,0,0]
+        self.ymask=[0,0,1]
+         
+        return 0
 
 
     def as_dict(self):
@@ -113,6 +116,7 @@ class Lasers():
         if (newval in self.supportedgeometrylist):
             self.geometry = newval
             return self.calculatecartesianangles()
+            return self.calculatemask()
         else:
             return ValueError("unsupported geometry (see supportdgeometrylist for full list of supported geometries)")    
 
@@ -138,6 +142,19 @@ class Lasers():
             return ValueError("geometries require three lasers only(set k coeff to zero if not used")
         return 0
 
+
+    def calculatemasks(self):
+        """Based on the supported geometry list, generate a 0,1 binary type array of x and ys. If 0, that element is 
+        not to be used in related phasematching calculations.  Binary values are based on whether the inputs
+        need that coordinate specified.  For example, on boxcars, input 2 would have a binary 0 for x and binary 1 for y. """
+        geom=self.geometry
+        if (geom=="boxcars"):
+            self.xmask=[1,0,0]
+            self.ymask=[0,1,1]
+        elif (geom=="planar"):
+            self.xmask=[1,1,1]
+            self.ymask=[0,0,0]
+        return 0
 
     def save(self, file):
         """Save the JSON representation into an open file."""
@@ -168,6 +185,6 @@ class Lasers():
         self.k_coeffs=ar1['kcoeffs']
         self.polarizations=ar1['polarizations']
         self.geometry=ar1['geometry']
-        return self.calculatecartesianangles()
-        
+        self.calculatecartesianangles()
+        return self.calculatemasks()
       
