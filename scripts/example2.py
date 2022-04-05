@@ -44,7 +44,7 @@ for m in range(len(var1)):
         las.changefreq(1,var1[m])
         las.changefreq(2,var2a[n])
         Mlist,tklist,Tlist=pc.phasematch.Mcalc(samp1,las)
-        ch1[m,n]=(np.abs(Mlist[0])**2)  
+        ch1[m,n]=np.abs(Mlist[0])  
 
 
 data=wt.Data(name="example")

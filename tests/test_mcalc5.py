@@ -27,7 +27,7 @@ samp1.loadlayer(lay2file, tkwat, label="h2o")
 
 #generation of a Lasers object.
 las=pc.Lasers.Lasers()
-arr1=[1800.0,2700.0,43000.0]
+arr1=[1800.0,2700.0,45000.0]
 las.addfrequencies(arr1)
 arr2=[18.0,-8.0, 0.0]
 las.addangles(arr2)
@@ -38,9 +38,13 @@ las.addpolarizations(arr4)
 las.changegeometry("planar")
 
 
-var1=np.linspace(2450.00,2900.00,46)[:,None]
-var2=np.linspace(1800.0,2100.0,61)[None, :]
-var2a=np.linspace(1800.0,2100.0,61)
+angle1=pc.phasematch.SolveAngle(samp1,las,1,1,frequency=1800.0)
+print(list(angle1))
+las.changeangle(1,list(angle1)[0])
+
+var1=np.linspace(2450.00,2900.00,91)[:,None]
+var2=np.linspace(1700.0,2100.0,161)[None, :]
+var2a=np.linspace(1700.0,2100.0,161)
 
 ch1= np.zeros([len(var1), len(var2a)])
 ch2=np.zeros([len(var1), len(var2a)])
@@ -72,7 +76,7 @@ data.create_variable(name="w2", units="wn", values= var2)
 data.create_channel(name='DOVE', values=ch1)
 data.create_channel(name='TSF', values=ch2)
 data.create_channel(name="DOVE_TSF_RATIO", values=ch3)
-data.transform("w2","w1")
+data.transform("w1","w2")
 wt.artists.quick2D(data, channel=0)
 plt.show()
 
