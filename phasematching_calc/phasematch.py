@@ -861,7 +861,7 @@ def SolveFrequency(Iso, Las, layernum, freqnum, amt=None):
             return FiniteSet(freq)
 
 
-def calculatedeltats(Iso, Las, t_end, t_interval):
+def calculatedeltats(Iso, Las):
     """Calculate the change in delays each pulse makes with respect to the first pulse (first on the Las.frequencies
        list)  as each passes through the IsoSample.
 
@@ -998,3 +998,193 @@ def calculatedeltats(Iso, Las, t_end, t_interval):
         dt_chart_out[m]=dttemp
 
     return dt_chart_in, dt_chart_out
+
+
+def calculateabsorbances(Iso, Las):
+    """Calculate the absorbances each laser (including output) makes per layer in the IsoSample.
+
+       Return (tuple)
+       ------
+       Alist_in:  2D array with frequencies in 1st axis and layernums in second.  Elements are times (fsec)
+       in which frequency i  reaches the next layer.     
+       Alist_out: 1D array with layernums for the output at the given kcoeffs.
+       """
+    
+    if (isinstance (Iso,IsoSample)== False):
+        return ValueError("first argument not an object of class IsotropicSample")
+    if (isinstance (Las,Lasers)== False):
+        return ValueError("second argument not an object of class Lasers")
+
+    numlayers=len(Iso['layers'])
+    freqs=Las.frequencies
+    kcoeffs=Las.k_coeffs
+    pols=Las.polarizations
+    anglexrad=Las.anglesxrad
+    angleyrad=Las.anglesyrad
+
+
+    numfreqs=len(freqs)
+    freqout=float(0.00)
+    for m in range(numfreqs):
+        freqout=freqout+kcoeffs[m]*freqs[m]
+    
+    # These are 2D arrays where the 1st D is layer (1st and last are air) and 2nd are the input freqs
+    anglex=list()
+    angley=list()
+    nvec=list()
+    avec=list()
+    
+    # These are 1D arrays where the D is layer (1st and last are air)
+    nout=list()
+    aout=list()
+    angleoutx=list()
+    angleouty=list()
+
+    # These are 1D arrays where the D is layer (no air layers)
+    tk=list()
+
+    anglex1=anglexrad
+    anglex.append(anglex1)
+
+    angley1=angleyrad
+    angley.append(angley1)
+
+    Alist_in=np.zeros([numlayers,numfreqs])
+    Alist_out=np.zeros(numlayers)
+
+    for m in range(numlayers):
+        anglextemp=np.zeros(numfreqs)
+        angleytemp=np.zeros(numfreqs)
+        nvectemp=np.zeros(numfreqs)
+        avectemp=np.zeros(numfreqs)
+        layertemp=Iso['layers'][m]
+                    
+        wout,aouttemp,nouttemp=layertemp.estimate(freqout)
+
+        angleoutytemp=0.00
+        angleoutxtemp=0.00
+        koutz=0.00
+        kouty=0.00
+        koutx=0.00
+
+        for i in range(numfreqs):
+            anglex1temp,angley1temp=Angle(Iso,Las,m+1,i+1)
+            w,a,n=layertemp.estimate(freqs[i])
+            # NOTE: due to specific geometries used so far, it is unnecessary to have
+            # r, theta, phi conversions
+            #
+            if (anglex1temp==0.00):
+                anglez=np.pi/2-angley1temp
+                koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
+                kouty=2*np.pi*n*w*np.sin(angley1temp)*kcoeffs[i]+kouty
+              
+            else:
+                anglez=np.pi/2-anglex1temp
+                koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
+                koutx=2*np.pi*n*w*np.sin(anglex1temp)*kcoeffs[i]+koutx
+
+            anglextemp[i]=anglex1temp
+            angleytemp[i]=angley1temp
+            nvectemp[i]=n
+            avectemp[i]=a
+
+        angleoutxtemp=np.arctan(koutx/koutz)
+        angleoutytemp=np.arctan(kouty/koutz)
+        anglex.append(anglextemp)
+        angley.append(angleytemp)      
+        nvec.append(nvectemp)
+        tk.append(layertemp['thickness'])
+        angleouty.append(angleoutytemp)
+        angleoutx.append(angleoutxtemp)
+        nout.append(nouttemp)
+        aout.append(aouttemp)
+
+    launchanglex=np.arcsin(nouttemp*np.sin(angleoutxtemp))
+    launchangley=np.arcsin(nouttemp*np.sin(angleoutytemp))
+
+    angleoutx.append(launchanglex)
+    angleouty.append(launchangley)
+
+
+    for i in range(numfreqs):
+        dttemp=float(0.00)
+        for m in range(numlayers):
+            anglextemp=anglex[m][i]
+            angleytemp=angley[m][i]
+            ntemp=nvec[m][i]
+            atemp=avec[m][i]
+            thick=tk[m]
+            if (anglextemp==0):
+                tkeff=thick/np.cos(angleytemp)
+                abseff=atemp*tkeff
+            else:
+                tkeff=thick/np.cos(anglextemp)
+                abseff=atemp*tkeff
+            
+            Alist_in[m][i]=abseff
+
+
+    for m in range(numlayers):
+        anglextemp=angleoutx[m][i]
+        angleytemp=angleouty[m][i]
+        ntemp=nout[m]
+        thick=tk[m]
+        if (anglextemp==0):
+            tkeff=thick/np.cos(angleytemp)
+            abseff=atemp*tkeff/np.log(10)
+        else:
+            tkeff=thick/np.cos(anglextemp)
+            abseff=atemp*tkeff
+        Alist_out[m]=abseff/np.log(10)
+
+    return Alist_in, Alist_out
+
+
+def applylists(Mlist, Alist=None, Tlist=None):
+    """Calculate the absorbances each laser (including output) makes per layer in the IsoSample.
+
+       Parameters
+       ------
+       Mlist_in:  2D array with frequencies in 1st axis if (input) and layernums in second.  Elements are times (fsec)
+       in which frequency i  reaches the next layer.     
+       Alist_in: "  with absorbances (log 10)
+       Tlist:  " of Fresnel coefficients 
+    
+       Output
+       -----
+       Mlistnew:  Mlist scaled by Fresnel (if not None) and absorbance (if not None) losses
+    
+       """
+    
+
+    Mlistnew=list()
+
+    if ((Alist is None) & (Tlist is None)):
+        return Mlist
+    elif ((Alist is None) & (Tlist is not None)):
+        Alisttemp=float(0.000)
+        Alist=list()
+        for m in range(len(Tlist)):
+            Alistvec=list()
+            for i in range(len(Tlist[m])):
+                Alistvec.append(Alisttemp)
+            Alist.append(Alistvec)    
+    elif ((Alist is not None) & (Tlist is None)):
+        Tlisttemp=float(1.000)
+        Tlist=list()
+        for m in range(len(Alist)):
+            Tlistvec=list()
+            for i in range(len(Alist[m])):
+                Tlistvec.append(Tlisttemp)
+            Tlist.append(Tlistvec)
+    else:
+        pass
+        
+
+    for m in range(len(Mlist)):
+        Mlistnewtemp=Mlist[m]
+        for i in range(len(Mlist[m])):
+            Mlistnewtemp=10**(-Alist[m][i])*Tlist[m][i]*Mlistnewtemp
+        Mlistnew.append(Mlistnewtemp)    
+    
+    return Mlistnew
