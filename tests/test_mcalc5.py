@@ -27,9 +27,9 @@ samp1.loadlayer(lay2file, tkwat, label="h2o")
 
 #generation of a Lasers object.
 las=pc.Lasers.Lasers()
-arr1=[1800.0,2700.0,45000.0]
+arr1=[1800.0,2700.0,30000.0]
 las.addfrequencies(arr1)
-arr2=[18.0,-8.0, 0.0]
+arr2=[18.0,8.0, 0.0]
 las.addangles(arr2)
 arr3=[-1,1,1]
 las.addkcoeffs(arr3)
@@ -38,9 +38,9 @@ las.addpolarizations(arr4)
 las.changegeometry("planar")
 
 
-angle1=pc.phasematch.SolveAngle(samp1,las,1,1,frequency=1800.0)
-print(list(angle1))
-las.changeangle(1,list(angle1)[0])
+#angle1=pc.phasematch.SolveAngle(samp1,las,1,1,frequency=1800.0)
+#print(list(angle1))
+#las.changeangle(1,list(angle1)[0])
 
 var1=np.linspace(2450.00,2900.00,91)[:,None]
 var2=np.linspace(1700.0,2100.0,161)[None, :]

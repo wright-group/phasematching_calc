@@ -859,3 +859,142 @@ def SolveFrequency(Iso, Las, layernum, freqnum, amt=None):
             return FiniteSet()
         else:
             return FiniteSet(freq)
+
+
+def calculatedeltats(Iso, Las, t_end, t_interval):
+    """Calculate the change in delays each pulse makes with respect to the first pulse (first on the Las.frequencies
+       list)  as each passes through the IsoSample.
+
+       Uses the refractive indexes, angles of incidence, and thickness per sample, to determine the change in
+       timing each pulse makes through a sample relative to the first pulse assuming all are perfectly overlapped
+       before entering the IsoSample.
+
+       Is used to confirm that the pulse overlap in thicker samples is satisfactory or not satisfactory enough
+       to determine if delay changes are responsible for a limit to the interaction in such a sample.
+
+
+       Return
+       ------
+       dt_chart_in:  2D array with frequencies in 1st axis and layernums in second.  Elements are times (fsec)
+       in which frequency i  reaches the next layer.     
+       dt_chart_out: 1D array with layernums for the output at the given kcoeffs.
+       """
+    
+    if (isinstance (Iso,IsoSample)== False):
+        return ValueError("first argument not an object of class IsotropicSample")
+    if (isinstance (Las,Lasers)== False):
+        return ValueError("second argument not an object of class Lasers")
+
+    numlayers=len(Iso['layers'])
+    freqs=Las.frequencies
+    kcoeffs=Las.k_coeffs
+    pols=Las.polarizations
+    anglexrad=Las.anglesxrad
+    angleyrad=Las.anglesyrad
+    cvac=29979245800  #cm/sec
+
+    numfreqs=len(freqs)
+    freqout=float(0.00)
+    for m in range(numfreqs):
+        freqout=freqout+kcoeffs[m]*freqs[m]
+    
+    # These are 2D arrays where the 1st D is layer (1st and last are air) and 2nd are the input freqs
+    anglex=list()
+    angley=list()
+    nvec=list()
+    
+    # These are 1D arrays where the D is layer (1st and last are air)
+    nout=list()
+    angleoutx=list()
+    angleouty=list()
+
+    # These are 1D arrays where the D is layer (no air layers)
+    tk=list()
+
+    anglex1=anglexrad
+    anglex.append(anglex1)
+
+    angley1=angleyrad
+    angley.append(angley1)
+
+    dt_chart_in=np.zeros([numlayers,numfreqs])
+    dt_chart_out=np.zeros(numlayers)
+
+    for m in range(numlayers):
+        anglextemp=np.zeros(numfreqs)
+        angleytemp=np.zeros(numfreqs)
+        nvectemp=np.zeros(numfreqs)
+        layertemp=Iso['layers'][m]
+                    
+        wout,aouttemp,nouttemp=layertemp.estimate(freqout)
+
+        angleoutytemp=0.00
+        angleoutxtemp=0.00
+        koutz=0.00
+        kouty=0.00
+        koutx=0.00
+
+        for i in range(numfreqs):
+            anglex1temp,angley1temp=Angle(Iso,Las,m+1,i+1)
+            w,a,n=layertemp.estimate(freqs[i])
+            # NOTE: due to specific geometries used so far, it is unnecessary to have
+            # r, theta, phi conversions
+            #
+            if (anglex1temp==0.00):
+                anglez=np.pi/2-angley1temp
+                koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
+                kouty=2*np.pi*n*w*np.sin(angley1temp)*kcoeffs[i]+kouty
+              
+            else:
+                anglez=np.pi/2-anglex1temp
+                koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
+                koutx=2*np.pi*n*w*np.sin(anglex1temp)*kcoeffs[i]+koutx
+
+            anglextemp[i]=anglex1temp
+            angleytemp[i]=angley1temp
+            nvectemp[i]=n
+
+        angleoutxtemp=np.arctan(koutx/koutz)
+        angleoutytemp=np.arctan(kouty/koutz)
+        anglex.append(anglextemp)
+        angley.append(angleytemp)      
+        nvec.append(nvectemp)
+        tk.append(layertemp['thickness'])
+        angleouty.append(angleoutytemp)
+        angleoutx.append(angleoutxtemp)
+        nout.append(nouttemp)
+
+    launchanglex=np.arcsin(nouttemp*np.sin(angleoutxtemp))
+    launchangley=np.arcsin(nouttemp*np.sin(angleoutytemp))
+
+    angleoutx.append(launchanglex)
+    angleouty.append(launchangley)
+
+    for i in range(numfreqs):
+        dttemp=float(0.00)
+        for m in range(numlayers):
+            anglextemp=anglex[m][i]
+            angleytemp=angley[m][i]
+            ntemp=nvec[m][i]
+            thick=tk[m]
+            if (anglextemp==0):
+                tkeff=thick/np.cos(angleytemp)
+            else:
+                tkeff=thick/np.cos(anglextemp)
+            dttemp=dttemp+tkeff*ntemp/cvac*1E-15
+            dt_chart_in[m][i]=dttemp
+
+    dttemp=float(0.00)
+    for m in range(numlayers):
+        anglextemp=angleoutx[m][i]
+        angleytemp=angleouty[m][i]
+        ntemp=nout[m]
+        thick=tk[m]
+        if (anglextemp==0):
+            tkeff=thick/np.cos(angleytemp)
+        else:
+            tkeff=thick/np.cos(anglextemp)
+        dttemp=dttemp+tkeff*ntemp/cvac*1E-15
+        dt_chart_out[m]=dttemp
+
+    return dt_chart_in, dt_chart_out

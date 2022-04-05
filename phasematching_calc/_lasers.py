@@ -109,8 +109,7 @@ class Lasers():
                   |
                   O 3  
 
-        where "+" is the center of focus of the beams, and 4 is the output location.  Note that only input
-        beam 3 of the boxcars geometry gets its angle negated in the calculatecartesianangles method."""
+        where "+" is the center of focus of the beams, and 4 is the output location.  """
         if (newval in self.supportedgeometrylist):
             self.geometry = newval
             return self.calculatecartesianangles()
