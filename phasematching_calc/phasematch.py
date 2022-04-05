@@ -1022,7 +1022,6 @@ def calculateabsorbances(Iso, Las):
     anglexrad=Las.anglesxrad
     angleyrad=Las.anglesyrad
 
-
     numfreqs=len(freqs)
     freqout=float(0.00)
     for m in range(numfreqs):
@@ -1105,7 +1104,6 @@ def calculateabsorbances(Iso, Las):
     angleoutx.append(launchanglex)
     angleouty.append(launchangley)
 
-
     for i in range(numfreqs):
         dttemp=float(0.00)
         for m in range(numlayers):
@@ -1123,7 +1121,6 @@ def calculateabsorbances(Iso, Las):
             
             Alist_in[m][i]=abseff
 
-
     for m in range(numlayers):
         anglextemp=angleoutx[m][i]
         angleytemp=angleouty[m][i]
@@ -1140,15 +1137,16 @@ def calculateabsorbances(Iso, Las):
     return Alist_in, Alist_out
 
 
-def applylists(Mlist, Alist=None, Tlist=None):
-    """Calculate the absorbances each laser (including output) makes per layer in the IsoSample.
+def applyabsorbances(Mlist, Alist_in, Alist_out=None):
+    """Applies absorbances to the Mfactors calculated per layer in the IsoSample.
 
        Parameters
        ------
-       Mlist_in:  2D array with frequencies in 1st axis if (input) and layernums in second.  Elements are times (fsec)
-       in which frequency i  reaches the next layer.     
-       Alist_in: "  with absorbances (log 10)
-       Tlist:  " of Fresnel coefficients 
+       Mlist:  1D array of M factors for the output FWM in each layer.     
+       Alist_in: " 2D array with frequencies in 1st axis if (input) and layernums in second.  Elements are times (fsec)
+       in which frequency i reaches the next layer with absorbances (log 10)
+       Alist_out  1D array of output absorbances (log 10)
+       Tdict:  dictionary of Fresnel coefficients with format described by that in Mcalc 
     
        Output
        -----
@@ -1157,34 +1155,97 @@ def applylists(Mlist, Alist=None, Tlist=None):
        """
     
 
+    Mlistnew1=list()
     Mlistnew=list()
 
-    if ((Alist is None) & (Tlist is None)):
-        return Mlist
-    elif ((Alist is None) & (Tlist is not None)):
-        Alisttemp=float(0.000)
-        Alist=list()
-        for m in range(len(Tlist)):
-            Alistvec=list()
-            for i in range(len(Tlist[m])):
-                Alistvec.append(Alisttemp)
-            Alist.append(Alistvec)    
-    elif ((Alist is not None) & (Tlist is None)):
-        Tlisttemp=float(1.000)
-        Tlist=list()
-        for m in range(len(Alist)):
-            Tlistvec=list()
-            for i in range(len(Alist[m])):
-                Tlistvec.append(Tlisttemp)
-            Tlist.append(Tlistvec)
-    else:
-        pass
-        
+    if (Alist_out is None):
+        Alist_out=list()
+        Alistouttemp=float(0.000)
+        for m in range(len(Alist_in)):
+            Alist_out.append(float(Alistouttemp))
 
-    for m in range(len(Mlist)):
+    numlayers=len(Alist_in)
+
+    for m in range(numlayers):
         Mlistnewtemp=Mlist[m]
-        for i in range(len(Mlist[m])):
-            Mlistnewtemp=10**(-Alist[m][i])*Tlist[m][i]*Mlistnewtemp
-        Mlistnew.append(Mlistnewtemp)    
+        for i in range(len(Alist_in[m])):
+            Mlistnewtemp=10**(-Alist_in[m][i])*10**(-Alist_in[m][i])*Mlistnewtemp #note the squaring by the double 
+            #multiplication as M factor is already a squared term
+        Mlistnew1.append(Mlistnewtemp)   
+    
+    for m in range(numlayers):
+        Mlistnewtemp=Mlistnew1[numlayers-1-m]
+        Aouttemp=float(1.00)
+        if ((numlayers-1-m) ==0):
+            pass
+        else:
+            for n in range(numlayers-m+1,numlayers,1):
+                Aouttemp=Aouttemp*10**(-Alist_out[n])  #this is NOT squared.
+        Mlistnewtemp=Mlistnewtemp*Aouttemp
+        Mlistnew.append(Mlistnewtemp)
     
     return Mlistnew
+
+
+def applyfresneltrans(Mlist, Tdict=None):
+    """Applies Fresnel coefficients to the Mfactors calculated per layer in the IsoSample.  Builds
+        from all layers prior to that layer.  Transmission mode.
+
+       Parameters
+       ------
+       Mlist_in:  2D array with frequencies in 1st axis if (input) and layernums in second.  Elements are times (fsec)
+       in which frequency i  reaches the next layer.     
+       Tdict:  dictionary of Fresnel coefficients with format described by that in Mcalc 
+    
+       Output
+       -----
+       Mlistnew:  Mlist scaled by Fresnel (if not None) losses
+    
+       """
+    
+    Mlistnew1=list()
+    Mlistnew=list()
+
+    if ((Tdict is None)):
+        return Mlist
+
+    Txin=Tdict['Txin']
+    Tyin=Tdict['Tyin']
+    Txout=Tdict['Txout']
+    Tyout=Tdict['Tyout']
+    numlayers=len(Mlist)
+
+    for m in range(numlayers):
+        Mlistnewtemp=Mlist[m]
+        for i in range(len(Mlist[m])):
+            for n in range(m): #builds up including previous layers
+                Txintemp=Txin[n][i]
+                Tyintemp=Tyin[n][i]
+                if ((Txintemp==0.00) & (Tyintemp==0.00)):
+                    Ttemp=0.00
+                elif (Txintemp == 0.00):
+                    Ttemp=Tyintemp
+                elif (Txintemp == 0.00):
+                    Ttemp=Txintemp
+                else:
+                    return ValueError("Unable to compute on input due to presence of x and y terms ")    
+                Mlistnewtemp=Ttemp*Ttemp*Mlistnewtemp #again squared
+        Mlistnew1.append(Mlistnewtemp)    
+    
+    for m in range(numlayers):
+        Mlistnewtemp=Mlist[numlayers-m-1]
+        Touttemp=float(1.00)
+        for n in range(numlayers-m+1,numlayers,1):
+            if (Txout[n]==0):
+                Touttemp=Tyout[n]*Touttemp  #this is NOT squared.
+            elif (Tyout[n]==0):
+                Touttemp=Txout[n]*Touttemp
+            else:
+                return ValueError("Unable to compute on output due to presence of x and y terms")
+        Mlistnewtemp=Mlistnewtemp*Touttemp
+        Mlistnew.append(Mlistnewtemp)
+    
+    return Mlistnew
+        
+
+    
