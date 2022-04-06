@@ -83,8 +83,7 @@ def _calculatetrans(xmask,ymask,narr,anglexarr,angleyarr,polsvec,noutvec,angleou
         anglex2vec=anglexarr[m+1]
         angley2vec=angleyarr[m+1]
 
-        Tinxtemp=np.zeros(len(polsvec))
-        Tinytemp=np.zeros(len(polsvec))
+        Tintemp=np.zeros(len(polsvec))
 
         for i in range(len(polsvec)):
             
@@ -107,14 +106,13 @@ def _calculatetrans(xmask,ymask,narr,anglexarr,angleyarr,polsvec,noutvec,angleou
                 Tx=1-Rx
                 Ty=1-Ry
 
-            
-            Tinxtemp[i]=Tx
-            Tinytemp[i]=Ty
-        
             if (xmask[i]==0):
-                Tin.append(Tinytemp)
+                Tintemp[i]=Ty
             else:
-                Tin.append(Tinxtemp)
+                Tintemp[i]=Tx
+        
+        Tin.append(Tintemp)
+
 
     i=len(xmask)-1
 
@@ -1187,23 +1185,26 @@ def applyabsorbances(Mlist, Alist_in, Alist_out=None):
     for m in range(numlayers):
         Mlistnewtemp=Mlist[m]
         for i in range(len(Alist_in[m])):
-            for n in range(m+1):
-                if (m==0):
-                    pass
+            for n in range(m):
+                if (m==0):   #technically not needed as range(0) leads to a null but kept in
+                    pass  
                 else:
-                    Mlistnewtemp=10**(-Alist_in[n-1][i])*10**(-Alist_in[n-1][i])*Mlistnewtemp #note the squaring by the double 
+                    Mlistnewtemp=10**(-Alist_in[n][i])*10**(-Alist_in[n][i])*Mlistnewtemp #note the squaring by the double 
             #multiplication as M factor is already a squared term
         Mlistnew1.append(Mlistnewtemp)   
     
     for m in range(numlayers):
         Mlistnewtemp=Mlistnew1[numlayers-1-m]
-        Aouttemp=float(1.00)
+        Aouttemp=float(0.00)
         if ((numlayers-1-m) ==0):
             pass
         else:
-            for n in range(numlayers-m+1,numlayers,1):
-                Aouttemp=Aouttemp*10**(-Alist_out[n])  #this is NOT squared.
-        Mlistnewtemp=Mlistnewtemp*Aouttemp
+            for n in range(numlayers-1,numlayers-m-1,-1):
+                if (m==0):
+                    pass
+                else:
+                    Aouttemp=Aouttemp+Alist_out[n]  #this is NOT squared.
+        Mlistnewtemp=Mlistnewtemp*10**(-Aouttemp)
         Mlistnew.append(Mlistnewtemp)
     
     Mlistnew.reverse()
@@ -1238,23 +1239,32 @@ def applyfresneltrans(Mlist, Tdict=None):
     numlayers=len(Mlist)
 
     for m in range(numlayers):
-        Mlistnewtemp=Mlist[m]
-        for i in range(len(Tin[m])):
-            for n in range(m+1): #builds up including previous layers
-                Ttemp=Tin[n][i]
-                Mlistnewtemp=Ttemp*Ttemp*Mlistnewtemp #again squared
+        Mlistnewtemp=Mlist[numlayers-1-m]
+        Tintemp=float(1.00)
+        if ((numlayers-1-m)==0):
+            pass
+        else:
+            for n in range(numlayers-1,numlayers-m-1,-1):
+                if (m==0):
+                    pass
+                else:
+                    for i in range(len(Tin[m])):
+                        Ttemp=Tin[n][i]
+                        Tintemp=Tintemp*Ttemp*Ttemp
+            Mlistnewtemp=Mlistnewtemp*Tintemp
         Mlistnew1.append(Mlistnewtemp)    
-    
+
+    Mlistnew1.reverse()
+
     for m in range(numlayers):
-        Mlistnewtemp=Mlist[numlayers-m-1]
+        Mlistnewtemp=Mlistnew1[m]
         Touttemp=float(1.00)
-        for n in range(numlayers-m+1,numlayers,1):
+        for n in range(m,numlayers):
             Touttemp=Tout[n]*Touttemp
 
         Mlistnewtemp=Mlistnewtemp*Touttemp
         Mlistnew.append(Mlistnewtemp)
     
-    Mlistnew.reverse()
     return Mlistnew
         
 

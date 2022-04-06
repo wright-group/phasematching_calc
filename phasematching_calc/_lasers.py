@@ -12,8 +12,7 @@ class Lasers():
         self.supportedgeometrylist={"boxcars","planar"}
         self.xmask=[1,0,0]
         self.ymask=[0,0,1]
-         
-        return 0
+        return 
 
 
     def as_dict(self):
@@ -149,11 +148,11 @@ class Lasers():
         need that coordinate specified.  For example, on boxcars, input 2 would have a binary 0 for x and binary 1 for y. """
         geom=self.geometry
         if (geom=="boxcars"):
-            self.xmask=[1,0,0]
-            self.ymask=[0,1,1]
+            self.xmask=[1,0,0,1]
+            self.ymask=[0,1,1,0]
         elif (geom=="planar"):
-            self.xmask=[1,1,1]
-            self.ymask=[0,0,0]
+            self.xmask=[1,1,1,1]
+            self.ymask=[0,0,0,0]
         return 0
 
     def save(self, file):
