@@ -10,8 +10,8 @@ class Lasers():
         self.polarizations=list()
         self.geometry="boxcars"
         self.supportedgeometrylist={"boxcars","planar"}
-        self.xmask=[1,0,0]
-        self.ymask=[0,0,1]
+        self.xmask=[1,0,0,1]
+        self.ymask=[0,1,1,0]
         return 
 
 
@@ -114,8 +114,8 @@ class Lasers():
         where "+" is the center of focus of the beams, and 4 is the output location.  """
         if (newval in self.supportedgeometrylist):
             self.geometry = newval
-            return self.calculatecartesianangles()
-            return self.calculatemask()
+            self.calculatecartesianangles()
+            return self.calculatemasks()
         else:
             return ValueError("unsupported geometry (see supportdgeometrylist for full list of supported geometries)")    
 

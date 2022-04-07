@@ -44,3 +44,6 @@ print(out)
 freq=pc.phasematch.SolveFrequency(samp1,las4,2,3,30)
 out=freq
 print(out)
+
+tin,tout=pc.phasematch.calculatedeltats(samp1,las4)
+print(tin,tout)

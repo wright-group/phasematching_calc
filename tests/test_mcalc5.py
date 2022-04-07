@@ -50,6 +50,8 @@ ch1= np.zeros([len(var1), len(var2a)])
 ch2=np.zeros([len(var1), len(var2a)])
 ch3=np.zeros([len(var1), len(var2a)])
 
+chartin,chartout=pc.phasematch.calculatedeltats(samp1, las)
+
 for m in range(len(var1)):
     for n in range(len(var2a)):
         las.changefreq(1,var1[m])

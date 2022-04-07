@@ -30,7 +30,7 @@ def _guessoutputpol(polsvec):
         return ValueError("Polarizations list not supported for current estimated output polarization")
     
 
-def _calculatetrans(xmask,ymask,narr,anglexarr,angleyarr,polsvec,noutvec,angleoutxvec,angleoutyvec,polout):
+def _calculatetrans(xmask,narr,anglexarr,angleyarr,polsvec,noutvec,angleoutxvec,angleoutyvec,polout):
     '''
     Uses Fresnel's equations to calculate transmission coefficients between layers in a sample,
     as well as after the last layer
@@ -327,123 +327,50 @@ def Mcalc(Iso, Las):
     if (isinstance (Las,Lasers)== False):
         return ValueError("second argument not an object of class Lasers")
 
-    numlayers=len(Iso['layers'])
-    freqs=Las.frequencies
-    kcoeffs=Las.k_coeffs
+
+
     pols=Las.polarizations
-    anglexrad=Las.anglesxrad
-    angleyrad=Las.anglesyrad
-    xmask=Las.xmask
-    ymask=Las.ymask
     
-    numfreqs=len(freqs)
-    freqout=float(0.00)
-    for m in range(numfreqs):
-        freqout=freqout+kcoeffs[m]*freqs[m]
-    
-    # These are 2D arrays where the 1st D is layer (1st and last are air) and 2nd are the input freqs
-    anglex=list()
-    angley=list()
-    nvec=list()
-
-    # These are 2D arrays where the 1st D is layer (no air layers) and 2nd are the input freqs
-    kx=list()
-    ky=list()
-    kz=list()
-    avec=list()
-    
-    # These are 1D arrays where the D is layer (1st and last are air)
-    nout=list()
-    angleoutx=list()
-    angleouty=list()
-
-    # These are 1D arrays where the D is layer (no air layers)
-    tk=list()
-    aout=list()
     Mlist=list()
     tklist=list()
+    
+    output=_calculateinternals(Iso,Las, zerofreq=False, zerofreqnum=1)
+    anglex=output['anglex']
+    angley=output['angley']
+    angleoutx=output['angleoutx']
+    angleouty=output['angleouty']
+    nvec=output['n']
+    avec=output['a']
+    nout=output['nout']
+    aout=output['aout']
+    tk=output['thicknesses']
+    kx=output['kx']
+    ky=output['ky']
+    kz=output['kz']
+    freqout=output['freqout']
+    numlayers=output['numlayers']
+    numfreqs=output['numfreqs']
+    xmask=output['xmask']
+    kcoeffs=output['kcoeffs']
 
-    anglex1=anglexrad
-    anglex.append(anglex1)
+    noutf=nout[numlayers-1]
+    angleoutxf=angleoutx[numlayers-1]
+    angleoutyf=angleouty[numlayers-1]
 
-    angley1=angleyrad
-    angley.append(angley1)
-
-    for m in range(numlayers):
-        anglextemp=np.zeros(numfreqs)
-        angleytemp=np.zeros(numfreqs)
-        kxtemp=np.zeros(numfreqs)
-        kytemp=np.zeros(numfreqs)
-        kztemp=np.zeros(numfreqs)
-        atemp=np.zeros(numfreqs)
-        nvectemp=np.zeros(numfreqs)
-        layertemp=Iso['layers'][m]
-                    
-        wout,aouttemp,nouttemp=layertemp.estimate(freqout)
-
-        angleoutytemp=0.00
-        angleoutxtemp=0.00
-        koutz=0.00
-        kouty=0.00
-        koutx=0.00
-
-        for i in range(numfreqs):
-            anglex1temp,angley1temp=Angle(Iso,Las,m+1,i+1)
-            w,a,n=layertemp.estimate(freqs[i])
-
-            # NOTE: due to specific geometries used so far, it is unnecessary to have
-            # r, theta, phi conversions
-            #
-            if (xmask[i]==0.00):
-                anglez=np.pi/2-angley1temp
-                koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
-                kouty=2*np.pi*n*w*np.sin(angley1temp)*kcoeffs[i]+kouty
-                anglex1temp=0.00
-            else:
-                angley1temp=0.00
-                anglez=np.pi/2-anglex1temp
-                koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
-                koutx=2*np.pi*n*w*np.sin(anglex1temp)*kcoeffs[i]+koutx
-
-            kx1=2*np.pi*n*w*np.sin(anglex1temp)
-            ky1=2*np.pi*n*w*np.sin(angley1temp)
-            kz1=2*np.pi*n*w*np.sin(anglez)
-            anglextemp[i]=anglex1temp
-            angleytemp[i]=angley1temp
-            kxtemp[i]=kx1
-            kytemp[i]=ky1
-            kztemp[i]=kz1
-            nvectemp[i]=n
-            atemp[i]=a
-
-        angleoutxtemp=np.arctan(koutx/koutz)
-        angleoutytemp=np.arctan(kouty/koutz)
-        anglex.append(anglextemp)
-        angley.append(angleytemp)      
-        kx.append(kxtemp)
-        ky.append(kytemp)
-        kz.append(kztemp)
-        avec.append(atemp)
-        nvec.append(nvectemp)
-
-        tk.append(layertemp['thickness'])
-        aout.append(aouttemp)
-        angleouty.append(angleoutytemp)
-        angleoutx.append(angleoutxtemp)
-        nout.append(nouttemp)
-
-    launchanglex=np.arcsin(nouttemp*np.sin(angleoutxtemp))
-    launchangley=np.arcsin(nouttemp*np.sin(angleoutytemp))
-
+    launchanglex=np.arcsin(noutf*np.sin(angleoutxf))
+    launchangley=np.arcsin(noutf*np.sin(angleoutyf))
 
     angleoutx.append(launchanglex)
     angleouty.append(launchangley)
 
     polout=_guessoutputpol(pols)
     
-    Tin, Tout = _calculatetrans(xmask,ymask,nvec,anglex,angley,pols,nout,angleoutx,angleouty,polout)
+    Tin, Tout = _calculatetrans(xmask,nvec,anglex,angley,pols,nout,angleoutx,angleouty,polout)
     Mctemp=1
 
+    koutx=0.00
+    kouty=0.00
+    koutz=0.00
 
     n=len(xmask)-1
     for m in range(numlayers):
@@ -594,108 +521,56 @@ def SolveAngle(Iso,Las,layernum,freqnum, frequency=None):
         return ValueError("freqnum cannot be less than 1")
 
     freqs=Las.frequencies
-    kcoeffs=Las.k_coeffs
-    xmask=Las.xmask
-    
+    Lastemp=Las
+    Isotemp=Iso
+
     numfreqs=len(freqs)
-    freqout=float(0.00)
-    
+
     flag=int(0)
     
     if (frequency is not None):
         freqs[freqnum-1]=frequency
         if (frequency < 0.00):
             return ValueError("frequency cannot be less than 0")
+        Lastemp.changefreq(freqnum,frequency)
+
+    output=_calculateinternals(Isotemp,Lastemp, zerofreq=True, zerofreqnum=freqnum)
+    kx=output['kx']
+    ky=output['ky']
+    kz=output['kz']
+    kcoeffs=output['kcoeffs']
+        
+    kxtemp=kx[layernum-1]
+    kytemp=ky[layernum-1]
+    kztemp=kz[layernum-1]
+    ksumx=ksumy=ksumz=0.000
 
     for i in range(numfreqs):
-        freqout=freqout+kcoeffs[i]*freqs[i]
-
-
-    for m in range(layernum):
-        anglextemp=np.zeros(numfreqs)
-        angleytemp=np.zeros(numfreqs)
-        kxtemp=np.zeros(numfreqs)
-        kytemp=np.zeros(numfreqs)
-        kztemp=np.zeros(numfreqs)
-        atemp=np.zeros(numfreqs)
-        nvectemp=np.zeros(numfreqs)
-        layertemp=Iso.layers[m]
-        koutz=0.00
-        kouty=0.00
-        koutx=0.00
-        
-
-        for i in range(numfreqs):
-            anglex1temp,angley1temp=Angle(Iso,Las,m+1,i+1)
-            w,a,n=layertemp.estimate(freqs[i])
-            # NOTE: see above
-            #
-            if (xmask[i]==0.00):
-                anglez=np.pi/2.000-angley1temp
-                anglex1temp=0.00
-                koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
-                kouty=2*np.pi*n*w*np.sin(angley1temp)*kcoeffs[i]+kouty
-            else:
-                anglez=np.pi/2.000-anglex1temp
-                angley1temp=0.00
-                koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
-                koutx=2*np.pi*n*w*np.sin(anglex1temp)*kcoeffs[i]+koutx
-            if (i+1==freqnum):
-                factor=0.00
-            else:
-                factor=1.00
-            # this is put in as reminder that we are solving for this variable so the k's for this
-            # one have to be set to zero
-
-            kx1=2*np.pi*n*w*np.sin(anglex1temp)*factor
-            ky1=2*np.pi*n*w*np.sin(angley1temp)*factor
-            kz1=2*np.pi*n*w*np.sin(anglez)*factor
-            anglextemp[i]=anglex1temp
-            angleytemp[i]=angley1temp
-            kxtemp[i]=kx1
-            kytemp[i]=ky1
-            kztemp[i]=kz1
-            nvectemp[i]=n
-            atemp[i]=a
-
-        ksumx=ksumy=ksumz=0.000
-        
-        for i in range(numfreqs):
-            ksumx=kcoeffs[i]*kxtemp[i]+ksumx
-            ksumy=kcoeffs[i]*kytemp[i]+ksumy
-            ksumz=kcoeffs[i]*kztemp[i]+ksumz
-    
-        if ((ksumx==ksumz) & (ksumx==0.00)):
-            flag=1
-            break
-        elif ((ksumy==ksumz) & (ksumx==0.00)):
-            flag=1
-            break
-
+        ksumx=kcoeffs[i]*kxtemp[i]+ksumx
+        ksumy=kcoeffs[i]*kytemp[i]+ksumy
+        ksumz=kcoeffs[i]*kztemp[i]+ksumz
+    if ((ksumx==ksumz) & (ksumx==0.00)):
+        flag=1
+    elif ((ksumy==ksumz) & (ksumx==0.00)):
+        flag=1
 
     if (flag==1):
         angledeg=calculateoriginalcritangle(Iso, Las, layernum, freqnum, frequency)
         return Interval(0,angledeg)
     else:
         m = layernum-1
-  
-        Lastemp=Las
-        Isotemp=Iso
         tol=0.0001
         for k in range(layernum):
             Isotemp.layers[k].suppressabs()
-
         dir=1.00
         amt= 1.00 #deg
         Mtest,tklist,Tdict=Mcalc(Isotemp, Lastemp)
-
         magMtest=np.abs(Mtest[m]) 
         error1= 1-magMtest
         error2= error1
         iter=70
         angle=Lastemp.anglesairdeg[freqnum-1]
         b=0
-
         while( error2 > tol):
             b=b+1
             if (error2 > error1):
@@ -749,98 +624,49 @@ def SolveFrequency(Iso, Las, layernum, freqnum, amt=None):
         return ValueError("layernum cannot be less than 1")
 
     freqs=Las.frequencies
-    kcoeffs=Las.k_coeffs
-    xmask=Las.xmask
     flag=int(0)
     numfreqs=len(freqs)
-    freqout=float(0.00)
 
- 
+    Isotemp=Iso
+    Lastemp=Las
+
     if amt is None:
         amt = 0.01*freqs[freqnum-1]  # a guess
 
-    for i in range(numfreqs):
-        freqout=freqout+kcoeffs[i]*freqs[i]
+    output=_calculateinternals(Isotemp,Lastemp,zerofreq=True,zerofreqnum=freqnum)
+    kx=output['kx']
+    ky=output['ky']
+    kz=output['kz']
+    numfreqs=output['numfreqs']
+    kcoeffs=output['kcoeffs']
 
-    for m in range(layernum):
-        anglextemp=np.zeros(numfreqs)
-        angleytemp=np.zeros(numfreqs)
-        kxtemp=np.zeros(numfreqs)
-        kytemp=np.zeros(numfreqs)
-        kztemp=np.zeros(numfreqs)
-        atemp=np.zeros(numfreqs)
-        nvectemp=np.zeros(numfreqs)
-        layertemp=Iso['layers'][m]
-                    
-        koutx=0.00
-        kouty=0.00
-        koutz=0.00
+    ksumx=ksumy=ksumz=0.000
 
-        for i in range(numfreqs):
-            anglex1temp,angley1temp=Angle(Iso,Las,m+1,i+1)
-            w,a,n=layertemp.estimate(freqs[i])
-            # NOTE: see above
-            #
-            if (i+1 != freqnum):
-                if (xmask[i]==0.00):
-                    anglez=np.pi/2.000-angley1temp
-                    anglex1temp=0.000
-                    koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
-                    kouty=2*np.pi*n*w*np.sin(angley1temp)*kcoeffs[i]+kouty
-                else:
-                    anglez=np.pi/2.000-anglex1temp
-                    angley1temp=0.000
-                    koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
-                    koutx=2*np.pi*n*w*np.sin(anglex1temp)*kcoeffs[i]+koutx
-            else:
-                anglex1temp=0.00
-                angley1temp=0.00
-                anglez=0.00
-            # this is put in as reminder that we are solving for this variable so the k's for this
-            # one have to be set to zero
-
-            kx1=2*np.pi*n*w*np.sin(anglex1temp)
-            ky1=2*np.pi*n*w*np.sin(angley1temp)
-            kz1=2*np.pi*n*w*np.sin(anglez)
-            anglextemp[i]=anglex1temp
-            angleytemp[i]=angley1temp
-            kxtemp[i]=kx1
-            kytemp[i]=ky1
-            kztemp[i]=kz1
-            nvectemp[i]=n
-            atemp[i]=a
-        
-        ksumx=ksumy=ksumz=0.000
-
-        for i in range(numfreqs):
-            ksumx=kcoeffs[i]*kxtemp[i]+ksumx
-            ksumy=kcoeffs[i]*kytemp[i]+ksumy
-            ksumz=kcoeffs[i]*kztemp[i]+ksumz
+    kxtemp=kx[layernum-1]
+    kytemp=ky[layernum-1]
+    kztemp=kz[layernum-1]
     
-        if ((ksumx==ksumz) & (ksumx==0.00)):
-            flag=1
-            break
-        elif ((ksumy==ksumz) & (ksumx==0.00)):
-            flag=1
-            break
+    for i in range(numfreqs):
+        ksumx=kcoeffs[i]*kxtemp[i]+ksumx
+        ksumy=kcoeffs[i]*kytemp[i]+ksumy
+        ksumz=kcoeffs[i]*kztemp[i]+ksumz
 
+    if ((ksumx==ksumz) & (ksumx==0.00)):
+        flag=1
+    elif ((ksumy==ksumz) & (ksumx==0.00)):
+        flag=1
 
     if (flag==1):
         return Interval(0,oo)  #currently does not attempt a walkback of high frequencies
                             # at the given angle to see if it is reflected at a critical angle
     else:
         m = layernum-1
-  
-        Lastemp=Las
-        Isotemp=Iso
         tol=0.0001
         for k in range(layernum):
             Isotemp.layers[k].suppressabs()
 
         dir=1.00
-
         Mtest,tklist,Tdict=Mcalc(Isotemp, Lastemp)
-
         magMtest=np.abs(Mtest[m])
         freq=Lastemp.frequencies[freqnum-1]
         error1= 1-magMtest
@@ -895,88 +721,29 @@ def calculatedeltats(Iso, Las):
 
     numlayers=len(Iso['layers'])
     freqs=Las.frequencies
-    kcoeffs=Las.k_coeffs
-    pols=Las.polarizations
-    xmask=Las.xmask
-    anglexrad=Las.anglesxrad
-    angleyrad=Las.anglesyrad
     cvac=29979245800  #cm/sec
-
     numfreqs=len(freqs)
-    freqout=float(0.00)
-    for m in range(numfreqs):
-        freqout=freqout+kcoeffs[m]*freqs[m]
-    
-    # These are 2D arrays where the 1st D is layer (1st and last are air) and 2nd are the input freqs
-    anglex=list()
-    angley=list()
-    nvec=list()
-    
-    # These are 1D arrays where the D is layer (1st and last are air)
-    nout=list()
-    angleoutx=list()
-    angleouty=list()
-
-    # These are 1D arrays where the D is layer (no air layers)
-    tk=list()
-
-    anglex1=anglexrad
-    anglex.append(anglex1)
-
-    angley1=angleyrad
-    angley.append(angley1)
-
     dt_chart_in=np.zeros([numlayers,numfreqs])
     dt_chart_out=np.zeros(numlayers)
 
-    for m in range(numlayers):
-        anglextemp=np.zeros(numfreqs)
-        angleytemp=np.zeros(numfreqs)
-        nvectemp=np.zeros(numfreqs)
-        layertemp=Iso['layers'][m]
-                    
-        wout,aouttemp,nouttemp=layertemp.estimate(freqout)
+    output=_calculateinternals(Iso,Las, zerofreq=False, zerofreqnum=1)
+    anglex=output['anglex']
+    angley=output['angley']
+    angleoutx=output['angleoutx']
+    angleouty=output['angleouty']
+    nvec=output['n']
+    nout=output['nout']
+    tk=output['thicknesses']
+    numlayers=output['numlayers']
+    numfreqs=output['numfreqs']
+    xmask=output['xmask']
+    
+    noutf=nout[numlayers-1]
+    angleoutxf=angleoutx[numlayers-1]
+    angleoutyf=angleouty[numlayers-1]
 
-        angleoutytemp=0.00
-        angleoutxtemp=0.00
-        koutz=0.00
-        kouty=0.00
-        koutx=0.00
-
-        for i in range(numfreqs):
-            anglex1temp,angley1temp=Angle(Iso,Las,m+1,i+1)
-            w,a,n=layertemp.estimate(freqs[i])
-            # NOTE: due to specific geometries used so far, it is unnecessary to have
-            # r, theta, phi conversions
-            #
-            if (xmask[i]==0.00):
-                anglez=np.pi/2-angley1temp
-                anglex1temp=0.000
-                koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
-                kouty=2*np.pi*n*w*np.sin(angley1temp)*kcoeffs[i]+kouty
-              
-            else:
-                anglez=np.pi/2-anglex1temp
-                angley1temp=0.000
-                koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
-                koutx=2*np.pi*n*w*np.sin(anglex1temp)*kcoeffs[i]+koutx
-
-            anglextemp[i]=anglex1temp
-            angleytemp[i]=angley1temp
-            nvectemp[i]=n
-
-        angleoutxtemp=np.arctan(koutx/koutz)
-        angleoutytemp=np.arctan(kouty/koutz)
-        anglex.append(anglextemp)
-        angley.append(angleytemp)      
-        nvec.append(nvectemp)
-        tk.append(layertemp['thickness'])
-        angleouty.append(angleoutytemp)
-        angleoutx.append(angleoutxtemp)
-        nout.append(nouttemp)
-
-    launchanglex=np.arcsin(nouttemp*np.sin(angleoutxtemp))
-    launchangley=np.arcsin(nouttemp*np.sin(angleoutytemp))
+    launchanglex=np.arcsin(noutf*np.sin(angleoutxf))
+    launchangley=np.arcsin(noutf*np.sin(angleoutyf))
 
     angleoutx.append(launchanglex)
     angleouty.append(launchangley)
@@ -988,24 +755,24 @@ def calculatedeltats(Iso, Las):
             angleytemp=angley[m][i]
             ntemp=nvec[m][i]
             thick=tk[m]
-            if (anglextemp==0):
+            if (xmask[i]==0):
                 tkeff=thick/np.cos(angleytemp)
             else:
                 tkeff=thick/np.cos(anglextemp)
-            dttemp=dttemp+tkeff*ntemp/cvac*1E-15
+            dttemp=dttemp+tkeff*ntemp/cvac*1E15
             dt_chart_in[m][i]=dttemp
 
     dttemp=float(0.00)
     for m in range(numlayers):
-        anglextemp=angleoutx[m][i]
-        angleytemp=angleouty[m][i]
+        anglextemp=angleoutx[m]
+        angleytemp=angleouty[m]
         ntemp=nout[m]
         thick=tk[m]
-        if (anglextemp==0):
+        if (xmask[numfreqs]==0):
             tkeff=thick/np.cos(angleytemp)
         else:
             tkeff=thick/np.cos(anglextemp)
-        dttemp=dttemp+tkeff*ntemp/cvac*1E-15
+        dttemp=dttemp+tkeff*ntemp/cvac*1E15
         dt_chart_out[m]=dttemp
 
     return dt_chart_in, dt_chart_out
@@ -1025,96 +792,28 @@ def calculateabsorbances(Iso, Las):
         return ValueError("first argument not an object of class IsotropicSample")
     if (isinstance (Las,Lasers)== False):
         return ValueError("second argument not an object of class Lasers")
-
-    numlayers=len(Iso['layers'])
-    freqs=Las.frequencies
-    kcoeffs=Las.k_coeffs
-    pols=Las.polarizations
-    anglexrad=Las.anglesxrad
-    angleyrad=Las.anglesyrad
-    xmask=Las.xmask
-
-    numfreqs=len(freqs)
-    freqout=float(0.00)
-    for m in range(numfreqs):
-        freqout=freqout+kcoeffs[m]*freqs[m]
     
-    # These are 2D arrays where the 1st D is layer (1st and last are air) and 2nd are the input freqs
-    anglex=list()
-    angley=list()
-    nvec=list()
-    avec=list()
-    
-    # These are 1D arrays where the D is layer (1st and last are air)
-    nout=list()
-    aout=list()
-    angleoutx=list()
-    angleouty=list()
-
-    # These are 1D arrays where the D is layer (no air layers)
-    tk=list()
-
-    anglex1=anglexrad
-    anglex.append(anglex1)
-
-    angley1=angleyrad
-    angley.append(angley1)
-
     Alist_in=np.zeros([numlayers,numfreqs])
     Alist_out=np.zeros(numlayers)
 
-    for m in range(numlayers):
-        anglextemp=np.zeros(numfreqs)
-        angleytemp=np.zeros(numfreqs)
-        nvectemp=np.zeros(numfreqs)
-        avectemp=np.zeros(numfreqs)
-        layertemp=Iso['layers'][m]
-                    
-        wout,aouttemp,nouttemp=layertemp.estimate(freqout)
+    output=_calculateinternals(Iso,Las, zerofreq=False, zerofreqnum=1)
+    anglex=output['anglex']
+    angley=output['angley']
+    angleoutx=output['angleoutx']
+    angleouty=output['angleouty']
+    avec=output['a']
+    nout=output['nout']
+    tk=output['thicknesses']
+    numlayers=output['numlayers']
+    numfreqs=output['numfreqs']
+    xmask=output['xmask']
+     
+    noutf=nout[numlayers-1]
+    angleoutxf=angleoutx[numlayers-1]
+    angleoutyf=angleouty[numlayers-1]
 
-        angleoutytemp=0.00
-        angleoutxtemp=0.00
-        koutz=0.00
-        kouty=0.00
-        koutx=0.00
-
-        for i in range(numfreqs):
-            anglex1temp,angley1temp=Angle(Iso,Las,m+1,i+1)
-            w,a,n=layertemp.estimate(freqs[i])
-            # NOTE: due to specific geometries used so far, it is unnecessary to have
-            # r, theta, phi conversions
-            #
-            if (xmask[i]==0.00):
-                anglez=np.pi/2-angley1temp
-                anglex1temp=0.000
-                koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
-                kouty=2*np.pi*n*w*np.sin(angley1temp)*kcoeffs[i]+kouty
-              
-            else:
-                anglez=np.pi/2-anglex1temp
-                angley1temp=0.000
-                koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
-                koutx=2*np.pi*n*w*np.sin(anglex1temp)*kcoeffs[i]+koutx
-
-            anglextemp[i]=anglex1temp
-            angleytemp[i]=angley1temp
-            nvectemp[i]=n
-            avectemp[i]=a
-
-        angleoutxtemp=np.arctan(koutx/koutz)
-        angleoutytemp=np.arctan(kouty/koutz)
-        anglex.append(anglextemp)
-        angley.append(angleytemp)      
-        nvec.append(nvectemp)
-        avec.append(avectemp)
-        tk.append(layertemp['thickness'])
-        angleouty.append(angleoutytemp)
-        angleoutx.append(angleoutxtemp)
-        nout.append(nouttemp)
-        aout.append(aouttemp)
-
-    launchanglex=np.arcsin(nouttemp*np.sin(angleoutxtemp))
-    launchangley=np.arcsin(nouttemp*np.sin(angleoutytemp))
+    launchanglex=np.arcsin(noutf*np.sin(angleoutxf))
+    launchangley=np.arcsin(noutf*np.sin(angleoutyf))
 
     angleoutx.append(launchanglex)
     angleouty.append(launchangley)
@@ -1122,11 +821,9 @@ def calculateabsorbances(Iso, Las):
     n=len(xmask)-1
 
     for i in range(numfreqs):
-        dttemp=float(0.00)
         for m in range(numlayers):
             anglextemp=anglex[m][i]
             angleytemp=angley[m][i]
-            ntemp=nvec[m][i]
             atemp=avec[m][i]
             thick=tk[m]
             if (xmask[i]==0):
@@ -1135,13 +832,11 @@ def calculateabsorbances(Iso, Las):
             else:
                 tkeff=thick/np.cos(anglextemp)
                 abseff=atemp*tkeff
-            
             Alist_in[m][i]=abseff
 
     for m in range(numlayers):
         anglextemp=angleoutx[m]
         angleytemp=angleouty[m]
-        ntemp=nout[m]
         thick=tk[m]
         if (xmask[n]==0):
             tkeff=thick/np.cos(angleytemp)
@@ -1250,7 +945,7 @@ def applyfresneltrans(Mlist, Tdict=None):
                 else:
                     for i in range(len(Tin[m])):
                         Ttemp=Tin[n][i]
-                        Tintemp=Tintemp*Ttemp*Ttemp
+                        Tintemp=Tintemp*Ttemp*Ttemp  #Note the square
             Mlistnewtemp=Mlistnewtemp*Tintemp
         Mlistnew1.append(Mlistnewtemp)    
 
@@ -1261,11 +956,150 @@ def applyfresneltrans(Mlist, Tdict=None):
         Touttemp=float(1.00)
         for n in range(m,numlayers):
             Touttemp=Tout[n]*Touttemp
-
-        Mlistnewtemp=Mlistnewtemp*Touttemp
+        Mlistnewtemp=Mlistnewtemp*Touttemp  #Note that this is NOT squared.
         Mlistnew.append(Mlistnewtemp)
     
     return Mlistnew
         
 
+def _calculateinternals(Iso,Las, zerofreq=False, zerofreqnum=1):
+    """Returns a dictionary containing internal calculations used in many of the methods."""
+    output=dict()
+    freqs=Las.frequencies
+    kcoeffs=Las.k_coeffs
+    numlayers=len(Iso['layers'])
+    anglexrad=Las.anglesxrad
+    angleyrad=Las.anglesyrad
+    xmask=Las.xmask
     
+    
+    numfreqs=len(freqs)
+    freqout=float(0.00)
+    for m in range(numfreqs):
+        freqout=freqout+kcoeffs[m]*freqs[m]
+    
+    # These are 2D arrays where the 1st D is layer (1st and last are air) and 2nd are the input freqs
+    anglex=list()
+    angley=list()
+    nvec=list()
+
+    # These are 2D arrays where the 1st D is layer (no air layers) and 2nd are the input freqs
+    kx=list()
+    ky=list()
+    kz=list()
+    avec=list()
+    
+    # These are 1D arrays where the D is layer (1st and last are air)
+    nout=list()
+    angleoutx=list()
+    angleouty=list()
+
+    # These are 1D arrays where the D is layer (no air layers)
+    tk=list()
+    aout=list()
+
+    anglex1=anglexrad
+    anglex.append(anglex1)
+
+    angley1=angleyrad
+    angley.append(angley1)
+
+    for m in range(numlayers):
+        anglextemp=np.zeros(numfreqs)
+        angleytemp=np.zeros(numfreqs)
+        kxtemp=np.zeros(numfreqs)
+        kytemp=np.zeros(numfreqs)
+        kztemp=np.zeros(numfreqs)
+        atemp=np.zeros(numfreqs)
+        nvectemp=np.zeros(numfreqs)
+        layertemp=Iso['layers'][m]
+                    
+        wout,aouttemp,nouttemp=layertemp.estimate(freqout)
+
+        angleoutytemp=0.00
+        angleoutxtemp=0.00
+        koutz=0.00
+        kouty=0.00
+        koutx=0.00
+        factor=1.00
+        for i in range(numfreqs):
+            anglex1temp,angley1temp=Angle(Iso,Las,m+1,i+1)
+            w,a,n=layertemp.estimate(freqs[i])
+
+            # NOTE: due to specific geometries used so far, it is unnecessary to have
+            # r, theta, phi conversions
+            #
+            if (xmask[i]==0.00):
+                anglez=np.pi/2-angley1temp
+                koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
+                kouty=2*np.pi*n*w*np.sin(angley1temp)*kcoeffs[i]+kouty
+                anglex1temp=0.00
+            else:
+                angley1temp=0.00
+                anglez=np.pi/2-anglex1temp
+                koutz=2*np.pi*n*w*np.sin(anglez)*kcoeffs[i]+koutz
+                koutx=2*np.pi*n*w*np.sin(anglex1temp)*kcoeffs[i]+koutx
+            if (zerofreq==True):
+                if (zerofreqnum is None):
+                    return ValueError("zerofreqnum must be specified")
+                else:
+                    if (i+1==zerofreqnum):
+                        factor=0.00
+                    else:
+                        factor=1.00
+            # this is put in as reminder that we are solving for this variable so the k's for this
+            # one have to be set to zero if being used in a solver
+
+            kx1=2*np.pi*n*w*np.sin(anglex1temp)*factor
+            ky1=2*np.pi*n*w*np.sin(angley1temp)*factor
+            kz1=2*np.pi*n*w*np.sin(anglez)*factor
+            anglextemp[i]=anglex1temp
+            angleytemp[i]=angley1temp
+            kxtemp[i]=kx1
+            kytemp[i]=ky1
+            kztemp[i]=kz1
+            nvectemp[i]=n
+            atemp[i]=a
+
+        angleoutxtemp=np.arctan(koutx/koutz)
+        angleoutytemp=np.arctan(kouty/koutz)
+        anglex.append(anglextemp)
+        angley.append(angleytemp)      
+        kx.append(kxtemp)
+        ky.append(kytemp)
+        kz.append(kztemp)
+        avec.append(atemp)
+        nvec.append(nvectemp)
+
+        tk.append(layertemp['thickness'])
+        aout.append(aouttemp)
+        angleouty.append(angleoutytemp)
+        angleoutx.append(angleoutxtemp)
+        nout.append(nouttemp)
+    
+    output['anglex']=anglex
+    output['angley']=angley
+    output['angleoutx']=angleoutx
+    output['angleouty']=angleouty
+    output['n']=nvec
+    output['a']=avec
+    output['nout']=nout
+    output['aout']=aout
+    output['thicknesses']=tk
+    output['kx']=kx
+    output['ky']=ky
+    output['kz']=kz
+    output['freqout']=freqout
+    output['numlayers']=numlayers
+    output['numfreqs']=numfreqs
+    output['xmask']=xmask
+    output['kcoeffs']=kcoeffs
+        
+    return output
+
+def _arraycompare(arr1,arr2):
+    "compare two 2D arrays for equality, assumes each shape are same"
+    booltest=True
+    for n in range(len(arr1)):
+        booltest=booltest & ((arr1[n]==arr2[n]).all())
+    return booltest
