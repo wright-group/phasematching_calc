@@ -12,7 +12,7 @@ filepath=os.path.join(ROOT_DIR, 'tests')
 
 lay1file=os.path.join(filepath, 'CaF2_Malitson.txt')
 
-tkcaf2=0.3 
+tkcaf2=0.03 
 
 # generation of a IsoSample
 samp1=pc.IsoSample.IsoSample()
@@ -47,7 +47,7 @@ for m in range(len(var1)):
         ch1[m,n]=np.abs(Mlist[0])  
 
 
-data=wt.Data(name="example")
+data=wt.Data(name="CaF2 300 micron boxcars DOVE")
 data.create_variable(name="w1", units="wn", values= var1)
 data.create_variable(name="w2", units="wn", values= var2)
 data.create_channel(name='Mfactor', values=ch1)

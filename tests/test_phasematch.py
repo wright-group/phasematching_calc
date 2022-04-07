@@ -53,7 +53,7 @@ freq=pc.phasematch.SolveFrequency(samp1, las, 2, 1, 10)
 out=freq
 assert out==Interval(0,oo)   #this may be updated if critical angles will be calculated at high freq in future
 
-
+####### BEGIN SECTION that can be improved next round ##########
 Alist_in, Alist_out=pc.phasematch.calculateabsorbances(samp1,las)
 assert (np.isclose(Alist_in[1][0], 1.180156))
 assert (np.isclose(Alist_in[1][1], 2.973818))
@@ -63,7 +63,12 @@ assert (np.isclose(tlist_in[1][0], 1413.241232))
 assert (np.isclose(tlist_out[1], 1406.194641))
 
 Mlistout=pc.phasematch.applyabsorbances(Mlist,Alist_in,Alist_out)
-print(Mlistout)
+assert (np.isclose(Mlistout[2],5.5515857E-15))
+
+Mlistout2=pc.phasematch.applyfresneltrans(Mlist,Tdict)
+assert (np.isclose(Mlistout2[2],0.970785))
+####### END SECTION that can be improved next round ##########
+
 
 #new lasers object:  unphasematchable geometry TSF
 las2=pc.Lasers.Lasers()
