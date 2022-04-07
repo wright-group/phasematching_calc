@@ -54,6 +54,17 @@ out=freq
 assert out==Interval(0,oo)   #this may be updated if critical angles will be calculated at high freq in future
 
 
+Alist_in, Alist_out=pc.phasematch.calculateabsorbances(samp1,las)
+assert (np.isclose(Alist_in[1][0], 1.180156))
+assert (np.isclose(Alist_in[1][1], 2.973818))
+
+tlist_in, tlist_out=pc.phasematch.calculatedeltats(samp1,las)
+assert (np.isclose(tlist_in[1][0], 1413.241232))
+assert (np.isclose(tlist_out[1], 1406.194641))
+
+Mlistout=pc.phasematch.applyabsorbances(Mlist,Alist_in,Alist_out)
+print(Mlistout)
+
 #new lasers object:  unphasematchable geometry TSF
 las2=pc.Lasers.Lasers()
 arr1=[2700.0,1800.0,25000.0]

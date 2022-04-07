@@ -523,12 +523,12 @@ def Mcalc(Iso, Las):
             tkeff=tktemp/np.cos(angleoutytemp)
             koutx=0.00
             koutz=kout*np.cos(angleoutytemp)
-            koutx=kout*np.sin(angleoutxtemp)
+            kouty=kout*np.sin(angleoutytemp)
         else:
             tkeff=tktemp/np.cos(angleoutxtemp)
             kouty=0.00
-            koutz=kout*np.cos(angleoutytemp)
-            kouty=kout*np.sin(angleoutytemp)
+            koutz=kout*np.cos(angleoutxtemp)
+            koutx=kout*np.sin(angleoutxtemp)
                
         ksumx=ksumy=ksumz=0.0000
         
@@ -540,7 +540,10 @@ def Mcalc(Iso, Las):
         dk=k4-kout        
         da=0.5*(aouttemp-(np.abs(kcoeffs[0])*avectemp[0]+np.abs(kcoeffs[1])*avectemp[1]+np.abs(kcoeffs[2])*avectemp[2]))*tkeff
         Mc1=np.exp(-aouttemp*tkeff)
-        Mc2=((1-np.exp(da))**2+4*np.exp(da)*(np.sin(dk*tkeff/2))**2)/(da**2+(dk*tkeff)**2)
+        if ((da==0.00) & (dk == 0.00)):
+            Mc2=1.00
+        else:
+            Mc2=((1-np.exp(da))**2+4*np.exp(da)*(np.sin(dk*tkeff/2))**2)/(da**2+(dk*tkeff)**2)
         Mctemp=Mc1*Mc2
 
         Mlist.append(Mctemp)
@@ -923,9 +926,6 @@ def calculateabsorbances(Iso, Las):
     if (isinstance (Las,Lasers)== False):
         return ValueError("second argument not an object of class Lasers")
     
-    Alist_in=np.zeros([numlayers,numfreqs])
-    Alist_out=np.zeros(numlayers)
-
     output=_calculateinternals(Iso,Las, zerofreq=False, zerofreqnum=1)
     anglex=output['anglex']
     angley=output['angley']
@@ -948,6 +948,8 @@ def calculateabsorbances(Iso, Las):
     angleoutx.append(launchanglex)
     angleouty.append(launchangley)
 
+    Alist_in=np.zeros([numlayers,numfreqs])
+    Alist_out=np.zeros(numlayers)
     n=len(xmask)-1
 
     for i in range(numfreqs):

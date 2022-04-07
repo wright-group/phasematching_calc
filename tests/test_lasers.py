@@ -1,7 +1,9 @@
 import phasematching_calc as pc
-
 import os
 from config.definitions import ROOT_DIR
+
+"""Test Requires R/W permissions in tests folder."""
+
 filepath=os.path.join(ROOT_DIR, 'tests')
 
 jsonfile=os.path.join(filepath, 'las.json')
