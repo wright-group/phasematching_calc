@@ -9,8 +9,10 @@ class IsoSample():
         self.description=""
         self.layers=list()
 
+
     def __getitem__(self,key):
         return getattr(self,key)
+
 
     def __setitem__(self,key):
         return setattr(self,key)
@@ -91,7 +93,6 @@ class IsoSample():
         return 0
 
 
-
 class Layer:
     def __init__(self):
         self=dict()
@@ -101,8 +102,10 @@ class Layer:
         self['n_points']=list()
         self['a_points']=list()
 
+
     def __getitem__(self,key):
         return getattr(self,key)
+
 
     def __setitem__(self,key,val):
         return setattr(self,key,val)

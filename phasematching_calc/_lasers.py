@@ -39,6 +39,7 @@ class Lasers():
         else:
             return 0
 
+
     def addangles(self, ar1):
         """ Add an array of angles(degrees) associated with the laser frequency and its geometry.
         Value:  float.  Must be of length equal to input frequencies.  These angles correspond to the angles in air
@@ -51,6 +52,7 @@ class Lasers():
             return self.calculatecartesianangles()
         else:
             return 0
+
 
     def addkcoeffs(self,ar1):
         """ Add an array of coefficients equivalent to the number and sign of wavevector associated with that input laser frequency.
@@ -155,6 +157,7 @@ class Lasers():
             self.ymask=[0,0,0,0]
         return 0
 
+
     def save(self, file):
         """Save the JSON representation into an open file."""
         f=open(file, 'w')
@@ -163,7 +166,6 @@ class Lasers():
                 if hasattr(obj, "tolist"):
                     return obj.tolist()
                 return json.JSONEncoder.default(self, obj)
-
         json.dump(self.as_dict(), f, cls=NdarrayEncoder)
         f.close()
         return 0
