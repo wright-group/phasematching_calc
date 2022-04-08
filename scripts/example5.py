@@ -1,4 +1,3 @@
-from turtle import end_fill
 import phasematching_calc as pc
 import WrightTools as wt
 import matplotlib.pyplot as plt
@@ -28,7 +27,7 @@ samp1.loadlayer(lay3file, tkcaf2, label="caf2bw")
 
 # new Lasers object
 las4=pc.Lasers.Lasers()
-arr1=[3150.0,2200.0,20000.0]
+arr1=[3150.0,2250.0,20000.0]
 las4.addfrequencies(arr1)
 arr2=[5.0,10.0,0.0]
 las4.addangles(arr2)
@@ -89,7 +88,7 @@ for m in range(len(tin)):
 
 plt.rcParams['figure.autolayout']=True
 plt.xlim(0,5)
-plt.ylim(-40.0,30.0)
+plt.ylim(-60.0,30.0)
 plt.grid()
 #plt.scatter(x1,y1,marker="o",markersize=10, markeredgecolor="red", markerfacecolor="red")
 #plt.scatter(x2,y2,marker="o",markersize=10, markeredgecolor="green", markerfacecolor="green")
