@@ -29,7 +29,7 @@ samp1.loadlayer(lay1file, tksap, label="saphfw")
 las=pc.Lasers.Lasers()
 arr1=[1800.0,2700.0,30000.0]
 las.addfrequencies(arr1)
-arr2=[18.0,8.0, 0.0]
+arr2=[-18.0,8.0, 0.0]
 las.addangles(arr2)
 arr3=[-1,1,1]
 las.addkcoeffs(arr3)
@@ -43,8 +43,8 @@ las.changegeometry("planar")
 #las.changeangle(1,list(angle1)[0])
 
 var1=np.linspace(2450.00,2900.00,91)[:,None]
-var2=np.linspace(1700.0,2100.0,161)[None, :]
-var2a=np.linspace(1700.0,2100.0,161)
+var2=np.linspace(1300.0,1900.0,161)[None, :]
+var2a=np.linspace(1300.0,1900.0,161)
 
 ch1= np.zeros([len(var1), len(var2a)])
 ch2=np.zeros([len(var1), len(var2a)])
