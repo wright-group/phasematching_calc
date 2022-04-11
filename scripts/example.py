@@ -20,9 +20,8 @@ tkcaf2=0.02 #cm
 tkwater=0.01 #cm
 
 # generation of a IsoSample
-samp1=pc.IsoSample.IsoSample()
-desc="FWM cell"
-samp1.description=desc
+samp1=pc.IsoSample.IsoSample(description="FWM Cell")
+
 samp1.loadlayer(lay1file, tkcaf2, label="caf2fw")
 samp1.loadlayer(lay2file, tkwater, label="water")
 samp1.loadlayer(lay1file, tkcaf2, label="caf2bw")

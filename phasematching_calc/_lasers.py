@@ -3,7 +3,11 @@ import json
 
 class Lasers():
         
-    def __init__(self):
+    def __init__(self, description=None):
+        if description is None:
+            self.description=""
+        else:
+            self.description=description
         self.frequencies=list()
         self.anglesairdeg=list()
         self.k_coeffs=list()
@@ -18,6 +22,7 @@ class Lasers():
     def as_dict(self):
         """Dictionary representation for this Lasers class."""
         out = {}
+        out["description"] = self.description
         out["frequencies"] = self.frequencies
         out["anglesairdeg"] = self.anglesairdeg
         out["kcoeffs"] = self.k_coeffs

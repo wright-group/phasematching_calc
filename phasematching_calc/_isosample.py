@@ -5,8 +5,11 @@ from types import SimpleNamespace
 
 
 class IsoSample():
-    def __init__(self):
-        self.description=""
+    def __init__(self, description=None):
+        if description is None:
+            self.description=""
+        else:
+            self.description=description
         self.layers=list()
 
 
@@ -129,7 +132,7 @@ class Layer:
         # freq: frequency (cm-1)
         #
         # Returns:
-        # tuple: {refractive index, absorption coefficient (cm-1)} 
+        # tuple: (freq (cm-1), absorption coefficient (cm-1), real refractive index ) 
         '''
         freq1=float(freq)
         ncalc=np.interp(freq1,self.w_points,self.n_points)
