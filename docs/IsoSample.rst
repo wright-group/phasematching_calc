@@ -42,8 +42,8 @@ Other exposed methods are available but have limited use, are short, and are sel
 
 
 
-Layer
-=====
+IsoSample.Layer
+===============
 The Layer object consists of a description, a layer thickness in cm, a set of `w_points`, `a_points`, and `n_points`,
 and layer methods. Only two methods are mentioned:
 
