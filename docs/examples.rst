@@ -293,6 +293,7 @@ all 4 inputs and output was determined per layer, and the difference from that m
     plt.show()
 
 
+.. image:: Figure_5.png
 
 Note the `scatter` plot does not show axes.  X is the layer number and y is the delta in femtoseconds each
 input or output makes relative to the mean of the 4 at the end of the layer.  Red is input 1, green is input 2, 
@@ -366,7 +367,7 @@ Results are:
     -14.9600000000000
 
 
-.. image:: Figure_5.png
+
     
 In this example, changing w3 by +80 cm-1 would result in the same phasematching as an angle change of +0.04 degrees.
 Changes in w3 in this range would result in very large wavelength changes needed over an entire scan.  On the 
