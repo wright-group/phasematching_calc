@@ -1,11 +1,10 @@
 .. scripts:
 
-Some examples using the `phasematching_calc` module are shown. 
+Some examples using the ``phasematching_calc`` module are shown. 
 
+Example 1. A 2D calculation of M factors and conversion into a ``WrightTools.data`` object.
 
-Example 1. A 2D calculation of M factors and conversion into a :class:`WrightTools.data` object.
-
-First, the files are loaded into an IsoSample.
+First, the files are loaded into an IsoSample object:
 
 .. plot::
     lay1file=os.path.join(filepath, 'CaF2_Malitson.txt')
@@ -21,7 +20,7 @@ First, the files are loaded into an IsoSample.
     samp1.loadlayer(lay2file, tkwater, label="water")
     samp1.loadlayer(lay1file, tkcaf2, label="caf2bw")
 
-Then, the Lasers object is created from the Python commands (as opposed to being loaded from file).
+Then, the Lasers object is created from the Python commands (as opposed to being loaded from file):
 
 .. plot::
     las=pc.Lasers.Lasers()
@@ -39,7 +38,7 @@ The above two objects signify we are looking at a DOVE process where the Lasers 
 the geometry is planar, and the first laser is the -k2 one while the others are k1 and k3.  The sample is a 
 sandwich of caf2, water, and caf2 at thicknesses shown.
 
-The simulated data space is shown in the next block.  One defines the numpy `linspace`s for the two independent
+The simulated ``WrightTools`` Data conversion is shown in the next block.  One defines the numpy `linspace`s for the two independent
 coordinates, the k1 and -k2 inputs.  Then a `for` loop cycles through each series of m,n elements and places it 
 into a channel array that gets placed into a Data object.  The remaining code follows the WrightTools methodology
 of using the linspaces as variables and plotting the result using the `artists.quick2D` method.
@@ -70,8 +69,9 @@ of using the linspaces as variables and plotting the result using the `artists.q
 
 .. image:: Figure_1.png
 
-Example 2. A similar calculation with a single 300 micron CaF2 window and different input geometries.
-In this case a `boxcars` geometry.
+
+**Example 2**. A similar calculation with a single 300 micron CaF2 window and different input geometries,
+in this case a `boxcars` geometry.
 
 .. plot::
     lay1file=os.path.join(filepath, 'CaF2_Malitson.txt')
@@ -116,10 +116,10 @@ In this case a `boxcars` geometry.
 
 .. image:: Figure_2.png
 
-Example 3.  An angle solving routine for an oriented sapphire:acetonitrile:sapphire Sample.
-We assume the oriented sapphire limits to anisotropy of it to very small amounts that are neglected
+**Example 3**.  An angle solving routine for an oriented sapphire:acetonitrile:sapphire sample.
+We assume the oriented sapphire limits its anisotropy to very small amounts that are neglected
 and may approximate an isotropic sample.  This is reverting back to a planar geometry.  The Sympy
-syntax requires the conversion of the FiniteSet to a list.  
+syntax requires the conversion of the `FiniteSet` to a `list`.  
 
 .. plot::
     lay1file=os.path.join(filepath, 'CH3CN_paste_1.txt')
@@ -174,7 +174,7 @@ For phasematching, the angle for w2 wants to be at large value for low values of
 is not a strong dependence of the angle of k2 as |k1| changes.  
 
 
-Example 4.  A frequency solving routine for an oriented sapphire:acetonitrile:sapphire Sample.
+**Example 4**.  A frequency solving routine for an oriented sapphire:acetonitrile:sapphire sample.
 The conditions are virtually identical to Example 3 except that a frequency solve for the high frequency
 k3 beam is requested.  The code is not posted as it is nearly identical except for  replacing the
 line `angleair2=pc.phasematch.SolveAngle(samp1,las,2,1)` with `angleair2=pc.phasematch.SolveFrequency(samp1,las,2,3)`.
@@ -187,9 +187,9 @@ at right to almost 30000 cm-1 at left, suggesting a very large change of colors 
 or require some additional laser modification for assistance.
 
 
-Example 5.  A delta t check of the inputs in a thick sample.  A thick (1 mm) sample of acetonitrile is simulated
+**Example 5**.  A delta t check of the inputs in a thick sample.  A thick (1 mm) sample of acetonitrile is simulated
 instead.  This thickness tends to be the upper limit for our liquid phase samples, as geometrical interactions
-tend to limit thicknesses.  (Geometrical calculations may be instituted as a calculation in a later version.)  
+tend to limit thicknesses.  (Geometrical calculations may be instituted as a function in a later version.)  
 
 The code starts normally:
 
@@ -302,9 +302,9 @@ near a strong absorption that will "delay" it. However, in general all four are 
 so with pulses 10x or wider in time there should be negligible effects on signal contributions due to delaying.
 
 
-Example 6.  A simple angle and frequency check.   Reverting back to the thin caf2:acetonitrile:caf2 sample,
+**Example 6**.  A simple angle and frequency check.   Reverting back to the thin caf2:acetonitrile:caf2 sample,
 a set of two frequency and angle solves are made for what may be considered two nearby data points to see 
-how much of either should be made .
+how much of either should be made to achieve phasematching for both points.
 
 
 .. plot::
@@ -361,13 +361,13 @@ Results are:
 
 .. image:: Figure_5.png
     
-In this example, changing w3 by +80 cm-1 would the same phasematching as an angle change of +0.04 degrees.
+In this example, changing w3 by +80 cm-1 would result in the same phasematching as an angle change of +0.04 degrees.
 Changes in w3 in this range would result in very large wavelength changes needed over an entire scan.  On the 
 other hand, phasematching angle changes may be restricted to a small range due to aberrations.  It is possible
 that the two can be modified in tandem in some studies.
 
 
-Example 7.  Comparison of DOVE vs TSF signal intensity.  WIth the oriented sapphire:water:sapphire sample,
+**Example 7**.  Comparison of DOVE vs TSF signal intensity.  WIth the oriented sapphire:water:sapphire sample,
 a check was done between the two expected signal intensities generated by the water layer in two example
 four-wave mixing modes (DOVE vs TSF).  The H2O signal was not phasematcheable in DOVE with the w3 wavelength.  
 However, it is important to note that as w3 increases, the vector contributions of k1 and -k2 become
