@@ -38,10 +38,10 @@ The above two objects signify we are looking at a DOVE process where the Lasers 
 the geometry is planar, and the first laser is the -k2 one while the others are k1 and k3.  The sample is a 
 sandwich of caf2, water, and caf2 at thicknesses shown.
 
-The simulated ``WrightTools`` Data conversion is shown in the next block.  One defines the numpy `linspace`s for the two independent
-coordinates, the k1 and -k2 inputs.  Then a `for` loop cycles through each series of m,n elements and places it 
+The simulated ``WrightTools`` Data conversion is shown in the next block.  One defines the numpy linspaces for the two independent
+coordinates, the k1 and -k2 inputs.  Then a for loop cycles through each series of m,n elements and places it 
 into a channel array that gets placed into a Data object.  The remaining code follows the WrightTools methodology
-of using the linspaces as variables and plotting the result using the `artists.quick2D` method.
+of using the linspaces as variables and plotting the result using the ``WrightTools.artists.quick2D`` method.
 
 
 .. plot::
@@ -177,7 +177,7 @@ is not a strong dependence of the angle of k2 as |k1| changes.
 **Example 4**.  A frequency solving routine for an oriented sapphire:acetonitrile:sapphire sample.
 The conditions are virtually identical to Example 3 except that a frequency solve for the high frequency
 k3 beam is requested.  The code is not posted as it is nearly identical except for  replacing the
-line `angleair2=pc.phasematch.SolveAngle(samp1,las,2,1)` with `angleair2=pc.phasematch.SolveFrequency(samp1,las,2,3)`.
+line ``angleair2=pc.phasematch.SolveAngle(samp1,las,2,1)`` with ``angleair2=pc.phasematch.SolveFrequency(samp1,las,2,3)``.
 
 .. image:: Figure_4.png
 
@@ -187,9 +187,9 @@ at right to almost 30000 cm-1 at left, suggesting a very large change of colors 
 or require some additional laser modification for assistance.
 
 
-**Example 5**.  A delta t check of the inputs in a thick sample.  A thick (1 mm) sample of acetonitrile is simulated
-instead.  This thickness tends to be the upper limit for our liquid phase samples, as geometrical interactions
-tend to limit thicknesses.  (Geometrical calculations may be instituted as a function in a later version.)  
+**Example 5**.  A delta t check of the inputs in a thick sample between two caf2 windows.  A thick (1 mm) sample of
+acetonitrile is simulated instead.  This thickness tends to be the upper limit for our liquid phase samples, as
+ geometrical interactions tend to limit thicknesses.  (Geometrical calculations may be instituted as a function in a later version.)  
 
 The code starts normally:
 
@@ -300,6 +300,13 @@ blue is input 3, and black is the output.  At layer 3 input 1 and 2 or overlappe
 40 fsec departure from the other inputs at the end of the acetonitrile layer, because the pulse is 
 near a strong absorption that will "delay" it. However, in general all four are within 20 fsec of each other and
 so with pulses 10x or wider in time there should be negligible effects on signal contributions due to delaying.
+
+While a relative delay of 40 fsec is small for a frequency scanning method of four-wave mixing using picosecond or
+similar pulses, it is occasionally useful to examine these delays, as often delays are established between pulses
+to limit background signal.   The delays may be a simple pulsewidth difference.  In this case, ther could be small
+changes in the expected delay during a scan by nature of the change in refractive index, which may slighly reduce
+or increase the delay there.  At the edge of a pulsewidth, profound changes in background can occur, so noticeable
+changes in background contributions may manifest in these areas.
 
 
 **Example 6**.  A simple angle and frequency check.   Reverting back to the thin caf2:acetonitrile:caf2 sample,
