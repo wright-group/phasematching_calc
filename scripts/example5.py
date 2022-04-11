@@ -21,24 +21,24 @@ tkacn=0.1 #cm
 samp1=pc.IsoSample.IsoSample()
 desc="FWM cell"
 samp1.description=desc
-samp1.loadlayer(lay5file, tkcaf2, label="caf2fw")
-samp1.loadlayer(lay4file, tkacn, label="ACN")
-samp1.loadlayer(lay3file, tkcaf2, label="caf2bw")
+samp1.load_layer(lay5file, tkcaf2, label="caf2fw")
+samp1.load_layer(lay4file, tkacn, label="ACN")
+samp1.load_layer(lay3file, tkcaf2, label="caf2bw")
 
 # new Lasers object
 las4=pc.Lasers.Lasers()
 arr1=[3150.0,2250.0,20000.0]
-las4.addfrequencies(arr1)
+las4.add_frequencies(arr1)
 arr2=[5.0,10.0,0.0]
-las4.addangles(arr2)
+las4.add_angles(arr2)
 arr3=[1,-1,1]
-las4.addkcoeffs(arr3)
+las4.add_k_coeffs(arr3)
 arr4=[1,1,1]
-las4.addpolarizations(arr4)
-las4.changegeometry("planar")
+las4.add_pols(arr4)
+las4.change_geometry("planar")
 
 
-tin,tout=pc.phasematch.calculatedeltats(samp1,las4)
+tin,tout=pc.phasematch.calculate_ts(samp1,las4)
 print(tin,tout)
 
 for m in range(len(tin)):

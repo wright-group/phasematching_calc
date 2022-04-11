@@ -20,22 +20,22 @@ tkwat=0.01
 samp1=pc.IsoSample.IsoSample()
 desc="sapphwatersapph"
 samp1.description=desc
-samp1.loadlayer(lay1file, tksap, label="saphfw")
-samp1.loadlayer(lay2file, tkwat, label="h2o")
-samp1.loadlayer(lay1file, tksap, label="saphfw")
+samp1.load_layer(lay1file, tksap, label="saphfw")
+samp1.load_layer(lay2file, tkwat, label="h2o")
+samp1.load_layer(lay1file, tksap, label="saphfw")
 
 
 #generation of a Lasers object.
 las=pc.Lasers.Lasers()
 arr1=[1800.0,2700.0,30000.0]
-las.addfrequencies(arr1)
+las.add_frequencies(arr1)
 arr2=[-18.0,8.0, 0.0]
-las.addangles(arr2)
+las.add_angles(arr2)
 arr3=[-1,1,1]
-las.addkcoeffs(arr3)
+las.add_k_coeffs(arr3)
 arr4=[1,1,1]
-las.addpolarizations(arr4)
-las.changegeometry("planar")
+las.add_pols(arr4)
+las.change_geometry("planar")
 
 
 #angle1=pc.phasematch.SolveAngle(samp1,las,1,1,frequency=1800.0)
@@ -50,27 +50,27 @@ ch1= np.zeros([len(var1), len(var2a)])
 ch2=np.zeros([len(var1), len(var2a)])
 ch3=np.zeros([len(var1), len(var2a)])
 
-chartin,chartout=pc.phasematch.calculatedeltats(samp1, las)
+chartin,chartout=pc.phasematch.calculate_ts(samp1, las)
 
 for m in range(len(var1)):
     for n in range(len(var2a)):
-        las.changefreq(1,var1[m])
-        las.changefreq(2,var2a[n])
-        Mlist,tklist,Tdict=pc.phasematch.Mcalc(samp1,las)
-        Alist, Alistout=pc.phasematch.calculateabsorbances(samp1,las) 
-        Mlist1a=pc.phasematch.applyabsorbances(Mlist,Alist,Alistout)
-        Mlist1b=pc.phasematch.applyfresneltrans(Mlist1a, Tdict)
+        las.change_freq(1,var1[m])
+        las.change_freq(2,var2a[n])
+        Mlist,tklist,Tdict=pc.phasematch.m_calc(samp1,las)
+        Alist, Alistout=pc.phasematch.calculate_absorbances(samp1,las) 
+        Mlist1a=pc.phasematch.apply_absorbances(Mlist,Alist,Alistout)
+        Mlist1b=pc.phasematch.apply_trans(Mlist1a, Tdict)
         ch1[m,n]=Mlist[1]  
 
 vec2=[1,1,1]
-las.addkcoeffs(vec2)
+las.add_k_coeffs(vec2)
 pass
 
 for m in range(len(var1)):
     for n in range(len(var2a)):
-        las.changefreq(1,var1[m])
-        las.changefreq(2,var2a[n])
-        Mlist2,tklist2,Tlist2=pc.phasematch.Mcalc(samp1,las)
+        las.change_freq(1,var1[m])
+        las.change_freq(2,var2a[n])
+        Mlist2,tklist2,Tlist2=pc.phasematch.m_calc(samp1,las)
         ch2[m,n]=Mlist2[1]  
 
 ch3=ch1/ch2

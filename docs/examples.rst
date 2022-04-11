@@ -16,23 +16,23 @@ First, the files are loaded into an IsoSample object:
     samp1=pc.IsoSample.IsoSample()
     desc="FWM cell"
     samp1.description=desc
-    samp1.loadlayer(lay1file, tkcaf2, label="caf2fw")
-    samp1.loadlayer(lay2file, tkwater, label="water")
-    samp1.loadlayer(lay1file, tkcaf2, label="caf2bw")
+    samp1.load_layer(lay1file, tkcaf2, label="caf2fw")
+    samp1.load_layer(lay2file, tkwater, label="water")
+    samp1.load_layer(lay1file, tkcaf2, label="caf2bw")
 
 Then, the Lasers object is created from the Python commands (as opposed to being loaded from file):
 
 .. plot::
     las=pc.Lasers.Lasers()
     arr1=[1800.0,2700.0,30000.0]
-    las.addfrequencies(arr1)
+    las.add_frequencies(arr1)
     arr2=[20.0,7.0, 0.0]
-    las.addangles(arr2)
+    las.add_angles(arr2)
     arr3=[-1,1,1]
-    las.addkcoeffs(arr3)
+    las.add_k_coeffs(arr3)
     arr4=[1,1,1]
-    las.addpolarizations(arr4)
-    las.changegeometry("planar")
+    las.add_polarizations(arr4)
+    las.change_geometry("planar")
 
 The above two objects signify we are looking at a DOVE process where the Lasers are at 1800, 2700, and 30000 cm-1,
 the geometry is planar, and the first laser is the -k2 one while the others are k1 and k3.  The sample is a 
@@ -54,7 +54,7 @@ of using the linspaces as variables and plotting the result using the ``WrightTo
         for n in range(len(var2a)):
             las.changefreq(1,var1[m])
             las.changefreq(2,var2a[n])
-            Mlist,tklist,Tlist=pc.phasematch.Mcalc(samp1,las)
+            Mlist,tklist,Tlist=pc.phasematch.m_calc(samp1,las)
             ch1[m,n]=np.abs(Mlist[1])
 
 
@@ -80,18 +80,18 @@ in this case a `boxcars` geometry.
     samp1=pc.IsoSample.IsoSample()
     desc="caf2window300um"
     samp1.description=desc
-    samp1.loadlayer(lay1file, tkcaf2, label="caf2")
+    samp1.load_layer(lay1file, tkcaf2, label="caf2")
 
     las=pc.Lasers.Lasers()
     arr1=[1800.0,2700.0,18400.0]
-    las.addfrequencies(arr1)
+    las.add_frequencies(arr1)
     arr2=[8.0,8.0, 8.0]
-    las.addangles(arr2)
+    las.add_angles(arr2)
     arr3=[-1,1,1]
-    las.addkcoeffs(arr3)
+    las.add_k_coeffs(arr3)
     arr4=[1,1,1]
-    las.addpolarizations(arr4)
-    las.changegeometry("boxcars")
+    las.add_pols(arr4)
+    las.change_geometry("boxcars")
 
     var1=np.linspace(2600.00,3200.00,61)[:,None]
     var2=np.linspace(1600.0,2200.0,61)[None, :]
@@ -102,7 +102,7 @@ in this case a `boxcars` geometry.
         for n in range(len(var2a)):
             las.changefreq(1,var1[m])
             las.changefreq(2,var2a[n])
-            Mlist,tklist,Tlist=pc.phasematch.Mcalc(samp1,las)
+            Mlist,tklist,Tlist=pc.phasematch.m_calc(samp1,las)
             ch1[m,n]=np.abs(Mlist[0])  
 
     data=wt.Data(name="CaF2 300 micron boxcars DOVE")
@@ -131,20 +131,20 @@ syntax requires the conversion of the `FiniteSet` to a `list`.
     samp1=pc.IsoSample.IsoSample()
     desc="FWM cell"
     samp1.description=desc
-    samp1.loadlayer(lay1file, tksap, label="sapphire")
-    samp1.loadlayer(lay2file, tkacn, label="acn")
-    samp1.loadlayer(lay1file, tksap, label="sapphire")
+    samp1.load_layer(lay1file, tksap, label="sapphire")
+    samp1.load_layer(lay2file, tkacn, label="acn")
+    samp1.load_layer(lay1file, tksap, label="sapphire")
 
     las=pc.Lasers.Lasers()
     arr1=[1800.0,2700.0,18400.0]
-    las.addfrequencies(arr1)
+    las.add_frequencies(arr1)
     arr2=[8.0,-7.0, 0.0]
-    las.addangles(arr2)
+    las.add_angles(arr2)
     arr3=[-1,1,1]
-    las.addkcoeffs(arr3)
+    las.add_k_coeffs(arr3)
     arr4=[1,1,1]
-    las.addpolarizations(arr4)
-    las.changegeometry("planar")
+    las.add_pols(arr4)
+    las.change_geometry("planar")
 
 
     var1=np.linspace(2600.00,3200.00,61)[:,None]
@@ -154,9 +154,9 @@ syntax requires the conversion of the `FiniteSet` to a `list`.
     ch1= np.zeros([len(var1), len(var2a)])
     for m in range(len(var1)):
         for n in range(len(var2a)):
-            las.changefreq(1,var1[m])
-            las.changefreq(2,var2a[n])
-            angleair2=pc.phasematch.SolveAngle(samp1,las,2,1)
+            las.change_freq(1,var1[m])
+            las.change_freq(2,var2a[n])
+            angleair2=pc.phasematch.solve_angle(samp1,las,2,1)
             ch1[m,n]=(list(angleair2)[0])  
 
     data=wt.Data(name="angle check for w2")
@@ -204,22 +204,22 @@ The code starts normally:
     samp1=pc.IsoSample.IsoSample()
     desc="FWM cell"
     samp1.description=desc
-    samp1.loadlayer(lay5file, tkcaf2, label="caf2fw")
-    samp1.loadlayer(lay4file, tkacn, label="ACN")
-    samp1.loadlayer(lay3file, tkcaf2, label="caf2bw")
+    samp1.load_layer(lay5file, tkcaf2, label="caf2fw")
+    samp1.load_layer(lay4file, tkacn, label="ACN")
+    samp1.load_layer(lay3file, tkcaf2, label="caf2bw")
 
     las4=pc.Lasers.Lasers()
     arr1=[3150.0,2250.0,20000.0]
-    las4.addfrequencies(arr1)
+    las4.add_frequencies(arr1)
     arr2=[5.0,10.0,0.0]
-    las4.addangles(arr2)
+    las4.add_angles(arr2)
     arr3=[1,-1,1]
-    las4.addkcoeffs(arr3)
+    las4.add_k_coeffs(arr3)
     arr4=[1,1,1]
-    las4.addpolarizations(arr4)
-    las4.changegeometry("planar")
+    las4.add_pols(arr4)
+    las4.change_geometry("planar")
 
-    tin,tout=pc.phasematch.calculatedeltats(samp1,las4)
+    tin,tout=pc.phasematch.calculate_ts(samp1,las4)
     print(tin,tout)
 
 Some additonal code is needed to convert the times into more meaningful ones.  For example, the mean of
@@ -327,35 +327,35 @@ how much of either should be made to achieve phasematching for both points.
     samp1=pc.IsoSample.IsoSample()
     desc="FWM cell"
     samp1.description=desc
-    samp1.loadlayer(lay3file, tksapph, label="caf2fw")
-    samp1.loadlayer(lay4file, tkacn, label="ACN")
-    samp1.loadlayer(lay3file, tksapph, label="caf2bw")
+    samp1.load_layer(lay3file, tksapph, label="caf2fw")
+    samp1.load_layer(lay4file, tkacn, label="ACN")
+    samp1.load_layer(lay3file, tksapph, label="caf2bw")
 
     # new Lasers object
     las4=pc.Lasers.Lasers()
     arr1=[3150.0,2200.0,25000.0]
-    las4.addfrequencies(arr1)
+    las4.add_frequencies(arr1)
     arr2=[6.0,-15.0,0.0]  #**
-    las4.addangles(arr2)
+    las4.add_angles(arr2)
     arr3=[1,-1,1]
-    las4.addkcoeffs(arr3)
+    las4.add_k_coeffs(arr3)
     arr4=[1,1,1]
-    las4.addpolarizations(arr4)
-    las4.changegeometry("planar")
+    las4.add_pols(arr4)
+    las4.change_geometry("planar")
 
-freq=pc.phasematch.SolveFrequency(samp1,las4,2,3,20)
+freq=pc.phasematch.solve_frequency(samp1,las4,2,3,20)
 out=list(freq)
 print(out[0])
 
-las4.changefreq(3,out[0])
+las4.change_freq(3,out[0])
 
-las4.changefreq(2,2190.0)
-angle=pc.phasematch.SolveFrequency(samp1,las4,2,3,20)
+las4.change_freq(2,2190.0)
+angle=pc.phasematch.solve_frequency(samp1,las4,2,3,20)
 out2=list(angle)
 print(out2[0])
 
-las4.changefreq(3,out[0])
-angle=pc.phasematch.SolveAngle(samp1,las4,2,2)
+las4.change_freq(3,out[0])
+angle=pc.phasematch.solve_angle(samp1,las4,2,2)
 out3=list(angle)
 print(out3[0])
 
@@ -391,25 +391,25 @@ smaller relative to k3, and so phasemismatching becomes less problematic for DOV
     samp1=pc.IsoSample.IsoSample()
     desc="sapphwatersapph"
     samp1.description=desc
-    samp1.loadlayer(lay1file, tksap, label="saphfw")
-    samp1.loadlayer(lay2file, tkwat, label="h2o")
-    samp1.loadlayer(lay1file, tksap, label="saphfw")
+    samp1.load_layer(lay1file, tksap, label="saphfw")
+    samp1.load_layer(lay2file, tkwat, label="h2o")
+    samp1.load_layer(lay1file, tksap, label="saphfw")
 
     las=pc.Lasers.Lasers()
     arr1=[1800.0,2700.0,30000.0]
-    las.addfrequencies(arr1)
+    las.add_frequencies(arr1)
     arr2=[-18.0,8.0, 0.0]
-    las.addangles(arr2)
+    las.add_angles(arr2)
     arr3=[-1,1,1]
-    las.addkcoeffs(arr3)
+    las.add_k_coeffs(arr3)
     arr4=[1,1,1]
-    las.addpolarizations(arr4)
-    las.changegeometry("planar")
+    las.add_pols(arr4)
+    las.change_geometry("planar")
 
 
-    #angle1=pc.phasematch.SolveAngle(samp1,las,1,1,frequency=1800.0)
+    #angle1=pc.phasematch.solve_angle(samp1,las,1,1,frequency=1800.0)
     #print(list(angle1))
-    #las.changeangle(1,list(angle1)[0])
+    #las.change_angle(1,list(angle1)[0])
 
     var1=np.linspace(2450.00,2900.00,91)[:,None]
     var2=np.linspace(1300.0,1900.0,161)[None, :]
@@ -419,16 +419,16 @@ smaller relative to k3, and so phasemismatching becomes less problematic for DOV
     ch2=np.zeros([len(var1), len(var2a)])
     ch3=np.zeros([len(var1), len(var2a)])
 
-    chartin,chartout=pc.phasematch.calculatedeltats(samp1, las)
+    chartin,chartout=pc.phasematch.calculate_ts(samp1, las)
 
     for m in range(len(var1)):
         for n in range(len(var2a)):
             las.changefreq(1,var1[m])
             las.changefreq(2,var2a[n])
-            Mlist,tklist,Tdict=pc.phasematch.Mcalc(samp1,las)
-            Alist, Alistout=pc.phasematch.calculateabsorbances(samp1,las) 
-            Mlist1a=pc.phasematch.applyabsorbances(Mlist,Alist,Alistout)
-            Mlist1b=pc.phasematch.applyfresneltrans(Mlist1a, Tdict)
+            Mlist,tklist,Tdict=pc.phasematch.m_calc(samp1,las)
+            Alist, Alistout=pc.phasematch.calculate_absorbances(samp1,las) 
+            Mlist1a=pc.phasematch.apply_absorbances(Mlist,Alist,Alistout)
+            Mlist1b=pc.phasematch.apply_trans(Mlist1a, Tdict)
             ch1[m,n]=Mlist[1]  
 
     vec2=[1,1,1]
@@ -439,7 +439,7 @@ smaller relative to k3, and so phasemismatching becomes less problematic for DOV
         for n in range(len(var2a)):
             las.changefreq(1,var1[m])
             las.changefreq(2,var2a[n])
-            Mlist2,tklist2,Tlist2=pc.phasematch.Mcalc(samp1,las)
+            Mlist2,tklist2,Tlist2=pc.phasematch.m_calc(samp1,las)
             ch2[m,n]=Mlist2[1]  
 
     ch3=ch1/ch2

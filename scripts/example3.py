@@ -21,22 +21,22 @@ tkacn=0.01
 samp1=pc.IsoSample.IsoSample()
 desc="FWM cell"
 samp1.description=desc
-samp1.loadlayer(lay1file, tksap, label="sapphire")
-samp1.loadlayer(lay2file, tkacn, label="acn")
-samp1.loadlayer(lay1file, tksap, label="sapphire")
+samp1.load_layer(lay1file, tksap, label="sapphire")
+samp1.load_layer(lay2file, tkacn, label="acn")
+samp1.load_layer(lay1file, tksap, label="sapphire")
 
 
 #generation of a Lasers object.
 las=pc.Lasers.Lasers()
 arr1=[1800.0,2700.0,18400.0]
-las.addfrequencies(arr1)
+las.add_frequencies(arr1)
 arr2=[8.0,-7.0, 0.0]
-las.addangles(arr2)
+las.add_angles(arr2)
 arr3=[-1,1,1]
-las.addkcoeffs(arr3)
+las.add_k_coeffs(arr3)
 arr4=[1,1,1]
-las.addpolarizations(arr4)
-las.changegeometry("planar")
+las.add_pols(arr4)
+las.change_geometry("planar")
 
 
 var1=np.linspace(2600.00,3200.00,61)[:,None]
@@ -46,9 +46,9 @@ var2a=np.linspace(1600.0,2200.0,61)
 ch1= np.zeros([len(var1), len(var2a)])
 for m in range(len(var1)):
     for n in range(len(var2a)):
-        las.changefreq(1,var1[m])
-        las.changefreq(2,var2a[n])
-        angleair2=pc.phasematch.SolveAngle(samp1,las,2,1)
+        las.change_freq(1,var1[m])
+        las.change_freq(2,var2a[n])
+        angleair2=pc.phasematch.solve_angle(samp1,las,2,1)
         ch1[m,n]=(list(angleair2)[0])  
 
 

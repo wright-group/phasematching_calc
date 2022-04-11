@@ -22,26 +22,26 @@ tkwater=0.01 #cm
 # generation of a IsoSample
 samp1=pc.IsoSample.IsoSample(description="FWM Cell")
 
-samp1.loadlayer(lay1file, tkcaf2, label="caf2fw")
-samp1.loadlayer(lay2file, tkwater, label="water")
-samp1.loadlayer(lay1file, tkcaf2, label="caf2bw")
+samp1.load_layer(lay1file, tkcaf2, label="caf2fw")
+samp1.load_layer(lay2file, tkwater, label="water")
+samp1.load_layer(lay1file, tkcaf2, label="caf2bw")
 
 #generation of a Lasers object.
 las=pc.Lasers.Lasers()
 arr1=[1800.0,2700.0,30000.0]
-las.addfrequencies(arr1)
+las.add_frequencies(arr1)
 arr2=[20.0,7.0, 0.0]
-las.addangles(arr2)
+las.add_angles(arr2)
 arr3=[-1,1,1]
-las.addkcoeffs(arr3)
+las.add_k_coeffs(arr3)
 arr4=[1,1,1]
-las.addpolarizations(arr4)
-las.changegeometry("planar")
+las.add_pols(arr4)
+las.change_geometry("planar")
 
 #Test scripts show how the above objects can be saved and loaded.
 
 # single point Mcalc check
-Mlist,tklist,Tdict=pc.phasematch.Mcalc(samp1,las)
+Mlist,tklist,Tdict=pc.phasematch.m_calc(samp1,las)
 
 
 # angle estimation for laser 1 in layer 2 with frequency 1750 cm-1
@@ -62,9 +62,9 @@ var2a=np.linspace(1300.0,1900.0,61)
 ch1= np.zeros([len(var1), len(var2a)])
 for m in range(len(var1)):
     for n in range(len(var2a)):
-        las.changefreq(1,var1[m])
-        las.changefreq(2,var2a[n])
-        Mlist,tklist,Tlist=pc.phasematch.Mcalc(samp1,las)
+        las.change_freq(1,var1[m])
+        las.change_freq(2,var2a[n])
+        Mlist,tklist,Tlist=pc.phasematch.m_calc(samp1,las)
         ch1[m,n]=np.abs(Mlist[1])
 
 

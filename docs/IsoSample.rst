@@ -13,7 +13,7 @@ See Layer(below) for information on the Layers subclass.
 
 Public class methods are:
 
-`loadlayer(self, csvfile, thickness, label="")`
+`load_layer(self, csvfile, thickness, label="")`
 -------------------------
 Given a tab-delmited file on disk, the method loads the layer into memory as appended to the layers already
 generated in the sample.  This layer is always added at the END, meaning the inputs pass through all layers prior
@@ -58,7 +58,7 @@ real refractive index.    User may wish to validate the method works properly so
 that calculate this estimate based on other methods such as splines.
 
 
-`suppressabs(self)`
+`suppress_absorbances(self)`
 ------------------
 Sets the `a_points` to 0, which can be useful for optimizing M factor calculations that do not wish to see
 non-zero absorption.  No methods are created to revert to the original values. 

@@ -21,7 +21,7 @@ class IsoSample():
         return setattr(self,key)
 
 
-    def loadlayer(self, csvfile, thickness, label=""):
+    def load_layer(self, csvfile, thickness, label=""):
         ''' load a layer from a tab-delimited spreadsheet file
         # File must contain three columns (L-R):  freq (cm-1), absorption coeff (cm-1), n
         # Freqs should be in increasing order.
@@ -141,7 +141,7 @@ class Layer:
         return freq1, absorp, ncalc
 
 
-    def suppressabs(self):
+    def suppress_absorbances(self):
         """ zero out all absorbance data in the layer."""
  
         abszero=np.zeros(len(self.a_points))

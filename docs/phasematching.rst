@@ -16,7 +16,7 @@ incorporated.
 Public functions are:
 
 
-`Mcalc (IsoSample, Lasers)`
+`m_calc (IsoSample, Lasers)`
 -------------------------
 
 Given the two objects, this function outputs the associated M factors as per equation 18b, Carlson and Wright, 
@@ -49,7 +49,7 @@ a "squared" term) or not (if one is just using the program to model beam transmi
 terms have a different tracking consideration.  More to follow in the "applyfresneltrans" function.
 
 
-`SolveAngle(Iso,Las,layernum,freqnum, frequency=None)`
+`solve_angle(Iso,Las,layernum,freqnum, frequency=None)`
 ----------------------------------------------------
 Given the two objects, the functions attempts to solve through brute force iteration the angle that the
 input at freqnum needs to make in the layernum to achieve phasematching.   The iteration proceeds through
@@ -63,7 +63,7 @@ the process can be phasematcheable in that manner.  The endpoint of the interval
 that may be found between layers.  The return is for the original angle in air of that input in degrees.
 
 
-`SolveFrequency(Iso, Las, layernum, freqnum, amt=None)`
+`solve_frequency(Iso, Las, layernum, freqnum, amt=None)`
 ----------------------------------------------------
 Given the two objects, the functions attempts to solve through brute force iteration the frequency of the input
 required to achieve phasematching for the freqnum in the layernum.   The extra parameter `amt` is the amount of change
@@ -78,22 +78,7 @@ the process can be phasematcheable in that manner.  The endpoint is usually set 
 modification may end up limiting the frequency to a critical angle that may be found between layers.  
 
 
-`SolveFrequency(Iso, Las, layernum, freqnum, amt=None)`
-----------------------------------------------------
-Given the two objects, the functions attempts to solve through brute force iteration the frequency of the input
-required to achieve phasematching for the freqnum in the layernum.   The extra parameter `amt` is the amount of change
-the brute force algorithm may be requested to move per iteration.  If not specified, an internal algorithm 
-approximates this amount.   This number may be required for a user to achieve faster convergences due to the
-often large number of iterations required to find convergence in this function.  As a rule, it ought to be
-roughly 1% of the original frequency of the input.  
-
-SolveAngle returns a Sympy Set of Frequencies.  It could be a single item `FiniteSet`, an `Interval`, or an `EmptySet`
-if no solution is found.  An Interval indicates a full range of angles are possible, which can happen if
-the process can be phasematcheable in that manner.  The endpoint is usually set to Infinity (`oo`), though a future
-modification may end up limiting the frequency to a critical angle that may be found between layers.  
-
-
-`calculateabsorbances(Iso, Las)`
+`calculate_absorbances(Iso, Las)`
 -------------------------------
 Given the two objects, the function calculates log10 absorbances each input and output may make in each layer
 of the sample.  This absorbance incorporates the angles the lasers make and assumes all original angles
@@ -108,9 +93,9 @@ mixing intensity in the succeeding layer.   It may also serve as an auxiliary fu
 without need for use in four-wave mixing expressions.  See `applyabsorbances`.
 
 
-`calculatedeltats(Iso, Las)`
+`calculate_ts(Iso, Las)`
 -------------------------------
-Given the two objects, the function calculates changes in delays each input and output make in each layer
+Given the two objects, the function calculates the times each input and output make in each layer
 of the sample.  This incorporates the angles the lasers make and their respective refractive indexes.
 
 It returns a tuple of lists `(tin, tout)`:  `tin` specify the times in femtoseconds of each input makes by the end
@@ -123,10 +108,10 @@ it is possible to find instances where the differences may manifest into a sizea
 important.
 
 
-`applyabsorbances(Mlist, Alist_in, Alist_out=None)`
+`apply_absorbances(Mlist, Alist_in, Alist_out=None)`
 --------------------------------------------------
 An auxiliary function not requiring the two IsoSample and Lasers objects.   It uses the Mfactor list from a
-previous function and the absorbance lists from `calculateabsorbances`. The function calculates intensity
+previous function and the absorbance lists from `calculate_absorbances`. The function calculates intensity
 losses from prior absorbances into the succeeding layer's M factor.  It therefore squares each absorbance
 loss as the M factor is a squared term.   
 
@@ -135,22 +120,22 @@ absorbance sum of the SUCCESSIVE layers.  This is because it is presumed that fo
 not dependent on four-wave mixing signal generated in previous layers...i.e., that the signal is "weak" relative
 to the inputs.   (In other forms of non-linear mixing the generated signal may be a sizable fraction of the inputs
 and then "rob" or "contribute" to the inputs prior...this would require knowledge of the phase factors described
-above in `Mcalc`.)
+above in `m_calc`.)
 
 The output is a modified list of M factors `Mout` taking into account the absorbances.
 
 
-`applyfresneltrans(Mlist, Tdict=None)`
+`apply_trans(Mlist, Tdict=None)`
 -------------------------------------
 An auxiliary function not requiring the two IsoSample and Lasers objects.   It uses the Mfactor list from a
-previous function and the fresnel `Tdict` from `Mcalc`. The function calculates intensity
+previous function and the fresnel `Tdict` from `m_calc`. The function calculates intensity
 losses from prior reflections into the succeeding layer's M factor.  It therefore squares each transmission 
 coefficient as the M factor is a squared term.   The M-squared output four-wave mixing in that layer is also
 scaled by a SINGLE, NON-SQUARED Fresnel reflection loss from successive layers.  This is because it is presumed
 that four-wave mixing signal in a layer is not dependent on four-wave mixing signal generated in previous layers
 ...i.e., that the signal is "weak" relative to the inputs.   (In other forms of non-linear mixing the generated signal
 may be a sizable fraction of the inputs and then "rob" or "contribute" to the inputs prior...this would require
-knowledge of the phase factors described above in `Mcalc`.)
+knowledge of the phase factors described above in `m_calc`.)
 
 The output is a modified list of M factors `Mout` taking into account the Fresnel losses. 
 

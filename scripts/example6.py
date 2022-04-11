@@ -22,36 +22,36 @@ tkacn=0.01 #cm
 samp1=pc.IsoSample.IsoSample()
 desc="FWM cell"
 samp1.description=desc
-samp1.loadlayer(lay3file, tksapph, label="caf2fw")
-samp1.loadlayer(lay4file, tkacn, label="ACN")
-samp1.loadlayer(lay3file, tksapph, label="caf2bw")
+samp1.load_layer(lay3file, tksapph, label="caf2fw")
+samp1.load_layer(lay4file, tkacn, label="ACN")
+samp1.load_layer(lay3file, tksapph, label="caf2bw")
 
 # new Lasers object
 las4=pc.Lasers.Lasers()
 arr1=[3150.0,2200.0,25000.0]
-las4.addfrequencies(arr1)
+las4.add_frequencies(arr1)
 arr2=[6.0,-15.0,0.0]
-las4.addangles(arr2)
+las4.add_angles(arr2)
 arr3=[1,-1,1]
-las4.addkcoeffs(arr3)
+las4.add_k_coeffs(arr3)
 arr4=[1,1,1]
-las4.addpolarizations(arr4)
-las4.changegeometry("planar")
+las4.add_pols(arr4)
+las4.change_geometry("planar")
 
 
-freq=pc.phasematch.SolveFrequency(samp1,las4,2,3,20)
+freq=pc.phasematch.solve_frequency(samp1,las4,2,3,20)
 out=list(freq)
 print(out[0])
 
-las4.changefreq(3,out[0])
+las4.change_freq(3,out[0])
 
-las4.changefreq(2,2190.0)
-angle=pc.phasematch.SolveFrequency(samp1,las4,2,3,20)
+las4.change_freq(2,2190.0)
+angle=pc.phasematch.solve_frequency(samp1,las4,2,3,20)
 out2=list(angle)
 print(out2[0])
 
-las4.changefreq(3,out[0])
-angle=pc.phasematch.SolveAngle(samp1,las4,2,2)
+las4.change_freq(3,out[0])
+angle=pc.phasematch.solve_angle(samp1,las4,2,2)
 out3=list(angle)
 print(out3[0])
 

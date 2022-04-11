@@ -14,9 +14,9 @@ lay2file=os.path.join(filepath, 'H2O_1.txt')
 samp1=pc.IsoSample.IsoSample()
 desc="FWM cell"
 samp1.description=desc
-samp1.loadlayer(lay1file, 0.02, label="sapphirefw")
-samp1.loadlayer(lay2file, 0.01, label="water")
-samp1.loadlayer(lay1file, 0.02, label="sapphirebw")
+samp1.load_layer(lay1file, 0.02, label="sapphirefw")
+samp1.load_layer(lay2file, 0.01, label="water")
+samp1.load_layer(lay1file, 0.02, label="sapphirebw")
 
 samp1.save(jsonfile)
 

@@ -31,7 +31,7 @@ class Lasers():
         return out
 
 
-    def addfrequencies(self, ar1):
+    def add_frequencies(self, ar1):
         """ Add an array of frequencies(cm-1) associated with the laser frequency.
         Value:  float.  Must be of length equal to input frequencies. Current geometries allow only three distinct inputs
         indicative that the array must be of length 3.  """
@@ -40,12 +40,12 @@ class Lasers():
         if (len(ar2) != 3):
             return ValueError("geometries require three lasers only(set k coeff to zero if not used)")
         if len(self.anglesairdeg) == 3:
-            return self.calculatecartesianangles()  
+            return self.calculate_cartesian_angles()  
         else:
             return 0
 
 
-    def addangles(self, ar1):
+    def add_angles(self, ar1):
         """ Add an array of angles(degrees) associated with the laser frequency and its geometry.
         Value:  float.  Must be of length equal to input frequencies.  These angles correspond to the angles in air
         That the inputs make being focused into the sample.  """
@@ -54,12 +54,12 @@ class Lasers():
         if (len(ar2) != 3):
             return ValueError("geometries require three lasers only(set k coeff to zero if not used)")
         if (len(self.frequencies) ==3):
-            return self.calculatecartesianangles()
+            return self.calculate_cartesian_angles()
         else:
             return 0
 
 
-    def addkcoeffs(self,ar1):
+    def add_k_coeffs(self,ar1):
         """ Add an array of coefficients equivalent to the number and sign of wavevector associated with that input laser frequency.
         Value:  must be int, and can be zero.  Must be of length equal to input frequencies."""
         if (type(ar1[0]) != int):
@@ -71,7 +71,7 @@ class Lasers():
         return 0
 
 
-    def addpolarizations(self,ar1):
+    def add_pols(self,ar1):
         """ Add an array of polarizations with length equal to the input frequencies.
         Value:  1 == Vertical,   !1 == Horizontal.   No other polarizations supported, and must be int."""
         if (type(ar1[0]) != int):
@@ -83,7 +83,7 @@ class Lasers():
         return 0
 
 
-    def changefreq(self,pos,newval):
+    def change_freq(self,pos,newval):
         """ changefreq(self,pos,newval)  
         Change the laser frequency of one of the inputs to a new value (cm-1)"""
         val=float(newval)
@@ -96,17 +96,17 @@ class Lasers():
         return 0
 
 
-    def changeangle(self,pos,newval):
+    def change_angle(self,pos,newval):
         """ changeangle(self,pos,newval)  
         Change the angle of one of the inputs to a new value (degrees)"""
         lenfreq=len(self.frequencies)
         if (pos > lenfreq):
             return IndexError("position greater than list length")
         self.anglesairdeg[pos-1]=float(newval)
-        return self.calculatecartesianangles()  
+        return self.calculate_cartesian_angles()  
 
 
-    def changegeometry(self,newval="boxcars"):
+    def change_geometry(self,newval="boxcars"):
         """ Change Lasers geometry to one supported by the list.  See alo Lasers.supportedgeometrylist.
         "boxcars":                           "planar":
 
@@ -121,13 +121,13 @@ class Lasers():
         where "+" is the center of focus of the beams, and 4 is the output location.  """
         if (newval in self.supportedgeometrylist):
             self.geometry = newval
-            self.calculatecartesianangles()
-            return self.calculatemasks()
+            self.calculate_cartesian_angles()
+            return self.calculate_masks()
         else:
             return ValueError("unsupported geometry (see supportdgeometrylist for full list of supported geometries)")    
 
 
-    def calculatecartesianangles(self):
+    def calculate_cartesian_angles(self):
         """Based on the geometry, convert the angles into x and y angles, in radians."""
         num=len(self.frequencies)
         self.anglesxrad=np.zeros(num)
@@ -149,7 +149,7 @@ class Lasers():
         return 0
 
 
-    def calculatemasks(self):
+    def calculate_masks(self):
         """Based on the supported geometry list, generate a 0,1 binary type array of x and ys. If 0, that element is 
         not to be used in related phasematching calculations.  Binary values are based on whether the inputs
         need that coordinate specified.  For example, on boxcars, input 2 would have a binary 0 for x and binary 1 for y. """
@@ -191,6 +191,6 @@ class Lasers():
         self.k_coeffs=ar1['kcoeffs']
         self.polarizations=ar1['polarizations']
         self.geometry=ar1['geometry']
-        self.calculatecartesianangles()
-        return self.calculatemasks()
+        self.calculate_cartesian_angles()
+        return self.calculate_masks()
       
