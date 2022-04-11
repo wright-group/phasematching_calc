@@ -7,7 +7,7 @@ Example 1. A 2D calculation of M factors and conversion into a :class:`WrightToo
 
 First, the files are loaded into an IsoSample.
 
-.. code-block:: python
+.. plot::
     lay1file=os.path.join(filepath, 'CaF2_Malitson.txt')
     lay2file=os.path.join(filepath, 'H2O_1.txt')
 
@@ -21,9 +21,9 @@ First, the files are loaded into an IsoSample.
     samp1.loadlayer(lay2file, tkwater, label="water")
     samp1.loadlayer(lay1file, tkcaf2, label="caf2bw")
 
-Then, the Lasers object are created from the Python commands (as opposed to being loaded from file).
+Then, the Lasers object is created from the Python commands (as opposed to being loaded from file).
 
-.. code-block:: python
+.. plot::
     las=pc.Lasers.Lasers()
     arr1=[1800.0,2700.0,30000.0]
     las.addfrequencies(arr1)
@@ -45,7 +45,7 @@ into a channel array that gets placed into a Data object.  The remaining code fo
 of using the linspaces as variables and plotting the result using the `artists.quick2D` method.
 
 
-.. code-block:: python
+.. plot::
     var1=np.linspace(2450.00,2900.00,46)[:,None]
     var2=np.linspace(1300.0,1900.0,61)[None, :]
     var2a=np.linspace(1300.0,1900.0,61)
@@ -73,7 +73,7 @@ of using the linspaces as variables and plotting the result using the `artists.q
 Example 2. A similar calculation with a single 300 micron CaF2 window and different input geometries.
 In this case a `boxcars` geometry.
 
-.. code-block:: python
+.. plot::
     lay1file=os.path.join(filepath, 'CaF2_Malitson.txt')
     tkcaf2=0.03 
 
@@ -121,7 +121,7 @@ We assume the oriented sapphire limits to anisotropy of it to very small amounts
 and may approximate an isotropic sample.  This is reverting back to a planar geometry.  The Sympy
 syntax requires the conversion of the FiniteSet to a list.  
 
-.. code-block:: python
+.. plot::
     lay1file=os.path.join(filepath, 'CH3CN_paste_1.txt')
     lay2file=os.path.join(filepath, 'sapphire1.txt')
 
@@ -193,7 +193,7 @@ tend to limit thicknesses.  (Geometrical calculations may be instituted as a cal
 
 The code starts normally:
 
-.. code-block:: python
+.. plot::
     lay3file=os.path.join(filepath, 'CaF2_Malitson.txt')
     lay4file=os.path.join(filepath, 'CH3CN_paste_1.txt')
     lay5file=os.path.join(filepath, 'CaF2_Malitson.txt')
@@ -224,8 +224,7 @@ The code starts normally:
 
 Some additonal code is needed to convert the times into more meaningful ones.  For example, the mean of
 all 4 inputs and output was determined per layer, and the difference from that mean plotted per input.
-.. code-block:: python
-
+.. plot::
     for m in range(len(tin)):
         if m == 0:
             pass
@@ -308,7 +307,7 @@ a set of two frequency and angle solves are made for what may be considered two 
 how much of either should be made .
 
 
-.. code-block:: python
+.. plot::
     #new IsoSample: sapphire: ACN: sapphire
     lay3file=os.path.join(filepath, 'CaF2_Malitson.txt')
     lay4file=os.path.join(filepath, 'CH3CN_paste_1.txt')
@@ -375,7 +374,7 @@ However, it is important to note that as w3 increases, the vector contributions 
 smaller relative to k3, and so phasemismatching becomes less problematic for DOVE.  
 
 
-.. code-block:: python
+.. plot::
     lay1file=os.path.join(filepath, 'sapphire1.txt')
     lay2file=os.path.join(filepath, "H2O_1.txt")
     tksap=0.02 
