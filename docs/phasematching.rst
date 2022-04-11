@@ -90,7 +90,7 @@ make in the sample layers according to Snell's Law.
 
 This function can be used to calculate absorbance losses from earlier layers and how this affects four-wave 
 mixing intensity in the succeeding layer.   It may also serve as an auxiliary function for absorbance modeling
-without need for use in four-wave mixing expressions.  See `applyabsorbances`.
+without need for use in four-wave mixing expressions.  See `apply_absorbances`.
 
 
 `calculate_ts(Iso, Las)`

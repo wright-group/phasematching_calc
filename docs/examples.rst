@@ -75,7 +75,8 @@ in this case a `boxcars` geometry.
 
 .. plot::
     lay1file=os.path.join(filepath, 'CaF2_Malitson.txt')
-    tkcaf2=0.03 
+    
+    tkcaf2=0.03 #cm
 
     samp1=pc.IsoSample.IsoSample()
     desc="caf2window300um"
@@ -177,12 +178,12 @@ is not a strong dependence of the angle of k2 as |k1| changes.
 **Example 4**.  A frequency solving routine for an oriented sapphire:acetonitrile:sapphire sample.
 The conditions are virtually identical to Example 3 except that a frequency solve for the high frequency
 k3 beam is requested.  The code is not posted as it is nearly identical except for  replacing the
-line ``angleair2=pc.phasematch.SolveAngle(samp1,las,2,1)`` with ``angleair2=pc.phasematch.SolveFrequency(samp1,las,2,3)``.
+line ``angleair2=pc.phasematch.solve_angle(samp1,las,2,1)`` with ``angleair2=pc.phasematch.solve_frequency(samp1,las,2,3)``.
 
 .. image:: Figure_4.png
 
-It is unusual that the bottom left data points are unplotted.  Iterations may have proceeded beyond the estimated
-amount so that it could not find a solution, or none may have existed.  The expected w3 colors range from 18000 cm-1
+Note that the bottom left data points are unplotted.  Iterations have proceeded beyond the estimated
+amount so that it could not find a solution.   The expected w3 colors range from 18000 cm-1
 at right to almost 30000 cm-1 at left, suggesting a very large change of colors required that may obviate the method
 or require some additional laser modification for assistance.
 
