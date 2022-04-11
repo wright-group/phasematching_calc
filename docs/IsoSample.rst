@@ -1,4 +1,4 @@
-.. _isosample:
+.. IsoSample:
 
 IsoSample
 =========

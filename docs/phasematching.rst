@@ -1,4 +1,4 @@
-.. _phasematching:
+.. phasematching:
 
 Phasematching
 =============

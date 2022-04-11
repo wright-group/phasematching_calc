@@ -1,4 +1,4 @@
-.. _lasers:
+.. Lasers:
 
 Lasers
 =============

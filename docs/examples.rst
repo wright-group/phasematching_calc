@@ -1,4 +1,4 @@
-.. scripts:
+.. examples:
 
 Some examples using the ``phasematching_calc`` module are shown. 
 
