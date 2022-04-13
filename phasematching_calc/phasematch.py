@@ -5,6 +5,7 @@ from ._isosample import IsoSample
 from ._isosample import Layer
 from sympy import S, FiniteSet, Interval, oo
 import matplotlib.pyplot as plt 
+import time
 
 #prototypes
 Iso=IsoSample()
@@ -631,7 +632,7 @@ def _m_plot(Iso, Las, layernum, freqnum, side=1):
 
 
 
-def solve_angle(Iso,Las,layernum,freqnum, frequency=None):
+def solve_angle(Iso,Las,layernum,freqnum, frequency=None, isclose=False):
     '''
     Given an Isotropic Sample, a layer number and frequency number used in a geometry defined in Las object,
     determine the input angle (in air) required for phasematching that frequency. Uses Sympy Set. 
@@ -645,6 +646,8 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None):
     layernum = layer in which to solve for angle
     freqnum = laser position (defined by geometry)
     frequency = frequency at that laser position
+    isclose = if set to True it will only search for a solution close to the angle shown in the Lasers object
+            with a faster algorithm
 
     All other frequencies, k coefficients, refractive indexes are taken from the objects.
 
@@ -668,7 +671,7 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None):
 
     numfreqs=len(freqs)
 
-    flag=int(1)
+    flag=int(0)
     flag2=int(1)
     flag3=int(1)
     
@@ -702,67 +705,102 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None):
         return Interval(0,angledeg)
     else:
         m = layernum-1
-        tol=0.00001
+        tol=0.001
         iter=50
         for k in range(layernum):
             Isotemp.layers[k].suppress_absorbances()
         
-        mlist=_m_plot(Isotemp,Las,layernum,freqnum,side=1)
-        mlist2=_m_plot(Isotemp,Las,layernum,freqnum,side=-1)
-        mlist.reverse()
-        max1=max(mlist)
-        max1ind=mlist.index(max(mlist))
-        max2=max(mlist2)
-        max2ind=mlist2.index(max(mlist2))-75
-        
-        dir=1.000
-        error2=1.000-max1
-        error1=error2
-        amt=0.5
-        Lastemp.change_angle(freqnum,max1ind)
-        b=0
-        while( error2 > tol):
-            b=b+1
-            if (error2 > error1):
-                dir=(-1.00)*dir
-            if (np.abs(error2) < 0.33*np.abs(error1)):
-                amt=0.1*amt
-            error1=error2
-            angle=Lastemp.anglesairdeg[freqnum-1]+amt*dir
-            Lastemp.change_angle(freqnum,angle)
+        if isclose:
+            amt=0.5
             Mtest,tklist,Tdict=m_calc(Isotemp, Lastemp)
+            angle=Lastemp.anglesairdeg[freqnum-1]
+            magMtest1=np.abs(Mtest[m])
+            error2=1.000-magMtest1
+            dir=1.000
+            error1=error2 
+            b=0
+            while( error2 > tol):
+                b=b+1
+                if (error2 > error1):
+                    dir=(-1.00)*dir
+                if (np.abs(error2) < 0.33*np.abs(error1)):
+                    amt=0.1*amt
+                error1=error2
+                angle=Lastemp.anglesairdeg[freqnum-1]+amt*dir
+                Lastemp.change_angle(freqnum,angle)
+                Mtest,tklist,Tdict=m_calc(Isotemp, Lastemp)
+                magMtest1=np.abs(Mtest[m]) 
+                error2=1-magMtest1
+                if (b > iter):
+                    flag2=1
+                    break
+            if np.isclose(magMtest1,1.00, rtol=tol*10):
+                flag2=0
+            angle2=float("nan")
+            flag3=1    
+        else:
+            mlist=_m_plot(Isotemp,Las,layernum,freqnum,side=1)
+            mlist2=_m_plot(Isotemp,Las,layernum,freqnum,side=-1)
+            mlist.reverse()
+            max1=max(mlist)
+            max1ind=mlist.index(max(mlist))
+            max2=max(mlist2)
+            max2ind=mlist2.index(max(mlist2))-75
+
+            dir=1.000
+            amt=0.5
+            Lastemp.change_angle(freqnum,max1ind)
+            Mtest,tklist,Tdict=m_calc(Isotemp, Lastemp)
+            angle=Lastemp.anglesairdeg[freqnum-1]
             magMtest1=np.abs(Mtest[m]) 
-            error2=1-magMtest1
-            if (b > iter):
-                flag2=1
-                break
- 
-        dir=1.00
-        error2=1.000-max2
-        error1=error2
-        amt=0.5
-        Lastemp.change_angle(freqnum,max2ind)
-        b=0
-        while( error2 > tol):
-            b=b+1
-            if (error2 > error1):
-                dir=(-1.00)*dir
-            if (np.abs(error2) < 0.33*np.abs(error1)):
-                amt=0.1*amt
+            error2=1.000-magMtest1
             error1=error2
-            angle2=Lastemp.anglesairdeg[freqnum-1]+amt*dir
-            Lastemp.change_angle(freqnum,angle2)
+            b=0
+            while( error2 > tol):
+                b=b+1
+                if (error2 > error1):
+                    dir=(-1.00)*dir
+                if (np.abs(error2) < 0.33*np.abs(error1)):
+                    amt=0.1*amt
+                error1=error2
+                angle=Lastemp.anglesairdeg[freqnum-1]+amt*dir
+                Lastemp.change_angle(freqnum,angle)
+                Mtest,tklist,Tdict=m_calc(Isotemp, Lastemp)
+                magMtest1=np.abs(Mtest[m]) 
+                error2=1-magMtest1
+                if (b > iter):
+                    flag2=1
+                    break
+    
+            dir=1.00
+            amt=0.5
+            Lastemp.change_angle(freqnum,max2ind)
             Mtest,tklist,Tdict=m_calc(Isotemp, Lastemp)
-            magMtest2=np.abs(Mtest[m]) 
-            error2=1-magMtest2
-            if (b > iter):
-                flag3=1
-                break
-        
-        if np.isclose(magMtest1,1.00, rtol=tol*10):
-            flag2=0
-        if np.isclose(magMtest2,1.00, rtol=tol*10):
-            flag3=0
+            angle2=Lastemp.anglesairdeg[freqnum-1]
+            magMtest2=np.abs(Mtest[m])
+            error2=1.000-magMtest2
+            error1=error2 
+            b=0
+            while( error2 > tol):
+                b=b+1
+                if (error2 > error1):
+                    dir=(-1.00)*dir
+                if (np.abs(error2) < 0.33*np.abs(error1)):
+                    amt=0.1*amt
+                error1=error2
+                angle2=Lastemp.anglesairdeg[freqnum-1]+amt*dir
+                Lastemp.change_angle(freqnum,angle2)
+                Mtest,tklist,Tdict=m_calc(Isotemp, Lastemp)
+                magMtest2=np.abs(Mtest[m]) 
+                error2=1-magMtest2
+                if (b > iter):
+                    flag3=1
+                    break
+
+            if np.isclose(magMtest1,1.00, rtol=tol*10):
+                flag2=0
+            if np.isclose(magMtest2,1.00, rtol=tol*10):
+                flag3=0
         
         if (flag2==1 & flag3==1):
             return FiniteSet()

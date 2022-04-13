@@ -38,18 +38,32 @@ arr4=[1,1,1]
 las.add_pols(arr4)
 las.change_geometry("planar")
 
-
 var1=np.linspace(2600.00,3200.00,61)[:,None]
 var2=np.linspace(1600.0,2200.0,61)[None, :]
 var2a=np.linspace(1600.0,2200.0,61)
 
 ch1= np.zeros([len(var1), len(var2a)])
+mold=int(0)
 for m in range(len(var1)):
     for n in range(len(var2a)):
         las.change_freq(1,var1[m])
         las.change_freq(2,var2a[n])
-        angleair2=pc.phasematch.solve_angle(samp1,las,2,1)
-        ch1[m,n]=(list(angleair2)[0])  
+        if (m==0 & n==0):
+            angleair2=pc.phasematch.solve_angle(samp1,las,2,1,isclose=False)
+            angletemp=list(angleair2)[1]
+            ch1[m,n]=list(angleair2)[1]
+            las.change_angle(2,list(angleair2)[1])  
+        elif (mold==m):
+            angleair2=pc.phasematch.solve_angle(samp1,las,2,1,isclose=True)
+            ch1[m,n]=(list(angleair2)[0]) 
+            las.change_angle(2,list(angleair2)[0])           
+        else:
+            las.change_angle(2,angletemp) 
+            angleair2=pc.phasematch.solve_angle(samp1,las,2,1,isclose=True)
+            ch1[m,n]=list(angleair2)[0]
+            mold=m
+            angletemp=list(angleair2)[0]
+            las.change_angle(2,list(angleair2)[0])  
 
 
 data=wt.Data(name="angle check for w2")
