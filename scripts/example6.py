@@ -28,9 +28,9 @@ samp1.load_layer(lay3file, tksapph, label="caf2bw")
 
 # new Lasers object
 las4=pc.Lasers.Lasers()
-arr1=[3150.0,2200.0,25000.0]
+arr1=[3150.0,2200.0,17200.0]
 las4.add_frequencies(arr1)
-arr2=[6.0,-15.0,0.0]
+arr2=[6.0,-13.0,0.0]
 las4.add_angles(arr2)
 arr3=[1,-1,1]
 las4.add_k_coeffs(arr3)
@@ -38,6 +38,11 @@ arr4=[1,1,1]
 las4.add_pols(arr4)
 las4.change_geometry("planar")
 
+#out=pc.phasematch.m_plot(samp1,las4,2,2)
+
+angl1=pc.phasematch.solve_angle(samp1,las4,2,2, isclose=True)
+out=list(angl1)
+print(out)
 
 freq=pc.phasematch.solve_frequency(samp1,las4,2,3,20)
 out=list(freq)

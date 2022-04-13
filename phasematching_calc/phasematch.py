@@ -4,6 +4,7 @@ from ._lasers import Lasers
 from ._isosample import IsoSample
 from ._isosample import Layer
 from sympy import S, FiniteSet, Interval, oo
+import matplotlib.pyplot as plt 
 
 #prototypes
 Iso=IsoSample()
@@ -612,6 +613,24 @@ def angle(Iso,Las,layernum,freqnum, frequency=None):
     return lasanglex,lasangley
 
 
+def _m_plot(Iso, Las, layernum, freqnum, side=1):
+    if side==1:
+        anglelist=range(75,0,-1)
+    else:
+        anglelist=range(-75,0,1)
+
+    mlist=list()
+    Lastemp=Las
+    for m in anglelist:
+        Lastemp.change_angle(freqnum,m)
+        Mfac,tklist,Tdict=m_calc(Iso,Las)
+        #alist.append(m)
+        mlist.append(Mfac[layernum-1])
+
+    return mlist
+
+
+
 def solve_angle(Iso,Las,layernum,freqnum, frequency=None):
     '''
     Given an Isotropic Sample, a layer number and frequency number used in a geometry defined in Las object,
@@ -649,7 +668,9 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None):
 
     numfreqs=len(freqs)
 
-    flag=int(0)
+    flag=int(1)
+    flag2=int(1)
+    flag3=int(1)
     
     if (frequency is not None):
         freqs[freqnum-1]=frequency
@@ -657,12 +678,11 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None):
             return ValueError("frequency cannot be less than 0")
         Lastemp.change_freq(freqnum,frequency)
 
-    output=_calculate_internals(Isotemp,Lastemp, zerofreq=True, zerofreqnum=freqnum)
+    output=_calculate_internals(Isotemp,Lastemp)
     kx=output['kx']
     ky=output['ky']
     kz=output['kz']
     kcoeffs=output['kcoeffs']
-        
     kxtemp=kx[layernum-1]
     kytemp=ky[layernum-1]
     kztemp=kz[layernum-1]
@@ -682,17 +702,24 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None):
         return Interval(0,angledeg)
     else:
         m = layernum-1
-        tol=0.0001
+        tol=0.00001
+        iter=50
         for k in range(layernum):
             Isotemp.layers[k].suppress_absorbances()
-        dir=1.00
-        amt= 1.00 #deg
-        Mtest,tklist,Tdict=m_calc(Isotemp, Lastemp)
-        magMtest=np.abs(Mtest[m]) 
-        error1= 1-magMtest
-        error2= error1
-        iter=70
-        angle=Lastemp.anglesairdeg[freqnum-1]
+        
+        mlist=_m_plot(Isotemp,Las,layernum,freqnum,side=1)
+        mlist2=_m_plot(Isotemp,Las,layernum,freqnum,side=-1)
+        mlist.reverse()
+        max1=max(mlist)
+        max1ind=mlist.index(max(mlist))
+        max2=max(mlist2)
+        max2ind=mlist2.index(max(mlist2))-75
+        
+        dir=1.000
+        error2=1.000-max1
+        error1=error2
+        amt=0.5
+        Lastemp.change_angle(freqnum,max1ind)
         b=0
         while( error2 > tol):
             b=b+1
@@ -704,16 +731,47 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None):
             angle=Lastemp.anglesairdeg[freqnum-1]+amt*dir
             Lastemp.change_angle(freqnum,angle)
             Mtest,tklist,Tdict=m_calc(Isotemp, Lastemp)
-            magMtest=np.abs(Mtest[m]) 
-            error2=1-magMtest
+            magMtest1=np.abs(Mtest[m]) 
+            error2=1-magMtest1
             if (b > iter):
-                flag=2
+                flag2=1
                 break
-
-        if (flag==2):
+ 
+        dir=1.00
+        error2=1.000-max2
+        error1=error2
+        amt=0.5
+        Lastemp.change_angle(freqnum,max2ind)
+        b=0
+        while( error2 > tol):
+            b=b+1
+            if (error2 > error1):
+                dir=(-1.00)*dir
+            if (np.abs(error2) < 0.33*np.abs(error1)):
+                amt=0.1*amt
+            error1=error2
+            angle2=Lastemp.anglesairdeg[freqnum-1]+amt*dir
+            Lastemp.change_angle(freqnum,angle2)
+            Mtest,tklist,Tdict=m_calc(Isotemp, Lastemp)
+            magMtest2=np.abs(Mtest[m]) 
+            error2=1-magMtest2
+            if (b > iter):
+                flag3=1
+                break
+        
+        if np.isclose(magMtest1,1.00, rtol=tol*10):
+            flag2=0
+        if np.isclose(magMtest2,1.00, rtol=tol*10):
+            flag3=0
+        
+        if (flag2==1 & flag3==1):
             return FiniteSet()
-        else:
+        elif (flag2 == 1 ):
+            return FiniteSet(angle2)
+        elif (flag3 == 1):
             return FiniteSet(angle)
+        else:
+            return FiniteSet(angle,angle2)
 
 
 def solve_frequency(Iso, Las, layernum, freqnum, amt=None):
