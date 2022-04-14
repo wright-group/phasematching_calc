@@ -616,15 +616,19 @@ def angle(Iso,Las,layernum,freqnum, frequency=None):
 
 def _m_plot(Iso, Las, layernum, freqnum, side=1):
     if side==1:
-        anglelist=range(75,0,-1)
+        anglelist=list(range(75,0,-1))
     else:
-        anglelist=range(-75,0,1)
+        anglelist=list(range(-75,0,1))
 
     mlist=list()
-    Lastemp=Las
-    for m in anglelist:
-        Lastemp.change_angle(freqnum,m)
-        Mfac,tklist,Tdict=m_calc(Iso,Las)
+    Lastemp2=Las
+    Isotemp2=Iso
+    for k in range(layernum):
+        Isotemp2.layers[k].suppress_absorbances()
+
+    for m in range(len(anglelist)):
+        Lastemp2.change_angle(freqnum,anglelist[m])
+        Mfac,tklist,Tdict=m_calc(Isotemp2,Lastemp2)
         #alist.append(m)
         mlist.append(Mfac[layernum-1])
 
@@ -739,8 +743,8 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None, isclose=False):
             angle2=float("nan")
             flag3=1    
         else:
-            mlist=_m_plot(Isotemp,Las,layernum,freqnum,side=1)
-            mlist2=_m_plot(Isotemp,Las,layernum,freqnum,side=-1)
+            mlist=_m_plot(Isotemp,Lastemp,layernum,freqnum,side=1)
+            mlist2=_m_plot(Isotemp,Lastemp,layernum,freqnum,side=-1)
             mlist.reverse()
             max1=max(mlist)
             max1ind=mlist.index(max(mlist))

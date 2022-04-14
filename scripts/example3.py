@@ -28,7 +28,7 @@ samp1.load_layer(lay1file, tksap, label="sapphire")
 
 #generation of a Lasers object.
 las=pc.Lasers.Lasers()
-arr1=[1800.0,2700.0,18400.0]
+arr1=[1800.0,2700.0,12500.0]
 las.add_frequencies(arr1)
 arr2=[8.0,-7.0, 0.0]
 las.add_angles(arr2)
@@ -46,27 +46,27 @@ ch1= np.zeros([len(var1), len(var2a)])
 mold=int(0)
 for m in range(len(var1)):
     for n in range(len(var2a)):
-        las.change_freq(1,var1[m])
-        las.change_freq(2,var2a[n])
+        las.change_freq(1,var2a[n])
+        las.change_freq(2,var1[m])
         if ((m==0) & (n==0)):
             angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=False))
             angletemp=angleair2[1]   # this needs to solve for remainder to work
             if np.any(angleair2):
                 ch1[m,n]=(angleair2)[1]
-                las.change_angle(2,angleair2[1])  
+                las.change_angle(1,angleair2[1])  
         elif (mold==m):
             angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=True))
             if np.any(angleair2):
                 ch1[m,n]=(angleair2)[0] 
-                las.change_angle(2,angleair2[0])           
+                las.change_angle(1,angleair2[0])           
         else:
-            las.change_angle(2,angletemp) 
+            las.change_angle(1,angletemp) 
             angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=True))
             mold=m
             if np.any(angleair2):
-                ch1[m,n]=angleair2[0]
-                angletemp=angleair2[0]
-                las.change_angle(2,angleair2[0]) 
+                ch1[m,n]=angleair2[1]
+                angletemp=angleair2[1]
+                las.change_angle(1,angleair2[1]) 
         print(m,n) 
 
 
