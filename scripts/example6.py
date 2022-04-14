@@ -40,7 +40,7 @@ las4.change_geometry("planar")
 
 #out=pc.phasematch.m_plot(samp1,las4,2,2)
 
-angl1=pc.phasematch.solve_angle(samp1,las4,2,2, isclose=True)
+angl1=pc.phasematch.solve_angle(samp1,las4,2,2, isclose=False)
 out=list(angl1)
 print(out)
 

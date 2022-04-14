@@ -709,7 +709,7 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None, isclose=False):
         return Interval(0,angledeg)
     else:
         m = layernum-1
-        tol=0.01
+        tol=0.0001
         iter=50
         for k in range(layernum):
             Isotemp.layers[k].suppress_absorbances()
@@ -753,7 +753,7 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None, isclose=False):
 
             dir=1.000
             amt=0.5
-            Lastemp.change_angle(freqnum,max1ind)
+            Lastemp.change_angle(freqnum,max1ind-1)
             Mtest,tklist,Tdict=m_calc(Isotemp, Lastemp)
             angle=Lastemp.anglesairdeg[freqnum-1]
             magMtest1=np.abs(Mtest[m]) 
@@ -806,7 +806,7 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None, isclose=False):
             if np.isclose(magMtest2,1.00, rtol=tol*10):
                 flag3=0
         
-        if (flag2==1 & flag3==1):
+        if ((flag2==1) & (flag3==1)):
             return FiniteSet()
         elif (flag2 == 1 ):
             return FiniteSet(angle2)
