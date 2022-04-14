@@ -616,15 +616,19 @@ def angle(Iso,Las,layernum,freqnum, frequency=None):
 
 def _m_plot(Iso, Las, layernum, freqnum, side=1):
     if side==1:
-        anglelist=range(75,0,-1)
+        anglelist=list(range(75,0,-1))
     else:
-        anglelist=range(-75,0,1)
+        anglelist=list(range(-75,0,1))
 
     mlist=list()
-    Lastemp=Las
-    for m in anglelist:
-        Lastemp.change_angle(freqnum,m)
-        Mfac,tklist,Tdict=m_calc(Iso,Las)
+    Lastemp2=Las
+    Isotemp2=Iso
+    for k in range(layernum):
+        Isotemp2.layers[k].suppress_absorbances()
+
+    for m in range(len(anglelist)):
+        Lastemp2.change_angle(freqnum,anglelist[m])
+        Mfac,tklist,Tdict=m_calc(Isotemp2,Lastemp2)
         #alist.append(m)
         mlist.append(Mfac[layernum-1])
 
@@ -707,7 +711,7 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None, isclose=False):
         return Interval(0,angledeg)
     else:
         m = layernum-1
-        tol=0.01
+        tol=0.0001
         iter=50
         for k in range(layernum):
             Isotemp2.layers[k].suppress_absorbances()
@@ -753,7 +757,7 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None, isclose=False):
             amt=0.5
             Lastemp2.change_angle(freqnum,max1ind)
             Mtest,tklist,Tdict=m_calc(Isotemp2, Lastemp2)
-            angle=Lastemp.anglesairdeg[freqnum-1]
+            angle=Lastemp2.anglesairdeg[freqnum-1]
             magMtest1=np.abs(Mtest[m]) 
             error2=1.000-magMtest1
             error1=error2
@@ -804,7 +808,7 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None, isclose=False):
             if np.isclose(magMtest2,1.00, rtol=tol*10):
                 flag3=0
         
-        if (flag2==1 & flag3==1):
+        if ((flag2==1) & (flag3==1)):
             return FiniteSet()
         elif (flag2 == 1 ):
             return FiniteSet(angle2)
@@ -814,7 +818,7 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None, isclose=False):
             return FiniteSet(angle,angle2)
 
 
-def solve_frequency(Iso, Las, layernum, freqnum, amt=None):
+def solve_frequency(Iso, Las, layernum, freqnum, amt=None, isclose=False):
     '''Using the current frequency as first guess, solves for the nearest possible phasematching frequency
     at a fixed angle for that frequencynum in a given layer, using an iterative convergence.  Uses Sympy Set. 
     Returns an empty FiniteSet if a solution cannot be found within an internal convergence iteration series,
@@ -851,8 +855,14 @@ def solve_frequency(Iso, Las, layernum, freqnum, amt=None):
     Isotemp=Iso
     Lastemp=Las
 
-    if amt is None:
-        amt = 0.01*freqs[freqnum-1]  # a guess
+    if isclose:
+        if amt is None:
+            amt = 0.001*freqs[freqnum-1]
+            tol = 0.0001  
+    else:
+        if amt is None:
+            amt = 0.01*freqs[freqnum-1]  # a guess
+            tol = 0.001
 
     output=_calculate_internals(Isotemp,Lastemp,zerofreq=True,zerofreqnum=freqnum)
     kx=output['kx']
@@ -882,7 +892,7 @@ def solve_frequency(Iso, Las, layernum, freqnum, amt=None):
                             # at the given angle to see if it is reflected at a critical angle
     else:
         m = layernum-1
-        tol=0.0001
+        
         for k in range(layernum):
             Isotemp.layers[k].suppress_absorbances()
 

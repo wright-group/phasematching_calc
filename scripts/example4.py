@@ -28,7 +28,7 @@ samp1.load_layer(lay1file, tksap, label="sapphire")
 
 #generation of a Lasers object.
 las=pc.Lasers.Lasers()
-arr1=[1800.0,2700.0,16000.0]
+arr1=[1800.0,2700.0,17000.0]
 las.add_frequencies(arr1)
 arr2=[10.0,-7.0, 0.0]
 las.add_angles(arr2)
@@ -48,7 +48,7 @@ for m in range(len(var1)):
     for n in range(len(var2a)):
         las.change_freq(1,var1[m])
         las.change_freq(2,var2a[n])
-        angleair2=pc.phasematch.solve_frequency(samp1,las,2,3)
+        angleair2=pc.phasematch.solve_frequency(samp1,las,2,3, isclose=False)
         if np.any(list(angleair2)):
             ch1[m,n]=(list(angleair2)[0])  
         else:
