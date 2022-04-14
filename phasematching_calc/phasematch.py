@@ -668,6 +668,8 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None, isclose=False):
     freqs=Las.frequencies
     Lastemp=Las
     Isotemp=Iso
+    Lastemp2=Las
+    Isotemp2=Iso
 
     numfreqs=len(freqs)
 
@@ -681,7 +683,7 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None, isclose=False):
             return ValueError("frequency cannot be less than 0")
         Lastemp.change_freq(freqnum,frequency)
 
-    output=_calculate_internals(Isotemp,Lastemp)
+    output=_calculate_internals(Isotemp,Lastemp,zerofreq=True, zerofreqnum=freqnum)
     kx=output['kx']
     ky=output['ky']
     kz=output['kz']
@@ -708,11 +710,11 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None, isclose=False):
         tol=0.01
         iter=50
         for k in range(layernum):
-            Isotemp.layers[k].suppress_absorbances()
+            Isotemp2.layers[k].suppress_absorbances()
         
         if isclose:
             amt=0.5
-            Mtest,tklist,Tdict=m_calc(Isotemp, Lastemp)
+            Mtest,tklist,Tdict=m_calc(Isotemp2, Lastemp2)
             angle=Lastemp.anglesairdeg[freqnum-1]
             magMtest1=np.abs(Mtest[m])
             error2=1.000-magMtest1
@@ -726,9 +728,9 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None, isclose=False):
                 if (np.abs(error2) < 0.33*np.abs(error1)):
                     amt=0.1*amt
                 error1=error2
-                angle=Lastemp.anglesairdeg[freqnum-1]+amt*dir
-                Lastemp.change_angle(freqnum,angle)
-                Mtest,tklist,Tdict=m_calc(Isotemp, Lastemp)
+                angle=Lastemp2.anglesairdeg[freqnum-1]+amt*dir
+                Lastemp2.change_angle(freqnum,angle)
+                Mtest,tklist,Tdict=m_calc(Isotemp2, Lastemp2)
                 magMtest1=np.abs(Mtest[m]) 
                 error2=1-magMtest1
                 if (b > iter):
@@ -739,8 +741,8 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None, isclose=False):
             angle2=float("nan")
             flag3=1    
         else:
-            mlist=_m_plot(Isotemp,Las,layernum,freqnum,side=1)
-            mlist2=_m_plot(Isotemp,Las,layernum,freqnum,side=-1)
+            mlist=_m_plot(Isotemp2,Lastemp2,layernum,freqnum,side=1)
+            mlist2=_m_plot(Isotemp2,Lastemp2,layernum,freqnum,side=-1)
             mlist.reverse()
             max1=max(mlist)
             max1ind=mlist.index(max(mlist))
@@ -749,8 +751,8 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None, isclose=False):
 
             dir=1.000
             amt=0.5
-            Lastemp.change_angle(freqnum,max1ind)
-            Mtest,tklist,Tdict=m_calc(Isotemp, Lastemp)
+            Lastemp2.change_angle(freqnum,max1ind)
+            Mtest,tklist,Tdict=m_calc(Isotemp2, Lastemp2)
             angle=Lastemp.anglesairdeg[freqnum-1]
             magMtest1=np.abs(Mtest[m]) 
             error2=1.000-magMtest1
@@ -763,9 +765,9 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None, isclose=False):
                 if (np.abs(error2) < 0.33*np.abs(error1)):
                     amt=0.1*amt
                 error1=error2
-                angle=Lastemp.anglesairdeg[freqnum-1]+amt*dir
-                Lastemp.change_angle(freqnum,angle)
-                Mtest,tklist,Tdict=m_calc(Isotemp, Lastemp)
+                angle=Lastemp2.anglesairdeg[freqnum-1]+amt*dir
+                Lastemp2.change_angle(freqnum,angle)
+                Mtest,tklist,Tdict=m_calc(Isotemp2, Lastemp2)
                 magMtest1=np.abs(Mtest[m]) 
                 error2=1-magMtest1
                 if (b > iter):
@@ -774,9 +776,9 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None, isclose=False):
     
             dir=1.00
             amt=0.5
-            Lastemp.change_angle(freqnum,max2ind)
-            Mtest,tklist,Tdict=m_calc(Isotemp, Lastemp)
-            angle2=Lastemp.anglesairdeg[freqnum-1]
+            Lastemp2.change_angle(freqnum,max2ind)
+            Mtest,tklist,Tdict=m_calc(Isotemp2, Lastemp2)
+            angle2=Lastemp2.anglesairdeg[freqnum-1]
             magMtest2=np.abs(Mtest[m])
             error2=1.000-magMtest2
             error1=error2 
@@ -788,9 +790,9 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None, isclose=False):
                 if (np.abs(error2) < 0.33*np.abs(error1)):
                     amt=0.1*amt
                 error1=error2
-                angle2=Lastemp.anglesairdeg[freqnum-1]+amt*dir
-                Lastemp.change_angle(freqnum,angle2)
-                Mtest,tklist,Tdict=m_calc(Isotemp, Lastemp)
+                angle2=Lastemp2.anglesairdeg[freqnum-1]+amt*dir
+                Lastemp2.change_angle(freqnum,angle2)
+                Mtest,tklist,Tdict=m_calc(Isotemp2, Lastemp2)
                 magMtest2=np.abs(Mtest[m]) 
                 error2=1-magMtest2
                 if (b > iter):
