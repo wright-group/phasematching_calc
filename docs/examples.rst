@@ -438,10 +438,11 @@ Results are:
     -13.0000000000000
 
     
-In this example, changing w3 by +160 cm-1 would result in the same phasematching as an angle change of +0.20 degrees.
-Changes in w3 in this range would result in very large wavelength changes needed over an entire scan.  On the 
-other hand, phasematching angle changes may be restricted to a small range due to aberrations.  It is possible
-that the two can be modified in tandem in some studies.
+In this example, changing w3 by +160 cm-1 would result in the same phasematching as an angle change of -0.20 degrees 
+(likely rounded to tenths), for a -10 cm-1 change in the low frequency infrared input.
+ Changes in w3 in this range would result in very large wavelength changes needed over an
+ entire scan.  On the other hand, phasematching angle changes may be restricted to a small range due to aberrations.
+ It is possible that the two can be modified in tandem in some studies...for example, moving w3 by 80 cm-1 and angle by 0.10 deg.
 
 
 **Example 7**.  Comparison of DOVE vs TSF signal intensity.  WIth the oriented sapphire:water:sapphire sample,
