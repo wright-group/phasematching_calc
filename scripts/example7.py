@@ -37,11 +37,6 @@ arr4=[1,1,1]
 las.add_pols(arr4)
 las.change_geometry("planar")
 
-
-#angle1=pc.phasematch.SolveAngle(samp1,las,1,1,frequency=1800.0)
-#print(list(angle1))
-#las.changeangle(1,list(angle1)[0])
-
 var1=np.linspace(2450.00,2900.00,91)[:,None]
 var2=np.linspace(1300.0,1900.0,161)[None, :]
 var2a=np.linspace(1300.0,1900.0,161)
@@ -49,8 +44,6 @@ var2a=np.linspace(1300.0,1900.0,161)
 ch1= np.zeros([len(var1), len(var2a)])
 ch2=np.zeros([len(var1), len(var2a)])
 ch3=np.zeros([len(var1), len(var2a)])
-
-chartin,chartout=pc.phasematch.calculate_ts(samp1, las)
 
 for m in range(len(var1)):
     for n in range(len(var2a)):
@@ -64,7 +57,6 @@ for m in range(len(var1)):
 
 vec2=[1,1,1]
 las.add_k_coeffs(vec2)
-pass
 
 for m in range(len(var1)):
     for n in range(len(var2a)):

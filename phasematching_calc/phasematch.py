@@ -816,7 +816,7 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None, isclose=False):
             return FiniteSet(angle,angle2)
 
 
-def solve_frequency(Iso, Las, layernum, freqnum, amt=None):
+def solve_frequency(Iso, Las, layernum, freqnum, amt=None, isclose=False):
     '''Using the current frequency as first guess, solves for the nearest possible phasematching frequency
     at a fixed angle for that frequencynum in a given layer, using an iterative convergence.  Uses Sympy Set. 
     Returns an empty FiniteSet if a solution cannot be found within an internal convergence iteration series,
@@ -853,8 +853,14 @@ def solve_frequency(Iso, Las, layernum, freqnum, amt=None):
     Isotemp=Iso
     Lastemp=Las
 
-    if amt is None:
-        amt = 0.01*freqs[freqnum-1]  # a guess
+    if isclose:
+        if amt is None:
+            amt = 0.001*freqs[freqnum-1]
+            tol = 0.0001  
+    else:
+        if amt is None:
+            amt = 0.01*freqs[freqnum-1]  # a guess
+            tol = 0.001
 
     output=_calculate_internals(Isotemp,Lastemp,zerofreq=True,zerofreqnum=freqnum)
     kx=output['kx']
@@ -884,7 +890,7 @@ def solve_frequency(Iso, Las, layernum, freqnum, amt=None):
                             # at the given angle to see if it is reflected at a critical angle
     else:
         m = layernum-1
-        tol=0.0001
+        
         for k in range(layernum):
             Isotemp.layers[k].suppress_absorbances()
 

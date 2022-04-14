@@ -122,57 +122,127 @@ We assume the oriented sapphire limits its anisotropy to very small amounts that
 and may approximate an isotropic sample.  This is reverting back to a planar geometry.  The Sympy
 syntax requires the conversion of the `FiniteSet` to a `list`.  
 
+The script is somewhat lengthy because finding angles is time-consuming and it is better to
+use the "isclose" feature when possible.  One would need to calculate the angles crudely with
+``isclose`` set to ``False`` then use the values calculated in further sections.  As the
+``isclose`` feature only provides one solution, both angles solves would have to be separated.
+The double for loops shown can be consolidated if one sets up separate ``Lasers`` objects.
+
+
 .. plot::
-    lay1file=os.path.join(filepath, 'CH3CN_paste_1.txt')
-    lay2file=os.path.join(filepath, 'sapphire1.txt')
+filepath=os.path.join(ROOT_DIR, 'tests')
 
-    tksap=0.02
-    tkacn=0.01 
+lay1file=os.path.join(filepath, 'CH3CN_paste_1.txt')
+lay2file=os.path.join(filepath, 'sapphire1.txt')
+lay3file=os.path.join(filepath, 'CaF2_Malitson.txt')
 
-    samp1=pc.IsoSample.IsoSample()
-    desc="FWM cell"
-    samp1.description=desc
-    samp1.load_layer(lay1file, tksap, label="sapphire")
-    samp1.load_layer(lay2file, tkacn, label="acn")
-    samp1.load_layer(lay1file, tksap, label="sapphire")
+tksap=0.02
+tkacn=0.01 
+tkcaf2=0.02
 
-    las=pc.Lasers.Lasers()
-    arr1=[1800.0,2700.0,18400.0]
-    las.add_frequencies(arr1)
-    arr2=[8.0,-7.0, 0.0]
-    las.add_angles(arr2)
-    arr3=[-1,1,1]
-    las.add_k_coeffs(arr3)
-    arr4=[1,1,1]
-    las.add_pols(arr4)
-    las.change_geometry("planar")
+# generation of a IsoSample
+samp1=pc.IsoSample.IsoSample()
+desc="FWM cell"
+samp1.description=desc
+#samp1.load_layer(lay1file, tksap, label="sapphire")
+samp1.load_layer(lay3file, tkcaf2, label="caf2")
+samp1.load_layer(lay1file, tkacn, label="acn")
+samp1.load_layer(lay3file, tkcaf2, label="caf2bw")
+#samp1.load_layer(lay1file, tksap, label="sapphire")
+
+#generation of a Lasers object.
+las=pc.Lasers.Lasers()
+arr1=[2200.0, 3150.0,17200.0]
+las.add_frequencies(arr1)
+arr2=[-13.0,6.0, 0.0]
+las.add_angles(arr2)
+arr3=[-1,1,1]
+las.add_k_coeffs(arr3)
+arr4=[1,1,1]
+las.add_pols(arr4)
+las.change_geometry("planar")
+
+var1=np.linspace(1600.0,2200.0,61)[None, :]
+var1a=np.linspace(1600.0,2200.0,61)
+var2=np.linspace(2600.00,3200.00,61)[:,None]
+var2a=np.linspace(1600.0,2200.0,61)
+
+ch1= np.zeros([len(var1a), len(var2a)])
+mold=int(0)
+for m in range(len(var1a)):
+    for n in range(len(var2a)):
+        las.change_freq(1,var1a[n])
+        las.change_freq(2,var2a[m])
+        if ((m==0) & (n==0)):
+            angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=False))
+            angletemp=angleair2[0]   # this needs to solve for remainder to work
+            if np.any(angleair2):
+                ch1[m,n]=(angleair2)[0]
+                las.change_angle(1,angleair2[0])  
+        elif (mold==m):
+            angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=True))
+            if np.any(angleair2):
+                ch1[m,n]=(angleair2)[0] 
+                las.change_angle(1,angleair2[0])           
+        else:
+            las.change_angle(1,angletemp) 
+            angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=True))
+            mold=m
+            if np.any(angleair2):
+                ch1[m,n]=angleair2[0]
+                angletemp=angleair2[0]
+                las.change_angle(1,angleair2[0])
+
+data=wt.Data(name="angle for lower frequency input, opp side")
+data.create_variable(name="w1", units="wn", values= var1)
+data.create_variable(name="w2", units="wn", values= var2)
+data.create_channel(name='angleforw1', values=ch1)
+data.transform("w2","w1")
+wt.artists.quick2D(data)
+plt.show()
 
 
-    var1=np.linspace(2600.00,3200.00,61)[:,None]
-    var2=np.linspace(1600.0,2200.0,61)[None, :]
-    var2a=np.linspace(1600.0,2200.0,61)
+for m in range(len(var1a)):
+    for n in range(len(var2a)):
+        las.change_freq(1,var1a[n])
+        las.change_freq(2,var2a[m])
+        if ((m==0) & (n==0)):
+            angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=False))
+            angletemp=angleair2[1]   # this needs to solve for remainder to work
+            if np.any(angleair2):
+                ch1[m,n]=(angleair2)[1]
+                las.change_angle(1,angleair2[1])  
+        elif (mold==m):
+            angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=True))
+            if np.any(angleair2):
+                ch1[m,n]=(angleair2)[0] 
+                las.change_angle(1,angleair2[0])           
+        else:
+            las.change_angle(1,angletemp) 
+            angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=True))
+            mold=m
+            if np.any(angleair2):
+                ch1[m,n]=angleair2[0]
+                angletemp=angleair2[0]
+                las.change_angle(1,angleair2[0]) 
 
-    ch1= np.zeros([len(var1), len(var2a)])
-    for m in range(len(var1)):
-        for n in range(len(var2a)):
-            las.change_freq(1,var1[m])
-            las.change_freq(2,var2a[n])
-            angleair2=pc.phasematch.solve_angle(samp1,las,2,1)
-            ch1[m,n]=(list(angleair2)[0])  
-
-    data=wt.Data(name="angle check for w2")
-    data.create_variable(name="w1", units="wn", values= var1)
-    data.create_variable(name="w2", units="wn", values= var2)
-    data.create_channel(name='angleforw2', values=ch1)
-    data.transform("w2","w1")
-    wt.artists.quick2D(data)
-    plt.show()
+data2=wt.Data(name="angle for lower frequency beam, same side")
+data2.create_variable(name="w1", units="wn", values= var1)
+data2.create_variable(name="w2", units="wn", values= var2)
+data2.create_channel(name='angleforw1', values=ch1)
+data2.transform("w2","w1")
+wt.artists.quick2D(data2)
+plt.show()
 
 .. image:: Figure_3.png
 
-Note the check is for the -k2 beam (i.e., w2) and it is looking for phasematching in the acetonitrile layer (layernum=2).
-For phasematching, the angle for w2 wants to be at large value for low values of |k2| and lower for high values.   There 
-is not a strong dependence of the angle of k2 as |k1| changes.  
+.. image:: Figure_3b.png
+
+Note the check is for the -k2 beam (i.e., "w1") and it is looking for phasematching in the acetonitrile layer (layernum=2).
+For phasematching, the angle for w2 wants to be at large value for low values of |k2| and lower for high values. 
+
+The solution for the phasematching on the same side puts the two beams (w1 and w2)  at nearly identical angles.   This may
+be good for certain optics, but bad if one wants separate optics for each beam.
 
 
 **Example 4**.  A frequency solving routine for an oriented sapphire:acetonitrile:sapphire sample.
@@ -182,10 +252,8 @@ line ``angleair2=pc.phasematch.solve_angle(samp1,las,2,1)`` with ``angleair2=pc.
 
 .. image:: Figure_4.png
 
-Note that the bottom left data points are unplotted.  Iterations have proceeded beyond the estimated
-amount so that it could not find a solution.   The expected w3 colors range from 18000 cm-1
-at right to almost 30000 cm-1 at left, suggesting a very large change of colors required that may obviate the method
-or require some additional laser modification for assistance.
+The expected w3 colors range from 18000 cm-1 at right to almost 19000 cm-1 at left, suggesting a very large change of colors
+required that may obviate the method or require some additional laser modification for assistance.
 
 
 **Example 5**.  A delta t check of the inputs in a thick sample between two caf2 windows.  A thick (1 mm) sample of
@@ -317,32 +385,36 @@ how much of either should be made to achieve phasematching for both points.
 
 
 .. plot::
-    #new IsoSample: sapphire: ACN: sapphire
-    lay3file=os.path.join(filepath, 'CaF2_Malitson.txt')
-    lay4file=os.path.join(filepath, 'CH3CN_paste_1.txt')
 
-    tksapph=0.02 #cm
-    tkacn=0.01 #cm
+filepath=os.path.join(ROOT_DIR, 'tests')
 
-    # generation of a IsoSample
-    samp1=pc.IsoSample.IsoSample()
-    desc="FWM cell"
-    samp1.description=desc
-    samp1.load_layer(lay3file, tksapph, label="caf2fw")
-    samp1.load_layer(lay4file, tkacn, label="ACN")
-    samp1.load_layer(lay3file, tksapph, label="caf2bw")
+lay3file=os.path.join(filepath, 'CaF2_Malitson.txt')
+lay4file=os.path.join(filepath, 'CH3CN_paste_1.txt')
 
-    # new Lasers object
-    las4=pc.Lasers.Lasers()
-    arr1=[3150.0,2200.0,25000.0]
-    las4.add_frequencies(arr1)
-    arr2=[6.0,-15.0,0.0]  #**
-    las4.add_angles(arr2)
-    arr3=[1,-1,1]
-    las4.add_k_coeffs(arr3)
-    arr4=[1,1,1]
-    las4.add_pols(arr4)
-    las4.change_geometry("planar")
+tksapph=0.02 #cm
+tkacn=0.01 #cm
+
+samp1=pc.IsoSample.IsoSample()
+desc="FWM cell"
+samp1.description=desc
+samp1.load_layer(lay3file, tksapph, label="caf2fw")
+samp1.load_layer(lay4file, tkacn, label="ACN")
+samp1.load_layer(lay3file, tksapph, label="caf2bw")
+
+las4=pc.Lasers.Lasers()
+arr1=[3150.0,2200.0,17200.0]
+las4.add_frequencies(arr1)
+arr2=[6.0,-13.20,0.0]
+las4.add_angles(arr2)
+arr3=[1,-1,1]
+las4.add_k_coeffs(arr3)
+arr4=[1,1,1]
+las4.add_pols(arr4)
+las4.change_geometry("planar")
+
+angl1=pc.phasematch.solve_angle(samp1,las4,2,2, isclose=False)
+out=list(angl1)
+print(out[0])
 
 freq=pc.phasematch.solve_frequency(samp1,las4,2,3,20)
 out=list(freq)
@@ -356,21 +428,20 @@ out2=list(angle)
 print(out2[0])
 
 las4.change_freq(3,out[0])
-angle=pc.phasematch.solve_angle(samp1,las4,2,2)
+angle=pc.phasematch.solve_angle(samp1,las4,2,2, isclose=False)
 out3=list(angle)
 print(out3[0])
 
 
 Results are:
 .. code-block:: python
-    20540.0000000000
-    20620.0000000000
-    -14.9600000000000
-
-
+ -13.2000000000000
+17200.0000000000
+17360.0000000000
+-13.0000000000000
 
     
-In this example, changing w3 by +80 cm-1 would result in the same phasematching as an angle change of +0.04 degrees.
+In this example, changing w3 by +160 cm-1 would result in the same phasematching as an angle change of +0.20 degrees.
 Changes in w3 in this range would result in very large wavelength changes needed over an entire scan.  On the 
 other hand, phasematching angle changes may be restricted to a small range due to aberrations.  It is possible
 that the two can be modified in tandem in some studies.
@@ -407,11 +478,6 @@ smaller relative to k3, and so phasemismatching becomes less problematic for DOV
     las.add_pols(arr4)
     las.change_geometry("planar")
 
-
-    #angle1=pc.phasematch.solve_angle(samp1,las,1,1,frequency=1800.0)
-    #print(list(angle1))
-    #las.change_angle(1,list(angle1)[0])
-
     var1=np.linspace(2450.00,2900.00,91)[:,None]
     var2=np.linspace(1300.0,1900.0,161)[None, :]
     var2a=np.linspace(1300.0,1900.0,161)
@@ -419,8 +485,6 @@ smaller relative to k3, and so phasemismatching becomes less problematic for DOV
     ch1= np.zeros([len(var1), len(var2a)])
     ch2=np.zeros([len(var1), len(var2a)])
     ch3=np.zeros([len(var1), len(var2a)])
-
-    chartin,chartout=pc.phasematch.calculate_ts(samp1, las)
 
     for m in range(len(var1)):
         for n in range(len(var2a)):
@@ -434,7 +498,6 @@ smaller relative to k3, and so phasemismatching becomes less problematic for DOV
 
     vec2=[1,1,1]
     las.addkcoeffs(vec2)
-
 
     for m in range(len(var1)):
         for n in range(len(var2a)):
@@ -469,12 +532,11 @@ smaller relative to k3, and so phasemismatching becomes less problematic for DOV
 .. image:: Figure_7c.png
 
 
-The input geometry for DOVE is off.  It is more ideal for k1 and -k2 to be on the same side.   However,
-the M factor is still quite large.  This calculation shows the effects of absorption within the water layer but
-note that the application of absorbances from later layers was not shown (they were calculated but not put
+Note the M factor is still quite large.  This calculation shows the effects of absorption within the water layer. 
+The application of absorbances from later layers was not shown (they were calculated but not put
 into the graphic.)
 
-Note the DOVE to TSF ratio can be up to a factor of 100 for this sample.  This is indicative of the expected
+Here, the DOVE to TSF ratio can be up to a factor of 100 for this sample.  This is indicative of the expected
 signal differences between the two processes strictly due to phase mismatching and not infrared or Raman
 polarizabilities of compounds within the scan range.  A thin film of material would likely want to be added as 
 an extra Layer, and the ratios between the two at that thin layer should approach 1 as it becomes small.

@@ -114,10 +114,3 @@ wt.artists.quick2D(data2)
 plt.show()
 
 
-
-
-
-
-
-
-pass

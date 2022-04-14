@@ -49,7 +49,7 @@ a "squared" term) or not (if one is just using the program to model beam transmi
 terms have a different tracking consideration.  More to follow in the "applyfresneltrans" function.
 
 
-`solve_angle(Iso,Las,layernum,freqnum, frequency=None)`
+`solve_angle(Iso,Las,layernum,freqnum, frequency=None, isclose=False)`
 ----------------------------------------------------
 Given the two objects, the functions attempts to solve through brute force iteration the angle that the
 input at freqnum needs to make in the layernum to achieve phasematching.   The iteration proceeds through
@@ -57,13 +57,17 @@ directional and smaller amounts until convergence is met by an internal toleranc
 the function will work with that frequency in place of the one found in the Lasers object.  The brute force
 algorithm starts at the angle originally specified in the Lasers object.
 
-SolveAngle returns a Sympy Set of Angles.  It could be a single item `FiniteSet`, an `Interval`, or an `EmptySet` if no
-solution is found.  An Interval indicates a full range of angles are possible, which can happen if
-the process can be phasematcheable in that manner.  The endpoint of the interval is determined by critical angles
-that may be found between layers.  The return is for the original angle in air of that input in degrees.
+`solve_angle` returns a Sympy Set of Angles.  It could be a single item `FiniteSet`, a double item
+`FiniteSet`, an `Interval`, or an `EmptySet` if no solution is found.  An `Interval`` indicates a full range of
+angles are possible, which can happen if the process can be phasematcheable in that manner.  The endpoint of the
+interval is determined by critical angles that may be found between layers.  The return is for the original angle
+in air of that input in degrees.
+
+The brute force algorithm is greatly speeded if ``isclose`` is set to ``True``.  However, only one solution will 
+be found this way.
 
 
-`solve_frequency(Iso, Las, layernum, freqnum, amt=None)`
+`solve_frequency(Iso, Las, layernum, freqnum, amt=None, isclose=False)`
 ----------------------------------------------------
 Given the two objects, the functions attempts to solve through brute force iteration the frequency of the input
 required to achieve phasematching for the freqnum in the layernum.   The extra parameter `amt` is the amount of change
@@ -72,8 +76,11 @@ approximates this amount.   This number may be required for a user to achieve fa
 often large number of iterations required to find convergence in this function.  As a rule, it ought to be
 roughly 1% of the original frequency of the input.  
 
-`SolveAngle` returns a Sympy Set of Frequencies.  It could be a single item `FiniteSet`, an `Interval`, or an `EmptySet`
-if no solution is found.  An Interval indicates a full range of angles are possible, which can happen if
+Setting `isclose` to `True` is not equivalent to that in `solve_angle`.  In this application, the tolerance is 
+improved.
+
+`solve_frequencu` returns a Sympy Set of Frequencies.  It could be a single item `FiniteSet`, an `Interval`, or an `EmptySet`
+if no solution is found.  An `Interval`` indicates a full range of angles are possible, which can happen if
 the process can be phasematcheable in that manner.  The endpoint is usually set to Infinity (`oo`), though a future
 modification may end up limiting the frequency to a critical angle that may be found between layers.  
 
@@ -139,6 +146,6 @@ knowledge of the phase factors described above in `m_calc`.)
 
 The output is a modified list of M factors `Mout` taking into account the Fresnel losses. 
 
-As a zero-order calculation, this equation does not consider internal, interative reflections like in a cavity,
+As a zero-order calculation, this equation does not consider internal, interative reflections like in a cavity
 at this time.
 
