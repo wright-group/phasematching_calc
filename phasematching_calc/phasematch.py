@@ -705,7 +705,7 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None, isclose=False):
         return Interval(0,angledeg)
     else:
         m = layernum-1
-        tol=0.001
+        tol=0.01
         iter=50
         for k in range(layernum):
             Isotemp.layers[k].suppress_absorbances()

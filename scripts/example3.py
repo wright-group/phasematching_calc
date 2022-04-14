@@ -48,22 +48,26 @@ for m in range(len(var1)):
     for n in range(len(var2a)):
         las.change_freq(1,var1[m])
         las.change_freq(2,var2a[n])
-        if (m==0 & n==0):
-            angleair2=pc.phasematch.solve_angle(samp1,las,2,1,isclose=False)
-            angletemp=list(angleair2)[1]
-            ch1[m,n]=list(angleair2)[1]
-            las.change_angle(2,list(angleair2)[1])  
+        if ((m==0) & (n==0)):
+            angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=False))
+            angletemp=angleair2[1]   # this needs to solve for remainder to work
+            if np.any(angleair2):
+                ch1[m,n]=(angleair2)[1]
+                las.change_angle(2,angleair2[1])  
         elif (mold==m):
-            angleair2=pc.phasematch.solve_angle(samp1,las,2,1,isclose=True)
-            ch1[m,n]=(list(angleair2)[0]) 
-            las.change_angle(2,list(angleair2)[0])           
+            angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=True))
+            if np.any(angleair2):
+                ch1[m,n]=(angleair2)[0] 
+                las.change_angle(2,angleair2[0])           
         else:
             las.change_angle(2,angletemp) 
-            angleair2=pc.phasematch.solve_angle(samp1,las,2,1,isclose=True)
-            ch1[m,n]=list(angleair2)[0]
+            angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=True))
             mold=m
-            angletemp=list(angleair2)[0]
-            las.change_angle(2,list(angleair2)[0])  
+            if np.any(angleair2):
+                ch1[m,n]=angleair2[0]
+                angletemp=angleair2[0]
+                las.change_angle(2,angleair2[0]) 
+        print(m,n) 
 
 
 data=wt.Data(name="angle check for w2")
