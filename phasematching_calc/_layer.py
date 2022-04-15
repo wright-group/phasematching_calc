@@ -34,10 +34,17 @@ class Layer:
         
         # Parameters:
         # -----------
-        # freq: frequency (cm-1)
+        # freq: float
+        #    frequency (cm-1) to estimate for
         #
         # Returns:
-        # tuple: {refractive index, absorption coefficient (cm-1)}
+        # tuple: (freq, absorp, n)
+        #       freq : float
+        #           loopedback frequency(cm-1)
+        #       absorp : float
+        #           absorption coefficient (cm-1),
+        #       n : float
+        #           real refractive index
         """
         freq1=float(freq)
         ncalc=np.interp(freq1,self.w_points,self.n_points)

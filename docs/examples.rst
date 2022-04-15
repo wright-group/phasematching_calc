@@ -254,8 +254,8 @@ required that may obviate the method or require some additional laser modificati
 
 
 **Example 5**.  A delta t check of the inputs in a thick sample between two caf2 windows.  A thick (1 mm) sample of
-acetonitrile is simulated instead.  This thickness tends to be the upper limit for our liquid phase samples, as
- geometrical interactions tend to limit thicknesses.  (Geometrical calculations may be instituted as a function in a later version.)  
+acetonitrile is simulated instead.  This thickness tends to be the upper limit for our liquid phase samples, as 
+geometrical interactions tend to limit thicknesses.  (Geometrical calculations may be instituted as a function in a later version.)  
 
 The code starts normally:
 

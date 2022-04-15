@@ -1,0 +1,13 @@
+{
+    "license": {"id": "MIT"},
+    "title": "WrightTools",
+    "upload_type": "software",
+    "creators": [
+        {
+            "orcid": "0000-0002-3802-5743",
+            "affiliation": "University of Wisconsin–Madison",
+            "name": "Kent Meyer"
+        }
+    ],
+    "access_right": "open"
+}
