@@ -23,14 +23,17 @@ class IsoSample():
 
     def load_layer(self, csvfile, thickness, label=""):
         ''' load a layer from a tab-delimited spreadsheet file
-        # File must contain three columns (L-R):  freq (cm-1), absorption coeff (cm-1), n
-        # Freqs should be in increasing order.
+         File must contain three columns (L-R):  freq (cm-1), absorption coeff (cm-1), n
+         Freqs should be in increasing order.
 
-        # Parameters:
-        # -----------
-        # csvfile: spreadsheet file
-        # thickness:  thickness of layer in cm
-        # label:  description of layer (str)
+         Parameters:
+         -----------
+         csvfile: path
+            path to tab-delimited spreadsheet file 
+         thickness: float
+            thickness of layer in cm
+         label: str
+            description of layer (str)
         '''
         data=np.loadtxt(csvfile)
         wp=np.asarray(data[:,0], dtype=float)
@@ -127,12 +130,20 @@ class Layer:
         ''' using the points in the layer, interpolate to estimate the refractive index and 
         # absorption coefficient for the specified frequency (cm-1)
         
-        # Parameters:
-        # -----------
-        # freq: frequency (cm-1)
-        #
-        # Returns:
-        # tuple: (freq (cm-1), absorption coefficient (cm-1), real refractive index ) 
+        Parameters:
+        -----------
+        freq: float
+           frequency (cm-1)
+        
+        Returns:
+        ---------
+            tuple:  (freq, absorp , ncalc ) 
+                freq : float
+                    frequency (cm-1) looped back
+                absorp : float
+                    absorption coefficient (cm-1)
+                ncalc : float
+                    real refractive index
         '''
         freq1=float(freq)
         ncalc=np.interp(freq1,self.w_points,self.n_points)

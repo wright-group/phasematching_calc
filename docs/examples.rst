@@ -130,116 +130,113 @@ The double for loops shown can be consolidated if one sets up separate ``Lasers`
 
 
 .. plot::
-filepath=os.path.join(ROOT_DIR, 'tests')
+    lay1file=os.path.join(filepath, 'CH3CN_paste_1.txt')
+    lay2file=os.path.join(filepath, 'sapphire1.txt')
+    lay3file=os.path.join(filepath, 'CaF2_Malitson.txt')
 
-lay1file=os.path.join(filepath, 'CH3CN_paste_1.txt')
-lay2file=os.path.join(filepath, 'sapphire1.txt')
-lay3file=os.path.join(filepath, 'CaF2_Malitson.txt')
+    tksap=0.02
+    tkacn=0.01 
+    tkcaf2=0.02
 
-tksap=0.02
-tkacn=0.01 
-tkcaf2=0.02
+    # generation of a IsoSample
+    samp1=pc.IsoSample.IsoSample()
+    desc="FWM cell"
+    samp1.description=desc
+    #samp1.load_layer(lay1file, tksap, label="sapphire")
+    samp1.load_layer(lay3file, tkcaf2, label="caf2")
+    samp1.load_layer(lay1file, tkacn, label="acn")
+    samp1.load_layer(lay3file, tkcaf2, label="caf2bw")
+    #samp1.load_layer(lay1file, tksap, label="sapphire")
 
-# generation of a IsoSample
-samp1=pc.IsoSample.IsoSample()
-desc="FWM cell"
-samp1.description=desc
-#samp1.load_layer(lay1file, tksap, label="sapphire")
-samp1.load_layer(lay3file, tkcaf2, label="caf2")
-samp1.load_layer(lay1file, tkacn, label="acn")
-samp1.load_layer(lay3file, tkcaf2, label="caf2bw")
-#samp1.load_layer(lay1file, tksap, label="sapphire")
+    #generation of a Lasers object.
+    las=pc.Lasers.Lasers()
+    arr1=[2200.0, 3150.0,17200.0]
+    las.add_frequencies(arr1)
+    arr2=[-13.0,6.0, 0.0]
+    las.add_angles(arr2)
+    arr3=[-1,1,1]
+    las.add_k_coeffs(arr3)
+    arr4=[1,1,1]
+    las.add_pols(arr4)
+    las.change_geometry("planar")
 
-#generation of a Lasers object.
-las=pc.Lasers.Lasers()
-arr1=[2200.0, 3150.0,17200.0]
-las.add_frequencies(arr1)
-arr2=[-13.0,6.0, 0.0]
-las.add_angles(arr2)
-arr3=[-1,1,1]
-las.add_k_coeffs(arr3)
-arr4=[1,1,1]
-las.add_pols(arr4)
-las.change_geometry("planar")
+    var1=np.linspace(1600.0,2200.0,61)[None, :]
+    var1a=np.linspace(1600.0,2200.0,61)
+    var2=np.linspace(2600.00,3200.00,61)[:,None]
+    var2a=np.linspace(1600.0,2200.0,61)
 
-var1=np.linspace(1600.0,2200.0,61)[None, :]
-var1a=np.linspace(1600.0,2200.0,61)
-var2=np.linspace(2600.00,3200.00,61)[:,None]
-var2a=np.linspace(1600.0,2200.0,61)
+    ch1= np.zeros([len(var1a), len(var2a)])
+    mold=int(0)
+    for m in range(len(var1a)):
+        for n in range(len(var2a)):
+            las.change_freq(1,var1a[n])
+            las.change_freq(2,var2a[m])
+            if ((m==0) & (n==0)):
+                angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=False))
+                angletemp=angleair2[0]   # this needs to solve for remainder to work
+                if np.any(angleair2):
+                    ch1[m,n]=(angleair2)[0]
+                    las.change_angle(1,angleair2[0])  
+            elif (mold==m):
+                angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=True))
+                if np.any(angleair2):
+                    ch1[m,n]=(angleair2)[0] 
+                    las.change_angle(1,angleair2[0])           
+            else:
+                las.change_angle(1,angletemp) 
+                angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=True))
+                mold=m
+                if np.any(angleair2):
+                    ch1[m,n]=angleair2[0]
+                    angletemp=angleair2[0]
+                    las.change_angle(1,angleair2[0])
 
-ch1= np.zeros([len(var1a), len(var2a)])
-mold=int(0)
-for m in range(len(var1a)):
-    for n in range(len(var2a)):
-        las.change_freq(1,var1a[n])
-        las.change_freq(2,var2a[m])
-        if ((m==0) & (n==0)):
-            angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=False))
-            angletemp=angleair2[0]   # this needs to solve for remainder to work
-            if np.any(angleair2):
-                ch1[m,n]=(angleair2)[0]
-                las.change_angle(1,angleair2[0])  
-        elif (mold==m):
-            angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=True))
-            if np.any(angleair2):
-                ch1[m,n]=(angleair2)[0] 
-                las.change_angle(1,angleair2[0])           
-        else:
-            las.change_angle(1,angletemp) 
-            angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=True))
-            mold=m
-            if np.any(angleair2):
-                ch1[m,n]=angleair2[0]
-                angletemp=angleair2[0]
-                las.change_angle(1,angleair2[0])
-
-data=wt.Data(name="angle for lower frequency input, opp side")
-data.create_variable(name="w1", units="wn", values= var1)
-data.create_variable(name="w2", units="wn", values= var2)
-data.create_channel(name='angleforw1', values=ch1)
-data.transform("w2","w1")
-wt.artists.quick2D(data)
-plt.show()
+    data=wt.Data(name="angle for lower frequency input, opp side")
+    data.create_variable(name="w1", units="wn", values= var1)
+    data.create_variable(name="w2", units="wn", values= var2)
+    data.create_channel(name='angleforw1', values=ch1)
+    data.transform("w2","w1")
+    wt.artists.quick2D(data)
+    plt.show()
 
 
-for m in range(len(var1a)):
-    for n in range(len(var2a)):
-        las.change_freq(1,var1a[n])
-        las.change_freq(2,var2a[m])
-        if ((m==0) & (n==0)):
-            angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=False))
-            angletemp=angleair2[1]   # this needs to solve for remainder to work
-            if np.any(angleair2):
-                ch1[m,n]=(angleair2)[1]
-                las.change_angle(1,angleair2[1])  
-        elif (mold==m):
-            angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=True))
-            if np.any(angleair2):
-                ch1[m,n]=(angleair2)[0] 
-                las.change_angle(1,angleair2[0])           
-        else:
-            las.change_angle(1,angletemp) 
-            angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=True))
-            mold=m
-            if np.any(angleair2):
-                ch1[m,n]=angleair2[0]
-                angletemp=angleair2[0]
-                las.change_angle(1,angleair2[0]) 
+    for m in range(len(var1a)):
+        for n in range(len(var2a)):
+            las.change_freq(1,var1a[n])
+            las.change_freq(2,var2a[m])
+            if ((m==0) & (n==0)):
+                angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=False))
+                angletemp=angleair2[1]   # this needs to solve for remainder to work
+                if np.any(angleair2):
+                    ch1[m,n]=(angleair2)[1]
+                    las.change_angle(1,angleair2[1])  
+            elif (mold==m):
+                angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=True))
+                if np.any(angleair2):
+                    ch1[m,n]=(angleair2)[0] 
+                    las.change_angle(1,angleair2[0])           
+            else:
+                las.change_angle(1,angletemp) 
+                angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=True))
+                mold=m
+                if np.any(angleair2):
+                    ch1[m,n]=angleair2[0]
+                    angletemp=angleair2[0]
+                    las.change_angle(1,angleair2[0]) 
 
-data2=wt.Data(name="angle for lower frequency beam, same side")
-data2.create_variable(name="w1", units="wn", values= var1)
-data2.create_variable(name="w2", units="wn", values= var2)
-data2.create_channel(name='angleforw1', values=ch1)
-data2.transform("w2","w1")
-wt.artists.quick2D(data2)
-plt.show()
+    data2=wt.Data(name="angle for lower frequency beam, same side")
+    data2.create_variable(name="w1", units="wn", values= var1)
+    data2.create_variable(name="w2", units="wn", values= var2)
+    data2.create_channel(name='angleforw1', values=ch1)
+    data2.transform("w2","w1")
+    wt.artists.quick2D(data2)
+    plt.show()
 
 .. image:: Figure_3.png
 
 .. image:: Figure_3b.png
 
 Note the check is for the -k2 beam (i.e., "w1") and it is looking for phasematching in the acetonitrile layer (layernum=2).
-For phasematching, the angle for w2 wants to be at large value for low values of |k2| and lower for high values. 
 
 The solution for the phasematching on the same side puts the two beams (w1 and w2)  at nearly identical angles.   This may
 be good for certain optics, but bad if one wants separate optics for each beam.
@@ -257,8 +254,8 @@ required that may obviate the method or require some additional laser modificati
 
 
 **Example 5**.  A delta t check of the inputs in a thick sample between two caf2 windows.  A thick (1 mm) sample of
-acetonitrile is simulated instead.  This thickness tends to be the upper limit for our liquid phase samples, as
- geometrical interactions tend to limit thicknesses.  (Geometrical calculations may be instituted as a function in a later version.)  
+acetonitrile is simulated instead.  This thickness tends to be the upper limit for our liquid phase samples, as 
+geometrical interactions tend to limit thicknesses.  (Geometrical calculations may be instituted as a function in a later version.)  
 
 The code starts normally:
 
@@ -386,65 +383,66 @@ how much of either should be made to achieve phasematching for both points.
 
 .. plot::
 
-filepath=os.path.join(ROOT_DIR, 'tests')
+    filepath=os.path.join(ROOT_DIR, 'tests')
 
-lay3file=os.path.join(filepath, 'CaF2_Malitson.txt')
-lay4file=os.path.join(filepath, 'CH3CN_paste_1.txt')
+    lay3file=os.path.join(filepath, 'CaF2_Malitson.txt')
+    lay4file=os.path.join(filepath, 'CH3CN_paste_1.txt')
 
-tksapph=0.02 #cm
-tkacn=0.01 #cm
+    tksapph=0.02 #cm
+    tkacn=0.01 #cm
 
-samp1=pc.IsoSample.IsoSample()
-desc="FWM cell"
-samp1.description=desc
-samp1.load_layer(lay3file, tksapph, label="caf2fw")
-samp1.load_layer(lay4file, tkacn, label="ACN")
-samp1.load_layer(lay3file, tksapph, label="caf2bw")
+    samp1=pc.IsoSample.IsoSample()
+    desc="FWM cell"
+    samp1.description=desc
+    samp1.load_layer(lay3file, tksapph, label="caf2fw")
+    samp1.load_layer(lay4file, tkacn, label="ACN")
+    samp1.load_layer(lay3file, tksapph, label="caf2bw")
 
-las4=pc.Lasers.Lasers()
-arr1=[3150.0,2200.0,17200.0]
-las4.add_frequencies(arr1)
-arr2=[6.0,-13.20,0.0]
-las4.add_angles(arr2)
-arr3=[1,-1,1]
-las4.add_k_coeffs(arr3)
-arr4=[1,1,1]
-las4.add_pols(arr4)
-las4.change_geometry("planar")
+    las4=pc.Lasers.Lasers()
+    arr1=[3150.0,2200.0,17200.0]
+    las4.add_frequencies(arr1)
+    arr2=[6.0,-13.20,0.0]
+    las4.add_angles(arr2)
+    arr3=[1,-1,1]
+    las4.add_k_coeffs(arr3)
+    arr4=[1,1,1]
+    las4.add_pols(arr4)
+    las4.change_geometry("planar")
 
-angl1=pc.phasematch.solve_angle(samp1,las4,2,2, isclose=False)
-out=list(angl1)
-print(out[0])
+    angl1=pc.phasematch.solve_angle(samp1,las4,2,2, isclose=False)
+    out=list(angl1)
+    print(out[0])
 
-freq=pc.phasematch.solve_frequency(samp1,las4,2,3,20)
-out=list(freq)
-print(out[0])
+    freq=pc.phasematch.solve_frequency(samp1,las4,2,3,20)
+    out=list(freq)
+    print(out[0])
 
-las4.change_freq(3,out[0])
+    las4.change_freq(3,out[0])
 
-las4.change_freq(2,2190.0)
-angle=pc.phasematch.solve_frequency(samp1,las4,2,3,20)
-out2=list(angle)
-print(out2[0])
+    las4.change_freq(2,2190.0)
+    angle=pc.phasematch.solve_frequency(samp1,las4,2,3,20)
+    out2=list(angle)
+    print(out2[0])
 
-las4.change_freq(3,out[0])
-angle=pc.phasematch.solve_angle(samp1,las4,2,2, isclose=False)
-out3=list(angle)
-print(out3[0])
+    las4.change_freq(3,out[0])
+    angle=pc.phasematch.solve_angle(samp1,las4,2,2, isclose=False)
+    out3=list(angle)
+    print(out3[0])
 
 
 Results are:
 .. code-block:: python
- -13.2000000000000
-17200.0000000000
-17360.0000000000
--13.0000000000000
+    -13.2000000000000
+    17200.0000000000
+    17360.0000000000
+    -13.0000000000000
 
     
-In this example, changing w3 by +160 cm-1 would result in the same phasematching as an angle change of +0.20 degrees.
-Changes in w3 in this range would result in very large wavelength changes needed over an entire scan.  On the 
-other hand, phasematching angle changes may be restricted to a small range due to aberrations.  It is possible
-that the two can be modified in tandem in some studies.
+In this example, changing w3 by +160 cm-1 would result in the same phasematching as an angle change of -0.20 degrees 
+(likely rounded to tenths), for a -10 cm-1 change in the low frequency infrared input.
+ Changes in w3 in this range would result in very large wavelength changes needed over an
+ entire scan.  On the other hand, phasematching angle changes may be restricted to a small range due to aberrations.
+ It is possible that the two can be modified in tandem in some studies...for example, moving w3 by 80 cm-1 and angle by 0.10 deg.
 
 
 **Example 7**.  Comparison of DOVE vs TSF signal intensity.  WIth the oriented sapphire:water:sapphire sample,

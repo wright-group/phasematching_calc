@@ -34,7 +34,13 @@ class Lasers():
     def add_frequencies(self, ar1):
         """ Add an array of frequencies(cm-1) associated with the laser frequency.
         Value:  float.  Must be of length equal to input frequencies. Current geometries allow only three distinct inputs
-        indicative that the array must be of length 3.  """
+        indicative that the array must be of length 3.  
+
+        Parameter
+        --------
+        ar1 : list(float)
+            array of frequencies currently only length 3 
+        """
         ar2=np.asarray(ar1,dtype=float)
         self.frequencies=ar2
         if (len(ar2) != 3):
@@ -47,8 +53,15 @@ class Lasers():
 
     def add_angles(self, ar1):
         """ Add an array of angles(degrees) associated with the laser frequency and its geometry.
-        Value:  float.  Must be of length equal to input frequencies.  These angles correspond to the angles in air
-        That the inputs make being focused into the sample.  """
+        These angles correspond to the angles in air
+        That the inputs make being focused into the sample. 
+
+        Parameter
+        --------
+        ar1 : list(float)
+            arrar of angles (degrees) in air currently only length 3
+        """
+
         ar2=np.asarray(ar1,dtype=float)
         self.anglesairdeg=ar2
         if (len(ar2) != 3):
@@ -61,7 +74,13 @@ class Lasers():
 
     def add_k_coeffs(self,ar1):
         """ Add an array of coefficients equivalent to the number and sign of wavevector associated with that input laser frequency.
-        Value:  must be int, and can be zero.  Must be of length equal to input frequencies."""
+        Value:  must be int, and can be zero.  Must be of length equal to input frequencies.
+        
+        Parameter
+        --------
+        ar1 : list(int)
+            coefficient for the wavemixing for the inputs, currently only length 3
+        """
         if (type(ar1[0]) != int):
             return ValueError('List elements are not integers')
         ar2=np.asarray(ar1,dtype=int)
@@ -73,7 +92,13 @@ class Lasers():
 
     def add_pols(self,ar1):
         """ Add an array of polarizations with length equal to the input frequencies.
-        Value:  1 == Vertical,   !1 == Horizontal.   No other polarizations supported, and must be int."""
+        Value:  1 == Vertical,   !1 == Horizontal.   No other polarizations supported, and must be int.
+
+        Parameter
+        --------
+        ar1 : list(int)
+            coefficient for polarizations, currently only length 3
+        """
         if (type(ar1[0]) != int):
             return ValueError('Polarizations not supported beyond int')
         ar2=np.asarray(ar1,dtype=int)
@@ -85,7 +110,15 @@ class Lasers():
 
     def change_freq(self,pos,newval):
         """ changefreq(self,pos,newval)  
-        Change the laser frequency of one of the inputs to a new value (cm-1)"""
+        Change the laser frequency of one of the inputs to a new value (cm-1)
+
+        Parameters
+        --------
+        pos : int
+            input number 
+        newval : float
+            frequency to change to (cm-1)
+        """
         val=float(newval)
         if (val < 0.00):
             return ValueError("must be real greater than zero")
@@ -98,7 +131,16 @@ class Lasers():
 
     def change_angle(self,pos,newval):
         """ changeangle(self,pos,newval)  
-        Change the angle of one of the inputs to a new value (degrees)"""
+        Change the angle of one of the inputs to a new value (degrees)
+        
+        Parameters
+        --------
+        pos : int
+            input number 
+        newval : float
+            angle in air (degrees) to change to
+        """
+
         lenfreq=len(self.frequencies)
         if (pos > lenfreq):
             return IndexError("position greater than list length")
@@ -118,7 +160,14 @@ class Lasers():
                   |
                   O 3  
 
-        where "+" is the center of focus of the beams, and 4 is the output location.  """
+        where "+" is the center of focus of the beams, and 4 is the output location. 
+
+        Parameters
+        --------
+        newval : str
+            geometry to change to
+        """
+
         if (newval in self.supportedgeometrylist):
             self.geometry = newval
             self.calculate_cartesian_angles()
@@ -129,6 +178,7 @@ class Lasers():
 
     def calculate_cartesian_angles(self):
         """Based on the geometry, convert the angles into x and y angles, in radians."""
+
         num=len(self.frequencies)
         self.anglesxrad=np.zeros(num)
         self.anglesyrad=np.zeros(num)
