@@ -10,8 +10,8 @@ First, the files are loaded into an IsoSample object:
     lay1file=os.path.join(filepath, 'CaF2_Malitson.txt')
     lay2file=os.path.join(filepath, 'H2O_1.txt')
 
-    tkcaf2=0.02 
-    tkwater=0.01 
+    tkcaf2=0.02 #cm
+    tkwater=0.01 #cm
 
     samp1=pc.IsoSample.IsoSample()
     desc="FWM cell"
@@ -290,6 +290,7 @@ The code starts normally:
 
 Some additonal code is needed to convert the times into more meaningful ones.  For example, the mean of
 all 4 inputs and output was determined per layer, and the difference from that mean plotted per input.
+
 .. plot::
     for m in range(len(tin)):
         if m == 0:
@@ -439,10 +440,10 @@ Results are:
 
     
 In this example, changing w3 by +160 cm-1 would result in the same phasematching as an angle change of -0.20 degrees 
-(likely rounded to tenths), for a -10 cm-1 change in the low frequency infrared input.
- Changes in w3 in this range would result in very large wavelength changes needed over an
- entire scan.  On the other hand, phasematching angle changes may be restricted to a small range due to aberrations.
- It is possible that the two can be modified in tandem in some studies...for example, moving w3 by 80 cm-1 and angle by 0.10 deg.
+(likely rounded to tenths), for a -10 cm-1 change in the low frequency infrared input.  Changes in w3 in this range
+would result in very large wavelength changes needed over an entire scan.  On the other hand, phasematching angle
+changes may be restricted to a small range due to aberrations.  It is possible that the two can be modified in tandem
+in some studies...for example, moving w3 by 80 cm-1 and angle by 0.10 deg.
 
 
 **Example 7**.  Comparison of DOVE vs TSF signal intensity.  WIth the oriented sapphire:water:sapphire sample,
