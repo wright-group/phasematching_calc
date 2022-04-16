@@ -252,7 +252,7 @@ line ``angleair2=pc.phasematch.solve_angle(samp1,las,2,1)`` with ``angleair2=pc.
 
 .. image:: Figure_4.png
 
-The expected w3 colors range from 18000 cm-1 at right to almost 19000 cm-1 at left, suggesting a very large change of colors
+The expected w3 colors range from 30000 cm-1 at right to almost 19000 cm-1 at left, suggesting a very large change of colors
 required that may obviate the method or require some additional laser modification for assistance.
 
 
@@ -367,9 +367,9 @@ all 4 inputs and output was determined per layer, and the difference from that m
 Note the `scatter` plot does not show axes.  X is the layer number and y is the delta in femtoseconds each
 input or output makes relative to the mean of the 4 at the end of the layer.  Red is input 1, green is input 2, 
 blue is input 3, and black is the output.  At layer 3 input 1 and 2 or overlapped.   The first input makes a
-40 fsec departure from the other inputs at the end of the acetonitrile layer, because the pulse is 
-near a strong absorption that will "delay" it. However, in general all four are within 20 fsec of each other and
-so with pulses 10x or wider in time there should be negligible effects on signal contributions due to delaying.
+40 fsec departure from the other inputs at the end of the acetonitrile layer.  It arrives ~40 fsec earlier.     
+However, in general all four are within 20 fsec of each other and so with pulses 10x or wider in time there should be negligible effects
+on signal contributions due to delaying.
 
 While a relative delay of 40 fsec is small for a frequency scanning method of four-wave mixing using picosecond or
 similar pulses, it is occasionally useful to examine these delays, as often delays are established between pulses
