@@ -1,6 +1,6 @@
 .. examples:
 
-Some examples using the ``phasematching_calc`` module are shown. 
+Some examples using the ``phasematching_calc`` module are shown.
 
 Example 1. A 2D calculation of M factors and conversion into a ``WrightTools.data`` object.
 
@@ -35,11 +35,11 @@ Then, the Lasers object is created from the Python commands (as opposed to being
     las.change_geometry("planar")
 
 The above two objects signify we are looking at a DOVE process where the Lasers are at 1800, 2700, and 30000 cm-1,
-the geometry is planar, and the first laser is the -k2 one while the others are k1 and k3.  The sample is a 
+the geometry is planar, and the first laser is the -k2 one while the others are k1 and k3.  The sample is a
 sandwich of caf2, water, and caf2 at thicknesses shown.
 
 The simulated ``WrightTools`` Data conversion is shown in the next block.  One defines the numpy linspaces for the two independent
-coordinates, the k1 and -k2 inputs.  Then a for loop cycles through each series of m,n elements and places it 
+coordinates, the k1 and -k2 inputs.  Then a for loop cycles through each series of m,n elements and places it
 into a channel array that gets placed into a Data object.  The remaining code follows the WrightTools methodology
 of using the linspaces as variables and plotting the result using the ``WrightTools.artists.quick2D`` method.
 
@@ -75,7 +75,7 @@ in this case a `boxcars` geometry.
 
 .. plot::
     lay1file=os.path.join(filepath, 'CaF2_Malitson.txt')
-    
+
     tkcaf2=0.03 #cm
 
     samp1=pc.IsoSample.IsoSample()
@@ -104,7 +104,7 @@ in this case a `boxcars` geometry.
             las.changefreq(1,var1[m])
             las.changefreq(2,var2a[n])
             Mlist,tklist,Tlist=pc.phasematch.m_calc(samp1,las)
-            ch1[m,n]=np.abs(Mlist[0])  
+            ch1[m,n]=np.abs(Mlist[0])
 
     data=wt.Data(name="CaF2 300 micron boxcars DOVE")
     data.create_variable(name="w1", units="wn", values= var1)
@@ -120,7 +120,7 @@ in this case a `boxcars` geometry.
 **Example 3**.  An angle solving routine for an oriented sapphire:acetonitrile:sapphire sample.
 We assume the oriented sapphire limits its anisotropy to very small amounts that are neglected
 and may approximate an isotropic sample.  This is reverting back to a planar geometry.  The Sympy
-syntax requires the conversion of the `FiniteSet` to a `list`.  
+syntax requires the conversion of the `FiniteSet` to a `list`.
 
 The script is somewhat lengthy because finding angles is time-consuming and it is better to
 use the "isclose" feature when possible.  One would need to calculate the angles crudely with
@@ -135,7 +135,7 @@ The double for loops shown can be consolidated if one sets up separate ``Lasers`
     lay3file=os.path.join(filepath, 'CaF2_Malitson.txt')
 
     tksap=0.02
-    tkacn=0.01 
+    tkacn=0.01
     tkcaf2=0.02
 
     # generation of a IsoSample
@@ -176,14 +176,14 @@ The double for loops shown can be consolidated if one sets up separate ``Lasers`
                 angletemp=angleair2[0]   # this needs to solve for remainder to work
                 if np.any(angleair2):
                     ch1[m,n]=(angleair2)[0]
-                    las.change_angle(1,angleair2[0])  
+                    las.change_angle(1,angleair2[0])
             elif (mold==m):
                 angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=True))
                 if np.any(angleair2):
-                    ch1[m,n]=(angleair2)[0] 
-                    las.change_angle(1,angleair2[0])           
+                    ch1[m,n]=(angleair2)[0]
+                    las.change_angle(1,angleair2[0])
             else:
-                las.change_angle(1,angletemp) 
+                las.change_angle(1,angletemp)
                 angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=True))
                 mold=m
                 if np.any(angleair2):
@@ -209,20 +209,20 @@ The double for loops shown can be consolidated if one sets up separate ``Lasers`
                 angletemp=angleair2[1]   # this needs to solve for remainder to work
                 if np.any(angleair2):
                     ch1[m,n]=(angleair2)[1]
-                    las.change_angle(1,angleair2[1])  
+                    las.change_angle(1,angleair2[1])
             elif (mold==m):
                 angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=True))
                 if np.any(angleair2):
-                    ch1[m,n]=(angleair2)[0] 
-                    las.change_angle(1,angleair2[0])           
+                    ch1[m,n]=(angleair2)[0]
+                    las.change_angle(1,angleair2[0])
             else:
-                las.change_angle(1,angletemp) 
+                las.change_angle(1,angletemp)
                 angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=True))
                 mold=m
                 if np.any(angleair2):
                     ch1[m,n]=angleair2[0]
                     angletemp=angleair2[0]
-                    las.change_angle(1,angleair2[0]) 
+                    las.change_angle(1,angleair2[0])
 
     data2=wt.Data(name="angle for lower frequency beam, same side")
     data2.create_variable(name="w1", units="wn", values= var1)
@@ -254,8 +254,8 @@ required that may obviate the method or require some additional laser modificati
 
 
 **Example 5**.  A delta t check of the inputs in a thick sample between two caf2 windows.  A thick (1 mm) sample of
-acetonitrile is simulated instead.  This thickness tends to be the upper limit for our liquid phase samples, as 
-geometrical interactions tend to limit thicknesses.  (Geometrical calculations may be instituted as a function in a later version.)  
+acetonitrile is simulated instead.  This thickness tends to be the upper limit for our liquid phase samples, as
+geometrical interactions tend to limit thicknesses.  (Geometrical calculations may be instituted as a function in a later version.)
 
 The code starts normally:
 
@@ -264,8 +264,8 @@ The code starts normally:
     lay4file=os.path.join(filepath, 'CH3CN_paste_1.txt')
     lay5file=os.path.join(filepath, 'CaF2_Malitson.txt')
 
-    tkcaf2=0.02 
-    tkacn=0.1 
+    tkcaf2=0.02
+    tkacn=0.1
 
     samp1=pc.IsoSample.IsoSample()
     desc="FWM cell"
@@ -363,9 +363,9 @@ all 4 inputs and output was determined per layer, and the difference from that m
 .. image:: Figure_5.png
 
 Note the `scatter` plot does not show axes.  X is the layer number and y is the delta in femtoseconds each
-input or output makes relative to the mean of the 4 at the end of the layer.  Red is input 1, green is input 2, 
+input or output makes relative to the mean of the 4 at the end of the layer.  Red is input 1, green is input 2,
 blue is input 3, and black is the output.  At layer 3 input 1 and 2 or overlapped.   The first input makes a
-40 fsec departure from the other inputs at the end of the acetonitrile layer.  It arrives ~40 fsec earlier.     
+40 fsec departure from the other inputs at the end of the acetonitrile layer.  It arrives ~40 fsec earlier.
 However, in general all four are within 20 fsec of each other and so with pulses 10x or wider in time there should be negligible effects
 on signal contributions due to delaying.
 
@@ -378,7 +378,7 @@ changes in background contributions may manifest in these areas.
 
 
 **Example 6**.  A simple angle and frequency check.   Reverting back to the thin caf2:acetonitrile:caf2 sample,
-a set of two frequency and angle solves are made for what may be considered two nearby data points to see 
+a set of two frequency and angle solves are made for what may be considered two nearby data points to see
 how much of either should be made to achieve phasematching for both points.
 
 
@@ -438,8 +438,8 @@ Results are:
     17360.0000000000
     -13.0000000000000
 
-    
-In this example, changing w3 by +160 cm-1 would result in the same phasematching as an angle change of -0.20 degrees 
+
+In this example, changing w3 by +160 cm-1 would result in the same phasematching as an angle change of -0.20 degrees
 (likely rounded to tenths), for a -10 cm-1 change in the low frequency infrared input.  Changes in w3 in this range
 would result in very large wavelength changes needed over an entire scan.  On the other hand, phasematching angle
 changes may be restricted to a small range due to aberrations.  It is possible that the two can be modified in tandem
@@ -448,15 +448,15 @@ in some studies...for example, moving w3 by 80 cm-1 and angle by 0.10 deg.
 
 **Example 7**.  Comparison of DOVE vs TSF signal intensity.  WIth the oriented sapphire:water:sapphire sample,
 a check was done between the two expected signal intensities generated by the water layer in two example
-four-wave mixing modes (DOVE vs TSF).  The H2O signal was not phasematcheable in DOVE with the w3 wavelength.  
+four-wave mixing modes (DOVE vs TSF).  The H2O signal was not phasematcheable in DOVE with the w3 wavelength.
 However, it is important to note that as w3 increases, the vector contributions of k1 and -k2 become
-smaller relative to k3, and so phasemismatching becomes less problematic for DOVE.  
+smaller relative to k3, and so phasemismatching becomes less problematic for DOVE.
 
 
 .. plot::
     lay1file=os.path.join(filepath, 'sapphire1.txt')
     lay2file=os.path.join(filepath, "H2O_1.txt")
-    tksap=0.02 
+    tksap=0.02
     tkwat=0.01
 
     samp1=pc.IsoSample.IsoSample()
@@ -490,10 +490,10 @@ smaller relative to k3, and so phasemismatching becomes less problematic for DOV
             las.changefreq(1,var1[m])
             las.changefreq(2,var2a[n])
             Mlist,tklist,Tdict=pc.phasematch.m_calc(samp1,las)
-            Alist, Alistout=pc.phasematch.calculate_absorbances(samp1,las) 
+            Alist, Alistout=pc.phasematch.calculate_absorbances(samp1,las)
             Mlist1a=pc.phasematch.apply_absorbances(Mlist,Alist,Alistout)
             Mlist1b=pc.phasematch.apply_trans(Mlist1a, Tdict)
-            ch1[m,n]=Mlist[1]  
+            ch1[m,n]=Mlist[1]
 
     vec2=[1,1,1]
     las.addkcoeffs(vec2)
@@ -503,7 +503,7 @@ smaller relative to k3, and so phasemismatching becomes less problematic for DOV
             las.changefreq(1,var1[m])
             las.changefreq(2,var2a[n])
             Mlist2,tklist2,Tlist2=pc.phasematch.m_calc(samp1,las)
-            ch2[m,n]=Mlist2[1]  
+            ch2[m,n]=Mlist2[1]
 
     ch3=ch1/ch2
 
@@ -531,14 +531,14 @@ smaller relative to k3, and so phasemismatching becomes less problematic for DOV
 .. image:: Figure_7c.png
 
 
-Note the M factor is still quite large.  This calculation shows the effects of absorption within the water layer. 
+Note the M factor is still quite large.  This calculation shows the effects of absorption within the water layer.
 The application of absorbances from later layers was not shown (they were calculated but not put
 into the graphic.)
 
 Here, the DOVE to TSF ratio can be up to a factor of 100 for this sample.  This is indicative of the expected
 signal differences between the two processes strictly due to phase mismatching and not infrared or Raman
-polarizabilities of compounds within the scan range.  A thin film of material would likely want to be added as 
+polarizabilities of compounds within the scan range.  A thin film of material would likely want to be added as
 an extra Layer, and the ratios between the two at that thin layer should approach 1 as it becomes small.
 
 This comparison can be made with other samples.  Thicker, more transparent samples can yield DOVE/TSF ratios
-into the 10^6 range.   
+into the 10^6 range.

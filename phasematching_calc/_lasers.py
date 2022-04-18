@@ -2,7 +2,7 @@ import numpy as np
 import json
 
 class Lasers():
-        
+
     def __init__(self, description=None):
         if description is None:
             self.description=""
@@ -16,7 +16,7 @@ class Lasers():
         self.supportedgeometrylist={"boxcars","planar"}
         self.xmask=[1,0,0,1]
         self.ymask=[0,1,1,0]
-        return 
+        return
 
 
     def as_dict(self):
@@ -34,19 +34,19 @@ class Lasers():
     def add_frequencies(self, ar1):
         """ Add an array of frequencies(cm-1) associated with the laser frequency.
         Value:  float.  Must be of length equal to input frequencies. Current geometries allow only three distinct inputs
-        indicative that the array must be of length 3.  
+        indicative that the array must be of length 3.
 
         Parameter
         --------
         ar1 : list(float)
-            array of frequencies currently only length 3 
+            array of frequencies currently only length 3
         """
         ar2=np.asarray(ar1,dtype=float)
         self.frequencies=ar2
         if (len(ar2) != 3):
             return ValueError("geometries require three lasers only(set k coeff to zero if not used)")
         if len(self.anglesairdeg) == 3:
-            return self.calculate_cartesian_angles()  
+            return self.calculate_cartesian_angles()
         else:
             return 0
 
@@ -54,7 +54,7 @@ class Lasers():
     def add_angles(self, ar1):
         """ Add an array of angles(degrees) associated with the laser frequency and its geometry.
         These angles correspond to the angles in air
-        That the inputs make being focused into the sample. 
+        That the inputs make being focused into the sample.
 
         Parameter
         --------
@@ -75,7 +75,7 @@ class Lasers():
     def add_k_coeffs(self,ar1):
         """ Add an array of coefficients equivalent to the number and sign of wavevector associated with that input laser frequency.
         Value:  must be int, and can be zero.  Must be of length equal to input frequencies.
-        
+
         Parameter
         --------
         ar1 : list(int)
@@ -109,13 +109,13 @@ class Lasers():
 
 
     def change_freq(self,pos,newval):
-        """ changefreq(self,pos,newval)  
+        """ changefreq(self,pos,newval)
         Change the laser frequency of one of the inputs to a new value (cm-1)
 
         Parameters
         --------
         pos : int
-            input number 
+            input number
         newval : float
             frequency to change to (cm-1)
         """
@@ -130,13 +130,13 @@ class Lasers():
 
 
     def change_angle(self,pos,newval):
-        """ changeangle(self,pos,newval)  
+        """ changeangle(self,pos,newval)
         Change the angle of one of the inputs to a new value (degrees)
-        
+
         Parameters
         --------
         pos : int
-            input number 
+            input number
         newval : float
             angle in air (degrees) to change to
         """
@@ -145,22 +145,22 @@ class Lasers():
         if (pos > lenfreq):
             return IndexError("position greater than list length")
         self.anglesairdeg[pos-1]=float(newval)
-        return self.calculate_cartesian_angles()  
+        return self.calculate_cartesian_angles()
 
 
     def change_geometry(self,newval="boxcars"):
         """ Change Lasers geometry to one supported by the list.  See alo Lasers.supportedgeometrylist.
         "boxcars":                           "planar":
 
-                  O 2                           
+                  O 2
                   |                                                                              |  y
          4        |         1                                                                    |
          O--------+---------O                ---------+----O-----O--O-------O                    +------ x
                   |                                        2     3  4       1
                   |
-                  O 3  
+                  O 3
 
-        where "+" is the center of focus of the beams, and 4 is the output location. 
+        where "+" is the center of focus of the beams, and 4 is the output location.
 
         Parameters
         --------
@@ -173,7 +173,7 @@ class Lasers():
             self.calculate_cartesian_angles()
             return self.calculate_masks()
         else:
-            return ValueError("unsupported geometry (see supportdgeometrylist for full list of supported geometries)")    
+            return ValueError("unsupported geometry (see supportdgeometrylist for full list of supported geometries)")
 
 
     def calculate_cartesian_angles(self):
@@ -200,7 +200,7 @@ class Lasers():
 
 
     def calculate_masks(self):
-        """Based on the supported geometry list, generate a 0,1 binary type array of x and ys. If 0, that element is 
+        """Based on the supported geometry list, generate a 0,1 binary type array of x and ys. If 0, that element is
         not to be used in related phasematching calculations.  Binary values are based on whether the inputs
         need that coordinate specified.  For example, on boxcars, input 2 would have a binary 0 for x and binary 1 for y. """
         geom=self.geometry
@@ -243,4 +243,3 @@ class Lasers():
         self.geometry=ar1['geometry']
         self.calculate_cartesian_angles()
         return self.calculate_masks()
-      

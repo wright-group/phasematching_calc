@@ -15,7 +15,7 @@ lay2file=os.path.join(filepath, 'sapphire1.txt')
 lay3file=os.path.join(filepath, 'CaF2_Malitson.txt')
 
 tksap=0.02
-tkacn=0.01 
+tkacn=0.01
 tkcaf2=0.02
 
 # generation of a IsoSample
@@ -57,14 +57,14 @@ for m in range(len(var1a)):
             angletemp=angleair2[0]   # this needs to solve for remainder to work
             if np.any(angleair2):
                 ch1[m,n]=(angleair2)[0]
-                las.change_angle(1,angleair2[0])  
+                las.change_angle(1,angleair2[0])
         elif (mold==m):
             angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=True))
             if np.any(angleair2):
-                ch1[m,n]=(angleair2)[0] 
-                las.change_angle(1,angleair2[0])           
+                ch1[m,n]=(angleair2)[0]
+                las.change_angle(1,angleair2[0])
         else:
-            las.change_angle(1,angletemp) 
+            las.change_angle(1,angletemp)
             angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=True))
             mold=m
             if np.any(angleair2):
@@ -90,20 +90,20 @@ for m in range(len(var1a)):
             angletemp=angleair2[1]   # this needs to solve for remainder to work
             if np.any(angleair2):
                 ch1[m,n]=(angleair2)[1]
-                las.change_angle(1,angleair2[1])  
+                las.change_angle(1,angleair2[1])
         elif (mold==m):
             angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=True))
             if np.any(angleair2):
-                ch1[m,n]=(angleair2)[0] 
-                las.change_angle(1,angleair2[0])           
+                ch1[m,n]=(angleair2)[0]
+                las.change_angle(1,angleair2[0])
         else:
-            las.change_angle(1,angletemp) 
+            las.change_angle(1,angletemp)
             angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=True))
             mold=m
             if np.any(angleair2):
                 ch1[m,n]=angleair2[0]
                 angletemp=angleair2[0]
-                las.change_angle(1,angleair2[0]) 
+                las.change_angle(1,angleair2[0])
 
 data2=wt.Data(name="angle for lower frequency beam, same side")
 data2.create_variable(name="w1", units="wn", values= var1)
