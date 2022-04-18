@@ -15,7 +15,6 @@ setup(
     packages=find_packages(),
     package_data=extra_files,
     install_requires=["numpy", "WrightTools"],
-
     version=version,
     description="A simulation package for simulating phasematching effects in discrete layer isotropic samples.",
     author="phasematching_calc Developers",

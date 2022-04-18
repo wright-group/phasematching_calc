@@ -7,52 +7,48 @@ from config.definitions import ROOT_DIR
 from sympy import *
 
 
+filepath = os.path.join(ROOT_DIR, "tests")
 
-filepath=os.path.join(ROOT_DIR, 'tests')
+lay3file = os.path.join(filepath, "CaF2_Malitson.txt")
+lay4file = os.path.join(filepath, "CH3CN_paste_1.txt")
 
-lay3file=os.path.join(filepath, 'CaF2_Malitson.txt')
-lay4file=os.path.join(filepath, 'CH3CN_paste_1.txt')
+tksapph = 0.02  # cm
+tkacn = 0.01  # cm
 
-tksapph=0.02 #cm
-tkacn=0.01 #cm
-
-samp1=pc.IsoSample.IsoSample()
-desc="FWM cell"
-samp1.description=desc
+samp1 = pc.IsoSample.IsoSample()
+desc = "FWM cell"
+samp1.description = desc
 samp1.load_layer(lay3file, tksapph, label="caf2fw")
 samp1.load_layer(lay4file, tkacn, label="ACN")
 samp1.load_layer(lay3file, tksapph, label="caf2bw")
 
-las4=pc.Lasers.Lasers()
-arr1=[3150.0,2200.0,17200.0]
+las4 = pc.Lasers.Lasers()
+arr1 = [3150.0, 2200.0, 17200.0]
 las4.add_frequencies(arr1)
-arr2=[6.0,-13.20,0.0]
+arr2 = [6.0, -13.20, 0.0]
 las4.add_angles(arr2)
-arr3=[1,-1,1]
+arr3 = [1, -1, 1]
 las4.add_k_coeffs(arr3)
-arr4=[1,1,1]
+arr4 = [1, 1, 1]
 las4.add_pols(arr4)
 las4.change_geometry("planar")
 
-angl1=pc.phasematch.solve_angle(samp1,las4,2,2, isclose=True)
-out=list(angl1)
+angl1 = pc.phasematch.solve_angle(samp1, las4, 2, 2, isclose=True)
+out = list(angl1)
 print(out[0])
 
-freq=pc.phasematch.solve_frequency(samp1,las4,2,3,20)
-out=list(freq)
+freq = pc.phasematch.solve_frequency(samp1, las4, 2, 3, 20)
+out = list(freq)
 print(out[0])
 
-las4.change_freq(3,out[0])
+las4.change_freq(3, out[0])
 
-las4.change_freq(2,2190.0)
-angle=pc.phasematch.solve_frequency(samp1,las4,2,3,20)
-out2=list(angle)
+las4.change_freq(2, 2190.0)
+angle = pc.phasematch.solve_frequency(samp1, las4, 2, 3, 20)
+out2 = list(angle)
 print(out2[0])
 
-las4.change_freq(3,out[0])
-angle=pc.phasematch.solve_angle(samp1,las4,2,2, isclose=False)
-out3=list(angle)
+las4.change_freq(3, out[0])
+angle = pc.phasematch.solve_angle(samp1, las4, 2, 2, isclose=False)
+out3 = list(angle)
 print(out3[0])
-
-
-
