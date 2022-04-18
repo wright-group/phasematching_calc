@@ -483,7 +483,8 @@ def m_calc(Iso, Las):
     
     Mlist=list()
     tklist=list()
-    
+    Mphaselist=list()
+
     output=_calculate_internals(Iso,Las, zerofreq=False, zerofreqnum=1)
     anglex=output['anglex']
     angley=output['angley']
@@ -556,18 +557,21 @@ def m_calc(Iso, Las):
             ksumy=kcoeffs[i]*kytemp[i]+ksumy
             ksumz=kcoeffs[i]*kztemp[i]+ksumz
         k4=np.sqrt(ksumx**2+ksumy**2+ksumz**2)
-        dk=k4-kout        
-        da=0.5*(aouttemp-(np.abs(kcoeffs[0])*avectemp[0]+np.abs(kcoeffs[1])*avectemp[1]+np.abs(kcoeffs[2])*avectemp[2]))*tkeff
+        dk=k4-kout
+        dkl=dk*tkeff        
+        dal=0.5*(aouttemp-(np.abs(kcoeffs[0])*avectemp[0]+np.abs(kcoeffs[1])*avectemp[1]+np.abs(kcoeffs[2])*avectemp[2]))*tkeff
         Mc1=np.exp(-aouttemp*tkeff)
-        if ((da==0.00) & (dk == 0.00)):
+        if ((dal==0.00) & (dkl == 0.00)):
             Mc2=1.00
+            Mphasedelta=0.00
         else:
-            Mc2=((1-np.exp(da))**2+4*np.exp(da)*(np.sin(dk*tkeff/2))**2)/(da**2+(dk*tkeff)**2)
+            Mc2=((1-np.exp(dal))**2+4*np.exp(dal)*(np.sin(dk*tkeff/2))**2)/(dal**2+(dk*tkeff)**2)
+            Mphasedelta=np.arctan((-dal+np.exp(dal)*(dal*np.cos(dkl)+dkl*np.sin(dkl)))/(dkl+np.exp(dal)*(-dkl*np.cos(dkl)+dal*np.sin(dkl))))
         Mctemp=Mc1*Mc2
 
         Mlist.append(Mctemp)
         tklist.append(tkeff)
-
+        Mphaselist.append(Mphasedelta)
     #angleoutxtemp and angleoutytemp can be converted to launch angles via Snell's Law to calculate
     #launch angle in air afterwards
     if (xmask[n]==0):
