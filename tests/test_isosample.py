@@ -20,6 +20,8 @@ samp1.load_layer(lay1file, 0.02, label="sapphirebw")
 
 samp1.save(jsonfile)
 
+savefile=os.path.join(filepath, 'testsum.txt')
+
 samp2=pc.IsoSample.IsoSample()
 samp2.load(jsonfile)
 assert samp2['description']==desc

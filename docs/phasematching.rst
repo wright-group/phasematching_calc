@@ -149,3 +149,11 @@ The output is a modified list of M factors `Mout` taking into account the Fresne
 As a zero-order calculation, this equation does not consider internal, interative reflections like in a cavity
 at this time.
 
+
+ `generate_csv(savefile, csvfile1, molfrac1=1.00, csvfile2=None, molfrac2=None, csvfile3=None, molfrac3=None)`
+ ---------------
+ Generate a new tab delimited ASCII file based on molfractions of up to 3 csvfiles on disk, interpolating points
+ to match the points of the first file.   Used to modify mole fractions and generate mixture files from known
+ solvents and references to which data may be archived on disk.   Since the first csvfile is used as basis for
+ the points list for the generated csv,  all other csvfiles should have a minimum and maximum points range
+ similar to or greater than the first csvfile.

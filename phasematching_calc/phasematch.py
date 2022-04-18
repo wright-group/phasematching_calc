@@ -483,10 +483,7 @@ def m_calc(Iso, Las):
 
     Mlist=list()
     tklist=list()
-<<<<<<< HEAD
     Mphaselist=list()
-=======
->>>>>>> 9e648349d41c011a91f250790d247ea36f90ff30
 
     output=_calculate_internals(Iso,Las, zerofreq=False, zerofreqnum=1)
     anglex=output['anglex']
@@ -561,12 +558,8 @@ def m_calc(Iso, Las):
             ksumz=kcoeffs[i]*kztemp[i]+ksumz
         k4=np.sqrt(ksumx**2+ksumy**2+ksumz**2)
         dk=k4-kout
-<<<<<<< HEAD
         dkl=dk*tkeff        
         dal=0.5*(aouttemp-(np.abs(kcoeffs[0])*avectemp[0]+np.abs(kcoeffs[1])*avectemp[1]+np.abs(kcoeffs[2])*avectemp[2]))*tkeff
-=======
-        da=0.5*(aouttemp-(np.abs(kcoeffs[0])*avectemp[0]+np.abs(kcoeffs[1])*avectemp[1]+np.abs(kcoeffs[2])*avectemp[2]))*tkeff
->>>>>>> 9e648349d41c011a91f250790d247ea36f90ff30
         Mc1=np.exp(-aouttemp*tkeff)
         if ((dal==0.00) & (dkl == 0.00)):
             Mc2=1.00
@@ -1264,3 +1257,46 @@ def apply_trans(Mlist, Tdict=None):
 
     return Mlistnew
 
+
+def generate_csv(savefile, csvfile1, molfrac1=1.00, csvfile2=None, molfrac2=None, csvfile3=None, molfrac3=None):
+    """generate a new tab delimited freq,absorp,n file based on up to 3 input files and the mole fractions of each component.
+
+    Parameters
+    ----------
+    savefile : path
+        tab delimited savefile
+    csvfile1, csvfile2 (optional), csvfile3 (optional) :  paths
+        filenames of tab delimited w,a,n files
+    molfract1, molfract2 (optional), molfract3 (optional):  float
+        respective mole fractions of each
+    """
+    data=np.loadtxt(csvfile1)
+    wp=np.asarray(data[:,0], dtype=float)
+    if (wp[0] > wp[1]):
+        return IndexError('freqs must be increasing order')
+
+    apoints=data[:,1]*molfrac1
+    npoints=data[:,2]*molfrac2
+
+    samptemp=IsoSample()
+    samptemp2=IsoSample()
+
+    if csvfile2 is not None:
+        samptemp.load_layer(csvfile=csvfile2, thickness=0.01, label="")
+        for i in range(len(wp)):
+            wtemp,apointtemp,npointtemp=samptemp.layers[0].estimate(wp[i])
+            apoints[i]=apoints[i]+apointtemp*molfrac2
+            npoints[i]=npoints[i]+npointtemp*molfrac2
+
+    if csvfile3 is not None:
+        samptemp2.load_layer(csvfile=csvfile3, thickness=0.01, label="")
+        for i in range(len(wp)):
+            wtemp,apointtemp,npointtemp=samptemp2.layers[0].estimate(wp[i])
+            apoints[i]=apoints[i]+apointtemp*molfrac3
+            npoints[i]=npoints[i]+npointtemp*molfrac2
+
+    data[:,1]=apoints[:]
+    data[:,2]=npoints[:]
+
+    data=np.savetxt(savefile, data, delimiter="\t")
+    return 0
