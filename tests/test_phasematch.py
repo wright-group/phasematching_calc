@@ -76,6 +76,23 @@ def test_pm_mcalcs():
 
 def test_emptyset():
     # new lasers object:  unphasematchable geometry TSF
+    filepath = os.path.join(ROOT_DIR, "tests")
+
+    lay1file = os.path.join(filepath, "CaF2_Malitson.txt")
+    lay2file = os.path.join(filepath, "H2O_1.txt")
+
+    tkcaf2 = 0.02  # cm
+    tkwater = 0.01  # cm
+
+    # generation of a IsoSample
+    samp1 = pc.IsoSample.IsoSample()
+    desc = "FWM cell"
+    samp1.description = desc
+    samp1.load_layer(lay1file, tkcaf2, label="caf2fw")
+    samp1.load_layer(lay2file, tkwater, label="water")
+    samp1.load_layer(lay1file, tkcaf2, label="caf2bw")
+    
+    
     las2 = pc.Lasers.Lasers()
     arr1 = [2700.0, 1800.0, 25000.0]
     las2.add_frequencies(arr1)
