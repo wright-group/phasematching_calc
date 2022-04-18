@@ -29,7 +29,7 @@ class IsoSample():
          Parameters:
          -----------
          csvfile: path
-            path to tab-delimited spreadsheet file 
+            path to tab-delimited spreadsheet file
          thickness: float
             thickness of layer in cm
          label: str
@@ -58,7 +58,7 @@ class IsoSample():
          layernum : int
             layer number to change
          csvfile: path
-            path to tab-delimited spreadsheet file 
+            path to tab-delimited spreadsheet file
          thickness: float
             thickness of layer in cm
          label: str
@@ -75,7 +75,7 @@ class IsoSample():
         layer['w_points']=wp
         layer['a_points']=np.asarray(data[:,1], dtype=float)
         layer['n_points']=np.asarray(data[:,2], dtype=float)
-        
+
         self.layers[layernum-1]=layer
         return 0
 
@@ -113,7 +113,7 @@ class IsoSample():
         f.close()
         obj=SimpleNamespace(**eval(str1))
         return self.to_IsoSample(obj)
-        
+
 
     def to_IsoSample(self, nsp):
         self.__init__()
@@ -124,7 +124,7 @@ class IsoSample():
             m['thickness']=float(k['thickness'])
             m['w_points']=k['w_points']
             m['a_points']=k['a_points']
-            m['n_points']=k['n_points']    
+            m['n_points']=k['n_points']
             self["layers"].append(m)
         return 0
 
@@ -157,17 +157,17 @@ class Layer:
 
 
     def estimate(self, freq):
-        ''' using the points in the layer, interpolate to estimate the refractive index and 
+        ''' using the points in the layer, interpolate to estimate the refractive index and
         # absorption coefficient for the specified frequency (cm-1)
-        
+
         Parameters:
         -----------
         freq: float
            frequency (cm-1)
-        
+
         Returns:
         ---------
-            tuple:  (freq, absorp , ncalc ) 
+            tuple:  (freq, absorp , ncalc )
                 freq : float
                     frequency (cm-1) looped back
                 absorp : float
@@ -184,7 +184,7 @@ class Layer:
 
     def suppress_absorbances(self):
         """ zero out all absorbance data in the layer."""
- 
+
         abszero=np.zeros(len(self.a_points))
         self.a_points=abszero
 
@@ -193,12 +193,12 @@ class Layer:
 
     def generatecsv(self, savefile, csvfile1, molfrac1=1.00, csvfile2=None, molfrac2=None, csvfile3=None, molfrac3=None):
         """generate a new tabdelimited freq,absorp,n file based on up to 3 input files and the mole fractions of each component.
-        
+
         Parameters
         ----------
         savefile : path
             tab delimited savefile
-        csvfile1, csvfile2 (optional), csvfile3 (optional) :  paths  
+        csvfile1, csvfile2 (optional), csvfile3 (optional) :  paths
             filenames of tab delimited w,a,n files
         molfract1, molfract2 (optional), molfract3 (optional):  float
             respective mole fractions of each
@@ -217,7 +217,7 @@ class Layer:
                 wtemp,apointtemp,npointtemp=layertemp.Layer.estimate(wp[i])
                 apoints[i]=apoints[i]+apointtemp*molfrac2
                 npoints[i]=npoints[i]+npointtemp*molfrac2
-        
+
         if csvfile3 is not None:
             layertemp=IsoSample.load_layer(csvfile3, 0.01)
             for i in range(len(wp)):

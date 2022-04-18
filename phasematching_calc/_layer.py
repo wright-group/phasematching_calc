@@ -29,9 +29,9 @@ class Layer:
 
 
     def estimate(self, freq):
-        """ using the points in the layer, interpolate to estimate the refractive index and 
+        """ using the points in the layer, interpolate to estimate the refractive index and
         # absorption coefficient for the specified frequency (cm-1)
-        
+
         # Parameters:
         # -----------
         # freq: float
@@ -55,7 +55,7 @@ class Layer:
 
     def suppress_absorbances(self):
         """ zero out all absorbance data in the layer."""
- 
+
         abszero=np.zeros(len(self.a_points))
         self.a_points=abszero
 

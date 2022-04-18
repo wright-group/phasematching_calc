@@ -15,7 +15,7 @@ lay2file=os.path.join(filepath, 'sapphire1.txt')
 
 
 tksap=0.02
-tkacn=0.01 
+tkacn=0.01
 
 # generation of a IsoSample
 samp1=pc.IsoSample.IsoSample()
@@ -50,10 +50,10 @@ for m in range(len(var1)):
         las.change_freq(2,var2a[n])
         angleair2=pc.phasematch.solve_frequency(samp1,las,2,3, isclose=False)
         if np.any(list(angleair2)):
-            ch1[m,n]=(list(angleair2)[0])  
+            ch1[m,n]=(list(angleair2)[0])
         else:
             ValueError(f"error at {m,n}")
-        
+
 data=wt.Data(name="freq check for w3")
 data.create_variable(name="w1", units="wn", values= var1)
 data.create_variable(name="w2", units="wn", values= var2)

@@ -12,7 +12,7 @@ filepath=os.path.join(ROOT_DIR, 'tests')
 
 lay1file=os.path.join(filepath, 'sapphire1.txt')
 lay2file=os.path.join(filepath, "H2O_1.txt")
-tksap=0.02 
+tksap=0.02
 tkwat=0.01
 
 
@@ -50,10 +50,10 @@ for m in range(len(var1)):
         las.change_freq(1,var1[m])
         las.change_freq(2,var2a[n])
         Mlist,tklist,Tdict=pc.phasematch.m_calc(samp1,las)
-        Alist, Alistout=pc.phasematch.calculate_absorbances(samp1,las) 
+        Alist, Alistout=pc.phasematch.calculate_absorbances(samp1,las)
         Mlist1a=pc.phasematch.apply_absorbances(Mlist,Alist,Alistout)
         Mlist1b=pc.phasematch.apply_trans(Mlist1a, Tdict)
-        ch1[m,n]=Mlist[1]  
+        ch1[m,n]=Mlist[1]
 
 vec2=[1,1,1]
 las.add_k_coeffs(vec2)
@@ -63,7 +63,7 @@ for m in range(len(var1)):
         las.change_freq(1,var1[m])
         las.change_freq(2,var2a[n])
         Mlist2,tklist2,Tlist2=pc.phasematch.m_calc(samp1,las)
-        ch2[m,n]=Mlist2[1]  
+        ch2[m,n]=Mlist2[1]
 
 ch3=ch1/ch2
 

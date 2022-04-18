@@ -12,7 +12,7 @@ filepath=os.path.join(ROOT_DIR, 'tests')
 
 lay1file=os.path.join(filepath, 'CaF2_Malitson.txt')
 
-tkcaf2=0.03 
+tkcaf2=0.03
 
 # generation of a IsoSample
 samp1=pc.IsoSample.IsoSample()
@@ -44,7 +44,7 @@ for m in range(len(var1)):
         las.change_freq(1,var1[m])
         las.change_freq(2,var2a[n])
         Mlist,tklist,Tlist=pc.phasematch.m_calc(samp1,las)
-        ch1[m,n]=np.abs(Mlist[0])  
+        ch1[m,n]=np.abs(Mlist[0])
 
 
 data=wt.Data(name="CaF2 300 micron boxcars DOVE")

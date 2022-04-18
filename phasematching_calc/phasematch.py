@@ -4,7 +4,7 @@ from ._lasers import Lasers
 from ._isosample import IsoSample
 from ._isosample import Layer
 from sympy import S, FiniteSet, Interval, oo
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
 import time
 
 #prototypes
@@ -17,7 +17,7 @@ def _array_compare(arr1,arr2):
     for n in range(len(arr1)):
         booltest=booltest & ((arr1[n]==arr2[n]).all())
     return booltest
-   
+
 
 def _calculate_trans(xmask,narr,anglexarr,angleyarr,polsvec,noutvec,angleoutxvec,angleoutyvec,polout):
     '''
@@ -25,7 +25,7 @@ def _calculate_trans(xmask,narr,anglexarr,angleyarr,polsvec,noutvec,angleoutxvec
     as well as after the last layer
 
     Assumes magnetic susceptibility of materials involved in layers to be zero.
-    
+
     Parameters
     ---------
     xmask : list(int)
@@ -33,7 +33,7 @@ def _calculate_trans(xmask,narr,anglexarr,angleyarr,polsvec,noutvec,angleoutxvec
     narr : list(float)
         2D array of n where the 1st D is layer and 2nd are the input freqs
     anglexarr : list(float)
-        "  of angles in x (radians) where 1st D is first input angles, THEN number of layers 
+        "  of angles in x (radians) where 1st D is first input angles, THEN number of layers
     angleyarr : list(float)
         "  of angles in y (radians) "
     noutvec : list(float)
@@ -49,22 +49,22 @@ def _calculate_trans(xmask,narr,anglexarr,angleyarr,polsvec,noutvec,angleoutxvec
         isotropic tensors as calculation does not automatically return errors for an output polarization
         not expected to have signal due to isotropic averaging)
             1=vertical
-            !1 = horizontal 
+            !1 = horizontal
 
     Return
     ------
     tuple:  Tin, Tout
     Tin= Transmission coefficient 2D array of 1D=frequencies, 2D=layers frequency in that layer according
     to the geometry and polarizations found in the Lasers object. Polarizations must be linear and array
-    of the form 1 = Vertical and != 1 = Horizontal 
+    of the form 1 = Vertical and != 1 = Horizontal
     The normal list of geometries presume that each input
-    is either x or y but not both.  
+    is either x or y but not both.
 
-    
-    Tout= transmission coefficient through each layer for the output as well as the final exit into the 
+
+    Tout= transmission coefficient through each layer for the output as well as the final exit into the
     air (m+1 layer array)
     '''
-    
+
     Tin=list()
     Tout=list()
 
@@ -105,7 +105,7 @@ def _calculate_trans(xmask,narr,anglexarr,angleyarr,polsvec,noutvec,angleoutxvec
                 Tintemp[i]=Ty
             else:
                 Tintemp[i]=Tx
-        
+
         Tin.append(Tintemp)
 
     i=len(xmask)-1
@@ -121,7 +121,7 @@ def _calculate_trans(xmask,narr,anglexarr,angleyarr,polsvec,noutvec,angleoutxvec
                 n2=1.000
             else:
                 n2=noutvec[m+1]
-            
+
             if polout==1:
                 Rx=(n1*np.cos(anglex1)-n2*np.cos(anglex2))**2/(n1*np.cos(anglex1)+n2*np.cos(anglex2))**2
                 Ry=(n1*np.cos(angley2)-n2*np.cos(angley1))**2/(n1*np.cos(angley2)+n2*np.cos(angley1))**2
@@ -142,7 +142,7 @@ def _calculate_trans(xmask,narr,anglexarr,angleyarr,polsvec,noutvec,angleoutxvec
 
 
 def _calculate_critical_angle(Iso, Las, layernum, freqnum, frequency=None):
-    """  Determines the critical angle for the layernum-1: layernum boundary.  Replaces value at freqnum 
+    """  Determines the critical angle for the layernum-1: layernum boundary.  Replaces value at freqnum
     by frequency if not None.
 
     Return
@@ -151,7 +151,7 @@ def _calculate_critical_angle(Iso, Las, layernum, freqnum, frequency=None):
       refractive index, critical angle (radians) for the layernum-1:layernum boundary,
       or numpy.pi/2 if no critical angle found.
     """
- 
+
     if (isinstance (Iso,IsoSample)== False):
         return ValueError("first argument not an object of class IsotropicSample")
     if (isinstance (Las,Lasers)== False):
@@ -160,7 +160,7 @@ def _calculate_critical_angle(Iso, Las, layernum, freqnum, frequency=None):
         return ValueError("freqnum cannot be less than 1")
     if (layernum < 1):
         return ValueError("layernum cannot be less than 1")
-    
+
     if (frequency is not None):
         Las.frequencies[freqnum-1]=frequency
 
@@ -173,7 +173,7 @@ def _calculate_critical_angle(Iso, Las, layernum, freqnum, frequency=None):
     else:
         w,a,nold=Iso["layers"][m].estimate(freq)
         w,a,n=Iso["layers"][m+1].estimate(freq)
-    
+
     if (n/nold > 1):
         crit=np.pi/2
     else:
@@ -184,7 +184,7 @@ def _calculate_critical_angle(Iso, Las, layernum, freqnum, frequency=None):
 
 def _calculate_all_critical_angles(Iso, Las, freqnum=None, frequency=None):
     """  Calculates all critical angles for all inputs at all layer boundaries.  Or returns
-    numpy pi/2 if there is no critical angle at that combination.  Replaces freqnum with 
+    numpy pi/2 if there is no critical angle at that combination.  Replaces freqnum with
     frequency if specified.
 
     Return
@@ -193,7 +193,7 @@ def _calculate_all_critical_angles(Iso, Las, freqnum=None, frequency=None):
         2D arrray (1st D is layers m, 2nd is laser inputs i with float of the critical angle
         between m and m+1 for each element  or numpy.pi/2 if no critical angle found.
     """
- 
+
     if (isinstance (Iso,IsoSample)== False):
         return ValueError("first argument not an object of class IsotropicSample")
     if (isinstance (Las,Lasers)== False):
@@ -202,7 +202,7 @@ def _calculate_all_critical_angles(Iso, Las, freqnum=None, frequency=None):
         return ValueError("freqnum cannot be less than 1")
     if (frequency < 0.00):
         return ValueError("frequency cannot be less than 0")
-    
+
     if ((frequency is not None) & (freqnum is not None)):
         Las.frequencies[freqnum-1]=frequency
 
@@ -229,12 +229,12 @@ def _calculate_internals(Iso,Las, zerofreq=False, zerofreqnum=1):
     anglexrad=Las.anglesxrad
     angleyrad=Las.anglesyrad
     xmask=Las.xmask
-        
+
     numfreqs=len(freqs)
     freqout=float(0.00)
     for m in range(numfreqs):
         freqout=freqout+kcoeffs[m]*freqs[m]
-    
+
     # These are 2D arrays where the 1st D is layer (1st and last are air) and 2nd are the input freqs
     anglex=list()
     angley=list()
@@ -267,7 +267,7 @@ def _calculate_internals(Iso,Las, zerofreq=False, zerofreqnum=1):
         atemp=np.zeros(numfreqs)
         nvectemp=np.zeros(numfreqs)
         layertemp=Iso['layers'][m]
-                    
+
         wout,aouttemp,nouttemp=layertemp.estimate(freqout)
 
         angleoutytemp=0.00
@@ -318,7 +318,7 @@ def _calculate_internals(Iso,Las, zerofreq=False, zerofreqnum=1):
         angleoutxtemp=np.arctan(koutx/koutz)
         angleoutytemp=np.arctan(kouty/koutz)
         anglex.append(anglextemp)
-        angley.append(angleytemp)      
+        angley.append(angleytemp)
         kx.append(kxtemp)
         ky.append(kytemp)
         kz.append(kztemp)
@@ -330,7 +330,7 @@ def _calculate_internals(Iso,Las, zerofreq=False, zerofreqnum=1):
         angleouty.append(angleoutytemp)
         angleoutx.append(angleoutxtemp)
         nout.append(nouttemp)
-    
+
     output['anglex']=anglex
     output['angley']=angley
     output['angleoutx']=angleoutx
@@ -348,7 +348,7 @@ def _calculate_internals(Iso,Las, zerofreq=False, zerofreqnum=1):
     output['numfreqs']=numfreqs
     output['xmask']=xmask
     output['kcoeffs']=kcoeffs
-        
+
     return output
 
 
@@ -377,7 +377,7 @@ def _guess_output_pol(polsvec):
 def _stack_critical_angles(narr, critarr, layernum, freqnum):
     """  Up to a given layernum, finds the smallest of all critical angles of a freqnum and
     returns it.  This is necessary for the SolveAngle result when a large solution of angles are possible.
-   
+
     Return
     -----
     crit : float
@@ -394,7 +394,7 @@ def _stack_critical_angles(narr, critarr, layernum, freqnum):
     crit=np.pi/2
 
     for m in range(layernum):
-        ncurrent=nvec[layernum-m-1]    
+        ncurrent=nvec[layernum-m-1]
         critcurrent=critvec[layernum-m-1]
         crit=np.minimum(crit,critcurrent)
 
@@ -402,12 +402,12 @@ def _stack_critical_angles(narr, critarr, layernum, freqnum):
             nnew=nvec[layernum-m-1]
         else:
             nnew=float(1.000)
-        
+
         critnew=np.arcsin(nnew/ncurrent*np.sin(crit))
 
         if (np.isnan(critnew)):
             critnew=np.pi/2
-        
+
         crit=critnew
 
     return crit
@@ -416,7 +416,7 @@ def _stack_critical_angles(narr, critarr, layernum, freqnum):
 def calculate_original_crit_angle(Iso, Las, layernum, freqnum, frequency=None):
     """calculates the maximum original angle in air to result in the critical angle at the
     layernum : layernum+1 interface (or numpy pi/2 if there are no critical angles, or
-    the angle in air of the smallest of any critical angles for that freqnum in any previous layers, 
+    the angle in air of the smallest of any critical angles for that freqnum in any previous layers,
     converted to its original angle in air)
 
     Return
@@ -454,14 +454,14 @@ def m_calc(Iso, Las):
     Return
     ---
     tuple (Mlist, tklist, Tdict) consisting of:
-    
-    Mlist :  list(float)  
+
+    Mlist :  list(float)
         a real array of phasemismatching factors for wavemixing at the output
         currently only supporting four wave mixing models with supportedgeometries shown in the Laser object.
     tklist :  list(float)
         the effective thickness of each layer as pertaining to the launched output wave, i.e.
         layer thickness / cosine(angleout)
-    Tdict : 
+    Tdict :
         dictionary with entries related to transmission coefficients of the lasers and output
         through the sample layers.  NOTE:  This application has not been performed on the entries in Mlist.
         The coefficients rely on linear polarizations defined in the Laser object.  User must perform
@@ -469,7 +469,7 @@ def m_calc(Iso, Las):
 
         Keys in the Tdict are:
             Tdict['Tin'] : list(float)  (2Darr) Transmission coefficients of the laser inputs based on the geometry,
-                with 1st D as layer and 2nd as freqnum 
+                with 1st D as layer and 2nd as freqnum
             Tdict['Tout'] : list(float)  (1D) Transmission coefficients of  the output based on the geometry .
             Tdict['launchangledeg'] : list(float) 1D launch angle of output in degrees in air at cartesian coordinate
                 specified by geometry
@@ -480,10 +480,10 @@ def m_calc(Iso, Las):
         return ValueError("second argument not an object of class Lasers")
 
     pols=Las.polarizations
-    
+
     Mlist=list()
     tklist=list()
-    
+
     output=_calculate_internals(Iso,Las, zerofreq=False, zerofreqnum=1)
     anglex=output['anglex']
     angley=output['angley']
@@ -514,7 +514,7 @@ def m_calc(Iso, Las):
     angleouty.append(launchangley)
 
     polout=_guess_output_pol(pols)
-    
+
     Tin, Tout = _calculate_trans(xmask,nvec,anglex,angley,pols,nout,angleoutx,angleouty,polout)
     Mctemp=1
 
@@ -528,9 +528,9 @@ def m_calc(Iso, Las):
         kztemp=kz[m]
         kytemp=ky[m]
         kxtemp=kx[m]
-        
+
         tktemp=tk[m]
-                
+
         aouttemp=aout[m]
         angleoutxtemp=angleoutx[m]
         angleoutytemp=angleouty[m]
@@ -548,15 +548,15 @@ def m_calc(Iso, Las):
             kouty=0.00
             koutz=kout*np.cos(angleoutxtemp)
             koutx=kout*np.sin(angleoutxtemp)
-               
+
         ksumx=ksumy=ksumz=0.0000
-        
+
         for i in range(numfreqs):
             ksumx=kcoeffs[i]*kxtemp[i]+ksumx
             ksumy=kcoeffs[i]*kytemp[i]+ksumy
             ksumz=kcoeffs[i]*kztemp[i]+ksumz
         k4=np.sqrt(ksumx**2+ksumy**2+ksumz**2)
-        dk=k4-kout        
+        dk=k4-kout
         da=0.5*(aouttemp-(np.abs(kcoeffs[0])*avectemp[0]+np.abs(kcoeffs[1])*avectemp[1]+np.abs(kcoeffs[2])*avectemp[2]))*tkeff
         Mc1=np.exp(-aouttemp*tkeff)
         if ((da==0.00) & (dk == 0.00)):
@@ -600,7 +600,7 @@ def angle(Iso,Las,layernum,freqnum, frequency=None):
 
     Return
     ------
-    tuple: {anglex,angley} 
+    tuple: {anglex,angley}
         projected angles float (radians) for the selected frequency in that layer according
         to the geometry found in the Lasers object.  NOTE:  User must determine which (or both)
         are to be used.  The xmask or ymask of a geometry is used in methods in this module to do so.
@@ -617,7 +617,7 @@ def angle(Iso,Las,layernum,freqnum, frequency=None):
     lasfreq=Las.frequencies[freqnum-1]
     lasanglex=Las.anglesxrad[freqnum-1]
     lasangley=Las.anglesyrad[freqnum-1]
- 
+
     if (frequency is not None):
         lasfreq=frequency
 
@@ -659,10 +659,10 @@ def _m_plot(Iso, Las, layernum, freqnum, side=1):
 def solve_angle(Iso,Las,layernum,freqnum, frequency=None, isclose=False):
     '''
     Given an Isotropic Sample, a layer number and frequency number used in a geometry defined in Las object,
-    determine the input angle (in air) required for phasematching that frequency. Uses Sympy Set. 
+    determine the input angle (in air) required for phasematching that frequency. Uses Sympy Set.
     Returns an empty FiniteSet if a solution cannot be found within an internal convergence iteration series,
     usually meaning there is no solution.
-    
+
     Parameters
     ----
     Iso : The IsotropicSample object
@@ -682,12 +682,12 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None, isclose=False):
 
     Return
     ----
-    Sympy: FiniteSet : {theta1,theta2} 
-           theta1,theta2: float 
+    Sympy: FiniteSet : {theta1,theta2}
+           theta1,theta2: float
               original angles in air (degrees) needed for that PM condition.
               theta1 and/or theta2 may be missing if either or both cannot be found as solution
               if isclose is set to True, only one solution at most will be found.
-           OR Interval(0,anglemax) 
+           OR Interval(0,anglemax)
               anglemax (deg) if all angles allowed until restricted by a critical angle before the layernum
     '''
     if (isinstance (Iso,IsoSample)== False):
@@ -708,7 +708,7 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None, isclose=False):
     flag=int(0)
     flag2=int(1)
     flag3=int(1)
-    
+
     if (frequency is not None):
         freqs[freqnum-1]=frequency
         if (frequency < 0.00):
@@ -743,7 +743,7 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None, isclose=False):
         iter=50
         for k in range(layernum):
             Isotemp2.layers[k].suppress_absorbances()
-        
+
         if isclose:
             amt=0.5
             Mtest,tklist,Tdict=m_calc(Isotemp2, Lastemp2)
@@ -751,7 +751,7 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None, isclose=False):
             magMtest1=np.abs(Mtest[m])
             error2=1.000-magMtest1
             dir=1.000
-            error1=error2 
+            error1=error2
             b=0
             while( error2 > tol):
                 b=b+1
@@ -763,7 +763,7 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None, isclose=False):
                 angle=Lastemp2.anglesairdeg[freqnum-1]+amt*dir
                 Lastemp2.change_angle(freqnum,angle)
                 Mtest,tklist,Tdict=m_calc(Isotemp2, Lastemp2)
-                magMtest1=np.abs(Mtest[m]) 
+                magMtest1=np.abs(Mtest[m])
                 error2=1-magMtest1
                 if (b > iter):
                     flag2=1
@@ -771,7 +771,7 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None, isclose=False):
             if np.isclose(magMtest1,1.00, rtol=tol*10):
                 flag2=0
             angle2=float("nan")
-            flag3=1    
+            flag3=1
         else:
             mlist=_m_plot(Isotemp2,Lastemp2,layernum,freqnum,side=1)
             mlist2=_m_plot(Isotemp2,Lastemp2,layernum,freqnum,side=-1)
@@ -786,7 +786,7 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None, isclose=False):
             Lastemp2.change_angle(freqnum,max1ind)
             Mtest,tklist,Tdict=m_calc(Isotemp2, Lastemp2)
             angle=Lastemp2.anglesairdeg[freqnum-1]
-            magMtest1=np.abs(Mtest[m]) 
+            magMtest1=np.abs(Mtest[m])
             error2=1.000-magMtest1
             error1=error2
             b=0
@@ -800,12 +800,12 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None, isclose=False):
                 angle=Lastemp2.anglesairdeg[freqnum-1]+amt*dir
                 Lastemp2.change_angle(freqnum,angle)
                 Mtest,tklist,Tdict=m_calc(Isotemp2, Lastemp2)
-                magMtest1=np.abs(Mtest[m]) 
+                magMtest1=np.abs(Mtest[m])
                 error2=1-magMtest1
                 if (b > iter):
                     flag2=1
                     break
-    
+
             dir=1.00
             amt=0.5
             Lastemp2.change_angle(freqnum,max2ind)
@@ -813,7 +813,7 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None, isclose=False):
             angle2=Lastemp2.anglesairdeg[freqnum-1]
             magMtest2=np.abs(Mtest[m])
             error2=1.000-magMtest2
-            error1=error2 
+            error1=error2
             b=0
             while( error2 > tol):
                 b=b+1
@@ -825,7 +825,7 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None, isclose=False):
                 angle2=Lastemp2.anglesairdeg[freqnum-1]+amt*dir
                 Lastemp2.change_angle(freqnum,angle2)
                 Mtest,tklist,Tdict=m_calc(Isotemp2, Lastemp2)
-                magMtest2=np.abs(Mtest[m]) 
+                magMtest2=np.abs(Mtest[m])
                 error2=1-magMtest2
                 if (b > iter):
                     flag3=1
@@ -835,7 +835,7 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None, isclose=False):
                 flag2=0
             if np.isclose(magMtest2,1.00, rtol=tol*10):
                 flag3=0
-        
+
         if ((flag2==1) & (flag3==1)):
             return FiniteSet()
         elif (flag2 == 1 ):
@@ -848,10 +848,10 @@ def solve_angle(Iso,Las,layernum,freqnum, frequency=None, isclose=False):
 
 def solve_frequency(Iso, Las, layernum, freqnum, amt=None, isclose=False):
     '''Using the current frequency as first guess, solves for the nearest possible phasematching frequency
-    at a fixed angle for that frequencynum in a given layer, using an iterative convergence.  Uses Sympy Set. 
+    at a fixed angle for that frequencynum in a given layer, using an iterative convergence.  Uses Sympy Set.
     Returns an empty FiniteSet if a solution cannot be found within an internal convergence iteration series,
     usually meaning there is no solution.
-    
+
     Parameters
     ----
     Iso : The IsotropicSample object
@@ -864,7 +864,7 @@ def solve_frequency(Iso, Las, layernum, freqnum, amt=None, isclose=False):
     amount : float (optional)
        amount to change frequency by per convergence step.  Approximates internally if set to None.
     isclose : bool (optional)
-       uses finer algorithm if set to True   
+       uses finer algorithm if set to True
 
     Return
     ----
@@ -893,7 +893,7 @@ def solve_frequency(Iso, Las, layernum, freqnum, amt=None, isclose=False):
     if isclose:
         if amt is None:
             amt = 0.001*freqs[freqnum-1]
-            tol = 0.0001  
+            tol = 0.0001
     else:
         if amt is None:
             amt = 0.01*freqs[freqnum-1]  # a guess
@@ -911,7 +911,7 @@ def solve_frequency(Iso, Las, layernum, freqnum, amt=None, isclose=False):
     kxtemp=kx[layernum-1]
     kytemp=ky[layernum-1]
     kztemp=kz[layernum-1]
-    
+
     for i in range(numfreqs):
         ksumx=kcoeffs[i]*kxtemp[i]+ksumx
         ksumy=kcoeffs[i]*kytemp[i]+ksumy
@@ -927,7 +927,7 @@ def solve_frequency(Iso, Las, layernum, freqnum, amt=None, isclose=False):
                             # at the given angle to see if it is reflected at a critical angle
     else:
         m = layernum-1
-        
+
         for k in range(layernum):
             Isotemp.layers[k].suppress_absorbances()
 
@@ -943,7 +943,7 @@ def solve_frequency(Iso, Las, layernum, freqnum, amt=None, isclose=False):
             b=b+1
             if (error2 > error1):
                 dir=(-1.00)*dir
-            if (np.abs(error2) < 0.33*np.abs(error1)):  # the 0.33 is a guess 
+            if (np.abs(error2) < 0.33*np.abs(error1)):  # the 0.33 is a guess
                 amt=0.1*amt
             error1=error2
             freq=Lastemp.frequencies[freqnum-1]+amt*dir
@@ -971,7 +971,7 @@ def calculate_ts(Iso, Las):
 
        Is used to confirm that the pulse overlap in thicker samples is satisfactory or not satisfactory enough
        to determine if delay changes are responsible for a limit to the interaction in such a sample.
-        
+
     Parameters
     -----
     Iso :  The IsoSample object
@@ -979,14 +979,14 @@ def calculate_ts(Iso, Las):
 
     Return
     -----
-    tuple : (t_chart_in, t_chart_out)  
+    tuple : (t_chart_in, t_chart_out)
             t_chart_in: list(float)
                 2D array with frequencies in 1st axis and layernums in second.  Elements are times (fsec)
-                in which frequency i  reaches the next layer.     
+                in which frequency i  reaches the next layer.
             t_chart_out: list(float)
                 1D array with layernums for the output at the given kcoeffs.
     """
-    
+
     if (isinstance (Iso,IsoSample)== False):
         return ValueError("first argument not an object of class IsotropicSample")
     if (isinstance (Las,Lasers)== False):
@@ -1010,7 +1010,7 @@ def calculate_ts(Iso, Las):
     numlayers=output['numlayers']
     numfreqs=output['numfreqs']
     xmask=output['xmask']
-    
+
     noutf=nout[numlayers-1]
     angleoutxf=angleoutx[numlayers-1]
     angleoutyf=angleouty[numlayers-1]
@@ -1053,27 +1053,27 @@ def calculate_ts(Iso, Las):
 
 def calculate_absorbances(Iso, Las):
     """Calculate the absorbances each laser (including output) makes per layer in the IsoSample.
-        
+
         Parameters
         -----
         Iso:  The IsoSample object
         Las:  The Lasers object
 
-       Return 
+       Return
        ------
-       tuple(Alist_in,Alist_out): 
+       tuple(Alist_in,Alist_out):
             Alist_in: list(float)
                 2D array with frequencies in 1st axis and layernums in second.  Elements are log10 absorbances
-                in which frequency i reaches the next layer.     
+                in which frequency i reaches the next layer.
             Alist_out: list(float)
                 1D array of log10 absorbances at the output frequency as it reaches the next layer.
        """
-    
+
     if (isinstance (Iso,IsoSample)== False):
         return ValueError("first argument not an object of class IsotropicSample")
     if (isinstance (Las,Lasers)== False):
         return ValueError("second argument not an object of class Lasers")
-    
+
     output=_calculate_internals(Iso,Las, zerofreq=False, zerofreqnum=1)
     anglex=output['anglex']
     angley=output['angley']
@@ -1085,7 +1085,7 @@ def calculate_absorbances(Iso, Las):
     numlayers=output['numlayers']
     numfreqs=output['numfreqs']
     xmask=output['xmask']
-     
+
     noutf=nout[numlayers-1]
     angleoutxf=angleoutx[numlayers-1]
     angleoutyf=angleouty[numlayers-1]
@@ -1135,24 +1135,24 @@ def apply_absorbances(Mlist, Alist_in, Alist_out=None):
        Parameters
        ------
        Mlist :  list(float)
-            1D array of M factors for the output FWM in each layer.     
+            1D array of M factors for the output FWM in each layer.
        Alist_in : list(float)
             " 2D array with frequencies in 1st axis if (input) and layernums in second.  Elements are log10 absorbances
             in which frequency i reaches the next layer
        Alist_out : list(float)
             1D array of output absorbances (log 10)
-       Tdict:  dictionary of Fresnel coefficients with format described by that in Mcalc 
-    
+       Tdict:  dictionary of Fresnel coefficients with format described by that in Mcalc
+
        Return
        -----
        Mlistnew:  list(float)
-            Mlist scaled by Fresnel (if not None) and absorbance (if not None) losses 
-            
+            Mlist scaled by Fresnel (if not None) and absorbance (if not None) losses
+
        See m_calc for description of Mlist and calculate_absorbances for more on the Alists.  See m_calc for
        description of Tdict.
-    
+
        """
-    
+
     Mlistnew1=list()
     Mlistnew=list()
 
@@ -1169,12 +1169,12 @@ def apply_absorbances(Mlist, Alist_in, Alist_out=None):
         for i in range(len(Alist_in[m])):
             for n in range(m):
                 if (m==0):   #technically not needed as range(0) leads to a null but kept in
-                    pass  
+                    pass
                 else:
-                    Mlistnewtemp=10**(-Alist_in[n][i])*10**(-Alist_in[n][i])*Mlistnewtemp #note the squaring by the double 
+                    Mlistnewtemp=10**(-Alist_in[n][i])*10**(-Alist_in[n][i])*Mlistnewtemp #note the squaring by the double
             #multiplication as M factor is already a squared term
-        Mlistnew1.append(Mlistnewtemp)   
-    
+        Mlistnew1.append(Mlistnewtemp)
+
     for m in range(numlayers):
         Mlistnewtemp=Mlistnew1[numlayers-1-m]
         Aouttemp=float(0.00)
@@ -1188,7 +1188,7 @@ def apply_absorbances(Mlist, Alist_in, Alist_out=None):
                     Aouttemp=Aouttemp+Alist_out[n]  #this is NOT squared.
         Mlistnewtemp=Mlistnewtemp*10**(-Aouttemp)
         Mlistnew.append(Mlistnewtemp)
-    
+
     Mlistnew.reverse()
     return Mlistnew
 
@@ -1201,19 +1201,19 @@ def apply_trans(Mlist, Tdict=None):
        ------
        Mlist_in : list(float)
             2D array with frequencies in 1st axis if (input) and layernums in second.  Elements are times (fsec)
-            in which frequency i  reaches the next layer.     
+            in which frequency i  reaches the next layer.
        Tdict:  dict
-            dictionary of Fresnel coefficients with format described by that in m_calc 
-    
+            dictionary of Fresnel coefficients with format described by that in m_calc
+
        Return
        -----
-       Mlistnew: list(float) 
+       Mlistnew: list(float)
             Mlist scaled by Fresnel (if not None) losses
-    
+
         See m_calc for description of Mlist and calculate_absorbances for more on the Alists.  See m_calc for
        description of Tdict.
        """
-    
+
     Mlistnew1=list()
     Mlistnew=list()
 
@@ -1239,7 +1239,7 @@ def apply_trans(Mlist, Tdict=None):
                         Ttemp=Tin[n][i]
                         Tintemp=Tintemp*Ttemp*Ttemp  #Note the square
             Mlistnewtemp=Mlistnewtemp*Tintemp
-        Mlistnew1.append(Mlistnewtemp)    
+        Mlistnew1.append(Mlistnewtemp)
 
     Mlistnew1.reverse()
 
@@ -1250,6 +1250,6 @@ def apply_trans(Mlist, Tdict=None):
             Touttemp=Tout[n]*Touttemp
         Mlistnewtemp=Mlistnewtemp*Touttemp  #Note that this is NOT squared.
         Mlistnew.append(Mlistnewtemp)
-    
+
     return Mlistnew
-        
+

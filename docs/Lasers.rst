@@ -4,10 +4,10 @@ Lasers
 =============
 
 The :class:`Lasers` class consist of the needed input and output laser fields used in the four-wave mixing study,
-as well as the methods for modifying these fields.  
+as well as the methods for modifying these fields.
 
 Fields include the laser frequencies, their angles, their polarizations, the laser output combination, a standard
-geometry the lasers make entering the sample, and some values helpful for computing phasematching effects 
+geometry the lasers make entering the sample, and some values helpful for computing phasematching effects
 generally related to the geometry.
 
 The user builds on the Laser by modifying frequencies, angles, polarizations and output combination as lists,
@@ -40,9 +40,9 @@ Changes the anglee (in degrees) of `freqnum` (input) to the `value`.  Should be 
 
 `add_k_coeffs(self,ar1)`
 ----------------------
-Input a list `ar1` of the four-wave mixing coefficient for each input.  Due to the limited number of 
+Input a list `ar1` of the four-wave mixing coefficient for each input.  Due to the limited number of
 interactions allowed in four-wave mixing, the expected set ranges integers [-3,3] including 0. However the
-method does not restrict higher numbers due to certain allowances for the four-wave mixing program to 
+method does not restrict higher numbers due to certain allowances for the four-wave mixing program to
 effectively simulate certain higher-order ones.  No single element change method was created for this entry.
 
 `add_pols(self,ar1)`
@@ -56,21 +56,21 @@ No single element change method was created for this entry.   (Note: the output 
 --------------------------------------
 the `supportedgeometrylist` contains entries that this method may use.  The two important ones are a fully planar
 or "2D" input/output geometry, or a "boxcars" (actually more like a "plus-sign") geometry, as they each
-can be readily used for calculating Fresnel coefficients and each have their uses.  
+can be readily used for calculating Fresnel coefficients and each have their uses.
         "boxcars":                           "planar":                                  Cartesian Axes:
 
-                  O 2                           
+                  O 2
                   |                                                                              |  y
          4        |         1                                                                    |
          O--------+---------O                ---------+----O-----O--O-------O                    +------ x
                   |                                        2     3  4       1
                   |
-                  O 3  
+                  O 3
 
-        where "+" is the center of focus of the beams, and 4 is the output location. 
+        where "+" is the center of focus of the beams, and 4 is the output location.
 
 It is expected for reasonable thickness and angle calculations that the "+" represents the surface normal
-to the IsoSample object used in tandem with this object.   
+to the IsoSample object used in tandem with this object.
 
 `save(self, file)`
 ------------------
