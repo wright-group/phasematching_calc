@@ -17,6 +17,7 @@ setup(
     name="phasematching_calc",
     packages=find_packages(),
     package_data=extra_files,
+<<<<<<< HEAD
     install_requires=["numpy", "WrightTools",  "matplotlib>=3.3.0"],
     extras_require={
         "docs": docs_require,
@@ -31,6 +32,9 @@ setup(
         ]
         + docs_require,
     },
+=======
+    install_requires=["numpy", "WrightTools"],
+>>>>>>> a7cccb3720f39442e1b39bdeaffc4b4ca1e3977a
     version=version,
     description="A simulation package for simulating phasematching effects in discrete layer isotropic samples.",
     author="phasematching_calc Developers",
