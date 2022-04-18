@@ -10,12 +10,27 @@ extra_files = {"phasematching_calc": ["VERSION"]}
 with __here__ / "phasematching_calc" / "VERSION" as version_file:
     version = version_file.read_text().strip()
 
+docs_require = ["sphinx", "sphinx-gallery==0.8.2", "sphinx-rtd-theme"]
+
+
 setup(
     name="phasematching_calc",
     packages=find_packages(),
     package_data=extra_files,
-    install_requires=["numpy", "WrightTools"],
-
+    install_requires=["numpy", "WrightTools",  "matplotlib>=3.3.0"],
+    extras_require={
+        "docs": docs_require,
+        "dev": [
+            "black",
+            "pre-commit",
+            "pydocstyle",
+            "pytest",
+            "pytest-cov",
+            "databroker>=1.2",
+            "msgpack",
+        ]
+        + docs_require,
+    },
     version=version,
     description="A simulation package for simulating phasematching effects in discrete layer isotropic samples.",
     author="phasematching_calc Developers",
