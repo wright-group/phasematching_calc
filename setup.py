@@ -28,7 +28,9 @@ setup(
             "pytest-cov",
             "databroker>=1.2",
             "msgpack",
-            "sympy"
+            "sympy",
+            "json"
+            "distutils"
         ]
         + docs_require,
     },
