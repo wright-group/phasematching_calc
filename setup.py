@@ -28,6 +28,7 @@ setup(
             "pytest-cov",
             "databroker>=1.2",
             "msgpack",
+            "sympy"
         ]
         + docs_require,
     },
