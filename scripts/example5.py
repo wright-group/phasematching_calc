@@ -27,7 +27,7 @@ samp1.load_layer(lay3file, tkcaf2, label="caf2bw")
 
 # new Lasers object
 las4=pc.Lasers.Lasers()
-arr1=[3150.0,2250.0,20000.0]
+arr1=[3150.0,2200.0,20000.0]
 las4.add_frequencies(arr1)
 arr2=[5.0,10.0,0.0]
 las4.add_angles(arr2)
