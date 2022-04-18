@@ -17,7 +17,7 @@ setup(
     name="phasematching_calc",
     packages=find_packages(),
     package_data=extra_files,
-    install_requires=["numpy", "WrightTools",  "matplotlib>=3.3.0", "sympy", "json", "distutils"],
+    install_requires=["numpy", "WrightTools",  "matplotlib>=3.3.0", "sympy", "json5", "distutils"],
     extras_require={
         "docs": docs_require,
         "dev": [
@@ -29,7 +29,7 @@ setup(
             "databroker>=1.2",
             "msgpack",
             "sympy",
-            "json"
+            "json5"
             "distutils"
         ]
         + docs_require,
