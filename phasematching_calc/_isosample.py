@@ -50,6 +50,36 @@ class IsoSample():
         return 0
 
 
+    def change_layer(self, layernum, csvfile, thickness, label=''):
+        ''' Replace a layer with the given number as per the csvfile, thickness, and label.
+
+         Parameters:
+         -----------
+         layernum : int
+            layer number to change
+         csvfile: path
+            path to tab-delimited spreadsheet file 
+         thickness: float
+            thickness of layer in cm
+         label: str
+            description of layer (str)
+        '''
+        data=np.loadtxt(csvfile)
+        wp=np.asarray(data[:,0], dtype=float)
+
+        if (wp[0] > wp[1]):
+            return IndexError('freqs must be increasing order')
+        layer=Layer()
+        layer['label']=label
+        layer['thickness']=thickness
+        layer['w_points']=wp
+        layer['a_points']=np.asarray(data[:,1], dtype=float)
+        layer['n_points']=np.asarray(data[:,2], dtype=float)
+        
+        self.layers[layernum-1]=layer
+        return 0
+
+
     def as_dict(self):
         """dict representation for this IsoSample class."""
         out = dict()
@@ -158,4 +188,45 @@ class Layer:
         abszero=np.zeros(len(self.a_points))
         self.a_points=abszero
 
+        return 0
+
+
+    def generatecsv(self, savefile, csvfile1, molfrac1=1.00, csvfile2=None, molfrac2=None, csvfile3=None, molfrac3=None):
+        """generate a new tabdelimited freq,absorp,n file based on up to 3 input files and the mole fractions of each component.
+        
+        Parameters
+        ----------
+        savefile : path
+            tab delimited savefile
+        csvfile1, csvfile2 (optional), csvfile3 (optional) :  paths  
+            filenames of tab delimited w,a,n files
+        molfract1, molfract2 (optional), molfract3 (optional):  float
+            respective mole fractions of each
+        """
+        data=np.loadtxt(csvfile1)
+        wp=np.asarray(data[:,0], dtype=float)
+        if (wp[0] > wp[1]):
+            return IndexError('freqs must be increasing order')
+
+        apoints=data[:,1]*molfrac1
+        npoints=data[:,2]*molfrac2
+
+        if csvfile2 is not None:
+            layertemp=IsoSample.load_layer(csvfile2, 0.01)
+            for i in range(len(wp)):
+                wtemp,apointtemp,npointtemp=layertemp.Layer.estimate(wp[i])
+                apoints[i]=apoints[i]+apointtemp*molfrac2
+                npoints[i]=npoints[i]+npointtemp*molfrac2
+        
+        if csvfile3 is not None:
+            layertemp=IsoSample.load_layer(csvfile3, 0.01)
+            for i in range(len(wp)):
+                wtemp,apointtemp,npointtemp=layertemp.Layer.estimate(wp[i])
+                apoints[i]=apoints[i]+apointtemp*molfrac3
+                npoints[i]=npoints[i]+npointtemp*molfrac2
+
+        data[:,1]=apoints[:]
+        data[:,2]=npoints[:]
+
+        data=np.savetxt(data,savefile, delimiter="\t")
         return 0
