@@ -38,7 +38,7 @@ def test_pm_mcalcs():
 
     # Other test scripts show how the above objects can be saved and loaded.
     # single point Mcalc check
-    Mlist, tklist, Tdict = pc.phasematch.m_calc(samp1, las)
+    Mlist, Mdeltalist, tklist, Tdict = pc.phasematch.m_calc(samp1, las)
     testoutput = np.abs(Mlist[1])
     assert np.isclose(testoutput, 0.02978456)
 
@@ -91,8 +91,7 @@ def test_emptyset():
     samp1.load_layer(lay1file, tkcaf2, label="caf2fw")
     samp1.load_layer(lay2file, tkwater, label="water")
     samp1.load_layer(lay1file, tkcaf2, label="caf2bw")
-    
-    
+
     las2 = pc.Lasers.Lasers()
     arr1 = [2700.0, 1800.0, 25000.0]
     las2.add_frequencies(arr1)

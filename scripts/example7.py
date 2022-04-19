@@ -48,7 +48,7 @@ for m in range(len(var1)):
     for n in range(len(var2a)):
         las.change_freq(1, var1[m])
         las.change_freq(2, var2a[n])
-        Mlist, tklist, Tdict = pc.phasematch.m_calc(samp1, las)
+        Mlist, Mphase, tklist, Tdict = pc.phasematch.m_calc(samp1, las)
         Alist, Alistout = pc.phasematch.calculate_absorbances(samp1, las)
         Mlist1a = pc.phasematch.apply_absorbances(Mlist, Alist, Alistout)
         Mlist1b = pc.phasematch.apply_trans(Mlist1a, Tdict)
@@ -61,7 +61,7 @@ for m in range(len(var1)):
     for n in range(len(var2a)):
         las.change_freq(1, var1[m])
         las.change_freq(2, var2a[n])
-        Mlist2, tklist2, Tlist2 = pc.phasematch.m_calc(samp1, las)
+        Mlist2, Mphase, tklist2, Tlist2 = pc.phasematch.m_calc(samp1, las)
         ch2[m, n] = Mlist2[1]
 
 ch3 = ch1 / ch2

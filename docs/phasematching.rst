@@ -27,14 +27,17 @@ The complex term found inside the term prior to squaring implies that each layer
 be necessary.    Otherwise, to low order, the M factor does not contain dependences on specific four-wave mixing
 processes relative to others, and so it is not necessary to leave the expression in its complex form.
 
-Mcalc returns a tuple (1,2,3) of 3 outputs:
+Mcalc returns a tuple (1,2,3,4) of 4 outputs:
 
 (1) an m-layered list of M factors for the specific phasematching path defined in the Lasers object.
 See the examples in the scripts folders for further information.
-(2) a series of thicknesses experienced by the output four-wave mixing term, per layer.  The thickness
+(2) A phase for the term inside the M^2 expression, which can be incorporated into the square
+root of the m-layered list to form a complex term, this phase is relative to the layer preceeding
+it.
+(3) a series of thicknesses experienced by the output four-wave mixing term, per layer.  The thickness
 is the original normal thickness of the sample layer divided by cosine(launchangle).   This effective
 thickness can be used to calculate four-wave mixing intensities more accurately.
-(3) A dictionary of transmission coefficients based on Fresnel coefficients between each layer.  The key 'Tin'
+(4) A dictionary of transmission coefficients based on Fresnel coefficients between each layer.  The key 'Tin'
 represents the transmission coefficients for the inputs.  The first layer represents transmission from the air
 into the sample, second represents transmission from 1st layer into 2nd layer, and so on.  It does not include
 transmission between the final layer and the output air.   The key 'Tout' represents the transmission of the
@@ -79,7 +82,7 @@ roughly 1% of the original frequency of the input.
 Setting `isclose` to `True` is not equivalent to that in `solve_angle`.  In this application, the tolerance is
 improved.
 
-`solve_frequencu` returns a Sympy Set of Frequencies.  It could be a single item `FiniteSet`, an `Interval`, or an `EmptySet`
+`solve_frequency` returns a Sympy Set of Frequencies.  It could be a single item `FiniteSet`, an `Interval`, or an `EmptySet`
 if no solution is found.  An `Interval`` indicates a full range of angles are possible, which can happen if
 the process can be phasematcheable in that manner.  The endpoint is usually set to Infinity (`oo`), though a future
 modification may end up limiting the frequency to a critical angle that may be found between layers.

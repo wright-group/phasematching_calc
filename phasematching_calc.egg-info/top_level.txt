@@ -1,1 +1,3 @@
+config
 phasematching_calc
+tests

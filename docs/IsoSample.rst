@@ -69,11 +69,5 @@ Sets the `a_points` to 0, which can be useful for optimizing M factor calculatio
 non-zero absorption.  No methods are created to revert to the original values.
 
 
- `generatecsv(savefile, csvfile1, molfrac1=1.00, csvfile2=None, molfrac2=None, csvfile3=None, molfrac3=None)`
- ---------------
- Generate a new tab delimited ASCII file based on molfractions of up to 3 csvfiles on disk, interpolating points
- to match the points of the first file.   Used to modify mole fractions and generate mixture files from known
- solvents and references to which data may be archived on disk.
-
 
 

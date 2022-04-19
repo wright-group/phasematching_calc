@@ -474,11 +474,15 @@ def m_calc(Iso, Las):
 
     Return
     ---
-    tuple (Mlist, tklist, Tdict) consisting of:
+    tuple (Mlist, Mlistdelta, tklist, Tdict) consisting of:
 
     Mlist :  list(float)
         a real array of phasemismatching factors for wavemixing at the output
         currently only supporting four wave mixing models with supportedgeometries shown in the Laser object.
+    Mlistdelta : list (float)
+        the phase (radians) of this term relative to terms from layers preceeding it, which can be used
+        with the np.sqrt of Mlist to provide the Complex expression for the term inside the M^2 factor
+        and can be used for small successive layer calculations
     tklist :  list(float)
         the effective thickness of each layer as pertaining to the launched output wave, i.e.
         layer thickness / cosine(angleout)
@@ -603,8 +607,8 @@ def m_calc(Iso, Las):
                 dal**2 + (dk * tkeff) ** 2
             )
             Mphasedelta = np.arctan(
-                (-dal + np.exp(dal) * (dal * np.cos(dkl) + dkl * np.sin(dkl)))
-                / (dkl + np.exp(dal) * (-dkl * np.cos(dkl) + dal * np.sin(dkl)))
+                (dkl + np.exp(dal) * (-dkl * np.cos(dkl) + dal * np.sin(dkl)))
+                / (-dal + np.exp(dal) * (dal * np.cos(dkl) + dkl * np.sin(dkl)))
             )
         Mctemp = Mc1 * Mc2
 
@@ -622,7 +626,7 @@ def m_calc(Iso, Las):
     Tdict["Tout"] = Tout
     Tdict["Tin"] = Tin
     Tdict["launchangledeg"] = launchangledeg
-    return Mlist, tklist, Tdict
+    return Mlist, Mphaselist, tklist, Tdict
 
 
 def angle(Iso, Las, layernum, freqnum, frequency=None):
@@ -691,7 +695,7 @@ def _m_plot(Iso, Las, layernum, freqnum, side=1):
 
     for m in range(len(anglelist)):
         Lastemp2.change_angle(freqnum, anglelist[m])
-        Mfac, tklist, Tdict = m_calc(Isotemp2, Lastemp2)
+        Mfac, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp2)
         # alist.append(m)
         mlist.append(Mfac[layernum - 1])
 
@@ -788,7 +792,7 @@ def solve_angle(Iso, Las, layernum, freqnum, frequency=None, isclose=False):
 
         if isclose:
             amt = 0.5
-            Mtest, tklist, Tdict = m_calc(Isotemp2, Lastemp2)
+            Mtest, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp2)
             angle = Lastemp.anglesairdeg[freqnum - 1]
             magMtest1 = np.abs(Mtest[m])
             error2 = 1.000 - magMtest1
@@ -804,7 +808,7 @@ def solve_angle(Iso, Las, layernum, freqnum, frequency=None, isclose=False):
                 error1 = error2
                 angle = Lastemp2.anglesairdeg[freqnum - 1] + amt * dir
                 Lastemp2.change_angle(freqnum, angle)
-                Mtest, tklist, Tdict = m_calc(Isotemp2, Lastemp2)
+                Mtest, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp2)
                 magMtest1 = np.abs(Mtest[m])
                 error2 = 1 - magMtest1
                 if b > iter:
@@ -826,7 +830,7 @@ def solve_angle(Iso, Las, layernum, freqnum, frequency=None, isclose=False):
             dir = 1.000
             amt = 0.5
             Lastemp2.change_angle(freqnum, max1ind)
-            Mtest, tklist, Tdict = m_calc(Isotemp2, Lastemp2)
+            Mtest, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp2)
             angle = Lastemp2.anglesairdeg[freqnum - 1]
             magMtest1 = np.abs(Mtest[m])
             error2 = 1.000 - magMtest1
@@ -841,7 +845,7 @@ def solve_angle(Iso, Las, layernum, freqnum, frequency=None, isclose=False):
                 error1 = error2
                 angle = Lastemp2.anglesairdeg[freqnum - 1] + amt * dir
                 Lastemp2.change_angle(freqnum, angle)
-                Mtest, tklist, Tdict = m_calc(Isotemp2, Lastemp2)
+                Mtest, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp2)
                 magMtest1 = np.abs(Mtest[m])
                 error2 = 1 - magMtest1
                 if b > iter:
@@ -851,7 +855,7 @@ def solve_angle(Iso, Las, layernum, freqnum, frequency=None, isclose=False):
             dir = 1.00
             amt = 0.5
             Lastemp2.change_angle(freqnum, max2ind)
-            Mtest, tklist, Tdict = m_calc(Isotemp2, Lastemp2)
+            Mtest, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp2)
             angle2 = Lastemp2.anglesairdeg[freqnum - 1]
             magMtest2 = np.abs(Mtest[m])
             error2 = 1.000 - magMtest2
@@ -866,7 +870,7 @@ def solve_angle(Iso, Las, layernum, freqnum, frequency=None, isclose=False):
                 error1 = error2
                 angle2 = Lastemp2.anglesairdeg[freqnum - 1] + amt * dir
                 Lastemp2.change_angle(freqnum, angle2)
-                Mtest, tklist, Tdict = m_calc(Isotemp2, Lastemp2)
+                Mtest, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp2)
                 magMtest2 = np.abs(Mtest[m])
                 error2 = 1 - magMtest2
                 if b > iter:
@@ -974,7 +978,7 @@ def solve_frequency(Iso, Las, layernum, freqnum, amt=None, isclose=False):
             Isotemp.layers[k].suppress_absorbances()
 
         dir = 1.00
-        Mtest, tklist, Tdict = m_calc(Isotemp, Lastemp)
+        Mtest, Mdelta, tklist, Tdict = m_calc(Isotemp, Lastemp)
         magMtest = np.abs(Mtest[m])
         freq = Lastemp.frequencies[freqnum - 1]
         error1 = 1 - magMtest
@@ -990,7 +994,7 @@ def solve_frequency(Iso, Las, layernum, freqnum, amt=None, isclose=False):
             error1 = error2
             freq = Lastemp.frequencies[freqnum - 1] + amt * dir
             Lastemp.change_freq(freqnum, freq)
-            Mtest, tklist, Tdict = m_calc(Isotemp, Lastemp)
+            Mtest, Mdelta, tklist, Tdict = m_calc(Isotemp, Lastemp)
             magMtest = np.abs(Mtest[m])
             error2 = 1 - magMtest
             if b > iter:
