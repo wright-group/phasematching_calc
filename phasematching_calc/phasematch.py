@@ -62,7 +62,7 @@ def _calculate_trans(
     of the form 1 = Vertical and != 1 = Horizontal
     The normal list of geometries presume that each input
     is either x or y but not both.
-
+    See calculate_absorbances for the calculation of absorbance in the layer itself.
 
     Tout= transmission coefficient through each layer for the output as well as the final exit into the
     air (m+1 layer array)
@@ -493,9 +493,11 @@ def m_calc(Iso, Las):
         the multiplication.  Methods to do so are available in this module.  See "applyfresneltrans".
 
         Keys in the Tdict are:
-            Tdict['Tin'] : list(float)  (2Darr) Transmission coefficients of the laser inputs based on the geometry,
+            Tdict['Tin'] : list(float)  (2Darr) Fresnel transmission coefficients of the laser inputs based on the geometry,
                 with 1st D as layer and 2nd as freqnum
-            Tdict['Tout'] : list(float)  (1D) Transmission coefficients of  the output based on the geometry .
+
+            Tdict['Tout'] : list(float)  (1D) Fresnel transmission coefficients of  the output based on the geometry .
+
             Tdict['launchangledeg'] : list(float) 1D launch angle of output in degrees in air at cartesian coordinate
                 specified by geometry
     """
@@ -539,6 +541,8 @@ def m_calc(Iso, Las):
     angleoutx.append(launchanglex)
     angleouty.append(launchangley)
 
+    tkeffvec = np.zeros(numfreqs)
+
     polout = _guess_output_pol(pols)
 
     Tin, Tout = _calculate_trans(
@@ -558,21 +562,22 @@ def m_calc(Iso, Las):
         kxtemp = kx[m]
 
         tktemp = tk[m]
-
+        anglextemp = anglex[m]
+        angleytemp = angley[m]
         aouttemp = aout[m]
         angleoutxtemp = angleoutx[m]
         angleoutytemp = angleouty[m]
         nouttemp = nout[m]
 
-        kout = 2.00 * np.pi * freqout * nouttemp
-
         if xmask[n] == 0.00:
             tkeff = tktemp / np.cos(angleoutytemp)
+            kout = 2.00 * np.pi * freqout * nouttemp * tkeff
             koutx = 0.00
             koutz = kout * np.cos(angleoutytemp)
             kouty = kout * np.sin(angleoutytemp)
         else:
             tkeff = tktemp / np.cos(angleoutxtemp)
+            kout = 2.00 * np.pi * freqout * nouttemp * tkeff
             kouty = 0.00
             koutz = kout * np.cos(angleoutxtemp)
             koutx = kout * np.sin(angleoutxtemp)
@@ -580,31 +585,33 @@ def m_calc(Iso, Las):
         ksumx = ksumy = ksumz = 0.0000
 
         for i in range(numfreqs):
-            ksumx = kcoeffs[i] * kxtemp[i] + ksumx
-            ksumy = kcoeffs[i] * kytemp[i] + ksumy
-            ksumz = kcoeffs[i] * kztemp[i] + ksumz
+            if xmask[i] == 0.00:
+                tkeffvec[i] = tktemp / np.cos(angleytemp[i])
+            else:
+                tkeffvec[i] = tktemp / np.cos(anglextemp[i])
+            ksumx = (kcoeffs[i] * kxtemp[i]) * tkeffvec[i] + ksumx
+            ksumy = (kcoeffs[i] * kytemp[i]) * tkeffvec[i] + ksumy
+            ksumz = (kcoeffs[i] * kztemp[i]) * tkeffvec[i] + ksumz
+
         k4 = np.sqrt(ksumx**2 + ksumy**2 + ksumz**2)
-        dk = k4 - kout
-        dkl = dk * tkeff
-        dal = (
-            0.5
-            * (
-                aouttemp
-                - (
-                    np.abs(kcoeffs[0]) * avectemp[0]
-                    + np.abs(kcoeffs[1]) * avectemp[1]
-                    + np.abs(kcoeffs[2]) * avectemp[2]
-                )
+        dkl = k4 - kout
+
+        dal = 0.5 * (
+            aouttemp * tkeff
+            - (
+                np.abs(kcoeffs[0]) * avectemp[0] * tkeffvec[0]
+                + np.abs(kcoeffs[1]) * avectemp[1] * tkeffvec[1]
+                + np.abs(kcoeffs[2]) * avectemp[2] * tkeffvec[2]
             )
-            * tkeff
         )
+
         Mc1 = np.exp(-aouttemp * tkeff)
         if (dal == 0.00) & (dkl == 0.00):
             Mc2 = 1.00
             Mphasedelta = 0.00
         else:
-            Mc2 = ((1 - np.exp(dal)) ** 2 + 4 * np.exp(dal) * (np.sin(dk * tkeff / 2)) ** 2) / (
-                dal**2 + (dk * tkeff) ** 2
+            Mc2 = ((1 - np.exp(dal)) ** 2 + 4 * np.exp(dal) * (np.sin(dkl / 2)) ** 2) / (
+                dal**2 + (dkl) ** 2
             )
             Mphasedelta = np.arctan(
                 (dkl + np.exp(dal) * (-dkl * np.cos(dkl) + dal * np.sin(dkl)))

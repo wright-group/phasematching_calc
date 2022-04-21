@@ -30,7 +30,7 @@ samp1.load_layer(lay1file, tkcaf2, label="caf2bw")
 las = pc.Lasers.Lasers()
 arr1 = [1800.0, 2700.0, 30000.0]
 las.add_frequencies(arr1)
-arr2 = [20.0, 7.0, 0.0]
+arr2 = [15.0, -6.0, 0.0]
 las.add_angles(arr2)
 arr3 = [-1, 1, 1]
 las.add_k_coeffs(arr3)
@@ -56,8 +56,8 @@ Mlist, Mphase, tklist, Tdict = pc.phasematch.m_calc(samp1, las)
 # A method for creating a 2D array of "Mcalcs" and converting into a
 # WrightTools data object for use in various simulations.
 var1 = np.linspace(2450.00, 2900.00, 46)[:, None]
-var2 = np.linspace(1300.0, 1900.0, 61)[None, :]
-var2a = np.linspace(1300.0, 1900.0, 61)
+var2 = np.linspace(1300.0, 2000.0, 61)[None, :]
+var2a = np.linspace(1300.0, 2000.0, 61)
 
 ch1 = np.zeros([len(var1), len(var2a)])
 for m in range(len(var1)):
@@ -68,7 +68,7 @@ for m in range(len(var1)):
         ch1[m, n] = np.abs(Mlist[1])
 
 
-data = wt.Data(name="FWM cell water w/CaF2 planar DOVE")
+data = wt.Data(name="FWM cell water CaF2 planar DOVE")
 data.create_variable(name="w1", units="wn", values=var1)
 data.create_variable(name="w2", units="wn", values=var2)
 data.create_channel(name="Mfactor", values=ch1)

@@ -41,8 +41,11 @@ var2 = np.linspace(1300.0, 1900.0, 161)[None, :]
 var2a = np.linspace(1300.0, 1900.0, 161)
 
 ch1 = np.zeros([len(var1), len(var2a)])
+ch1a = np.zeros([len(var1), len(var2a)])
 ch2 = np.zeros([len(var1), len(var2a)])
+ch2a = np.zeros([len(var1), len(var2a)])
 ch3 = np.zeros([len(var1), len(var2a)])
+ch3a = np.zeros([len(var1), len(var2a)])
 
 for m in range(len(var1)):
     for n in range(len(var2a)):
@@ -50,9 +53,13 @@ for m in range(len(var1)):
         las.change_freq(2, var2a[n])
         Mlist, Mphase, tklist, Tdict = pc.phasematch.m_calc(samp1, las)
         Alist, Alistout = pc.phasematch.calculate_absorbances(samp1, las)
-        Mlist1a = pc.phasematch.apply_absorbances(Mlist, Alist, Alistout)
-        Mlist1b = pc.phasematch.apply_trans(Mlist1a, Tdict)
+        Mlista = pc.phasematch.apply_absorbances(Mlist, Alist, Alistout)
+        Mlistb = pc.phasematch.apply_trans(Mlista, Tdict)
+        samp1.change_layer(2, thickness=0.0001)
+        Mlist1a, Mphase1a, tklist1a, Tdict1a = pc.phasematch.m_calc(samp1, las)
         ch1[m, n] = Mlist[1]
+        ch1a[m, n] = Mlist1a[1]
+        samp1.change_layer(2, thickness=tkwat)
 
 vec2 = [1, 1, 1]
 las.add_k_coeffs(vec2)
@@ -63,8 +70,14 @@ for m in range(len(var1)):
         las.change_freq(2, var2a[n])
         Mlist2, Mphase, tklist2, Tlist2 = pc.phasematch.m_calc(samp1, las)
         ch2[m, n] = Mlist2[1]
+        samp1.change_layer(2, thickness=0.0001)
+        Mlist2a, Mphase2a, tklist2a, Tdict2a = pc.phasematch.m_calc(samp1, las)
+        ch2a[m, n] = Mlist2a[1]
+        samp1.change_layer(2, thickness=tkwat)
 
 ch3 = ch1 / ch2
+ch3a = ch1a / ch2a
+
 
 data = wt.Data(name="example")
 data.create_variable(name="w1", units="wn", values=var1)
@@ -72,6 +85,7 @@ data.create_variable(name="w2", units="wn", values=var2)
 data.create_channel(name="DOVE", values=ch1)
 data.create_channel(name="TSF", values=ch2)
 data.create_channel(name="DOVE_TSF_RATIO", values=ch3)
+data.create_channel(name="DOVE_TSF_RATIO_thinfilm", values=ch3a)
 data.transform("w1", "w2")
 wt.artists.quick2D(data, channel=0)
 plt.show()
@@ -82,4 +96,6 @@ plt.show()
 wt.artists.quick2D(data, channel=2)
 plt.show()
 
+wt.artists.quick2D(data, channel=3)
+plt.show()  # should be 1 for all data points or very close to it
 pass
