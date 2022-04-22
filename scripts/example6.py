@@ -33,22 +33,22 @@ arr4 = [1, 1, 1]
 las4.add_pols(arr4)
 las4.change_geometry("planar")
 
-angl1 = pc.phasematch.solve_angle(samp1, las4, 2, 2, isclose=True)
+angl1 = pc.phasematch.solve_angle(samp1, las4, 2, 2)
 out = list(angl1)
-print(out[0])
+print(out)
 
 freq = pc.phasematch.solve_frequency(samp1, las4, 2, 3, 20)
 out = list(freq)
-print(out[0])
+print(out)
 
 las4.change_freq(3, out[0])
 
 las4.change_freq(2, 2190.0)
 angle = pc.phasematch.solve_frequency(samp1, las4, 2, 3, 20)
 out2 = list(angle)
-print(out2[0])
+print(out2)
 
 las4.change_freq(3, out[0])
 angle = pc.phasematch.solve_angle(samp1, las4, 2, 2, isclose=False)
 out3 = list(angle)
-print(out3[0])
+print(out3)

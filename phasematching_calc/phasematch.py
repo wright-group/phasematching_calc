@@ -792,13 +792,13 @@ def solve_angle(Iso, Las, layernum, freqnum, frequency=None, isclose=False):
         return Interval(0, angledeg)
     else:
         m = layernum - 1
-        tol = 0.0001
+        tol = 0.000001
         iter = 50
         for k in range(layernum):
             Isotemp2.layers[k].suppress_absorbances()
 
         if isclose:
-            amt = 0.5
+            amt = 0.1
             Mtest, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp2)
             angle = Lastemp.anglesairdeg[freqnum - 1]
             magMtest1 = np.abs(Mtest[m])
@@ -947,9 +947,13 @@ def solve_frequency(Iso, Las, layernum, freqnum, amt=None, isclose=False):
         if amt is None:
             amt = 0.001 * freqs[freqnum - 1]
             tol = 0.0001
+        else:
+            tol = 0.0001
     else:
         if amt is None:
             amt = 0.01 * freqs[freqnum - 1]  # a guess
+            tol = 0.001
+        else:
             tol = 0.001
 
     output = _calculate_internals(Isotemp, Lastemp, zerofreq=True, zerofreqnum=freqnum)

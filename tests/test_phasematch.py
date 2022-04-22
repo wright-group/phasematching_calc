@@ -40,7 +40,7 @@ def test_pm_mcalcs():
     # single point Mcalc check
     Mlist, Mdeltalist, tklist, Tdict = pc.phasematch.m_calc(samp1, las)
     testoutput = np.abs(Mlist[1])
-    assert np.isclose(testoutput, 0.02978456)
+    assert np.isclose(testoutput, 0.02978188)
 
     # angle estimation for laser 1 in layer 2 with frequency 2600 cm-1
     # using boxcars..test for all angles
@@ -70,7 +70,7 @@ def test_pm_mcalcs():
     assert np.isclose(Mlistout[2], 5.5515857e-15)
 
     Mlistout2 = pc.phasematch.apply_trans(Mlist, Tdict)
-    assert np.isclose(Mlistout2[2], 0.970785)
+    assert np.isclose(Mlistout2[2], 0.967159)
     ####### END SECTION that can be improved next round ##########
 
 
@@ -93,7 +93,7 @@ def test_emptyset():
     samp1.load_layer(lay1file, tkcaf2, label="caf2bw")
 
     las2 = pc.Lasers.Lasers()
-    arr1 = [2700.0, 1800.0, 25000.0]
+    arr1 = [6200.0, 3000.0, 25000.0]
     las2.add_frequencies(arr1)
     arr2 = [15.0, 5.0, 10.0]
     las2.add_angles(arr2)
@@ -103,7 +103,7 @@ def test_emptyset():
     las2.add_pols(arr4)
     las2.change_geometry("boxcars")
 
-    angle = pc.phasematch.solve_angle(samp1, las2, 2, 1, 2600)
+    angle = pc.phasematch.solve_angle(samp1, las2, 2, 1, 6000)
     out = angle
     assert out == S.EmptySet
 
