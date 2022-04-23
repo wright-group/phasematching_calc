@@ -6,6 +6,10 @@ import os
 from config.definitions import ROOT_DIR
 from sympy import *
 
+"""The following example attempts to slice up a single layer into multiple very small layers and compares
+the sum (with phases) to the single layer to see if they are nearly equal.  Errors in how the phase
+or M factor are calculated may manifest as difference and so this example is actually a test for how well
+the calculation works."""
 
 filepath = os.path.join(ROOT_DIR, "tests")
 
@@ -57,7 +61,6 @@ for m in range(len(var1a)):
         las.change_freq(2, var2a[n])
         Mlist, Mphase, tklist, Tdict = pc.phasematch.m_calc(samp1, las)
         Alist, Alistout = pc.phasematch.calculate_absorbances(samp1, las)
-
         ch1[m, n] = np.sqrt(Mlist[0])
         ch1p[m, n] = Mphase[0]
         A1list[m, n] = Alist[0][0]
@@ -93,13 +96,11 @@ for m in range(len(var1a)):
         Mlist, Mphase, tklist, Tdict = pc.phasematch.m_calc(samp1, las)
         ch2[m, n] = Mlist[0] * newtk * newtk
 
-
 A1list_t = np.zeros([len(var1a), len(var2a)])
 A2list_t = np.zeros([len(var1a), len(var2a)])
 
 A1list_t = A1list * thins
 A2list_t = A2list * thins
-
 
 data = wt.Data(name="example")
 data.create_variable(name="w1", units="wn", values=var1)

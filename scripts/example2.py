@@ -8,7 +8,6 @@ from sympy import *
 
 
 filepath = os.path.join(ROOT_DIR, "tests")
-
 lay1file = os.path.join(filepath, "CaF2_Malitson.txt")
 
 tkcaf2 = 0.03

@@ -46,6 +46,8 @@ var2 = np.linspace(2600.00, 3200.00, 61)[:, None]
 var2a = np.linspace(1600.0, 2200.0, 61)
 
 ch1 = np.zeros([len(var1a), len(var2a)])
+test1 = np.zeros([len(var1a), len(var2a)])
+
 mold = int(0)
 for m in range(len(var1a)):
     for n in range(len(var2a)):
@@ -104,10 +106,24 @@ for m in range(len(var1a)):
                 angletemp = angleair2[0]
                 las.change_angle(1, angleair2[0])
 
+
+for m in range(len(var1a)):
+    for n in range(len(var2a)):
+        las.change_freq(1, var1a[n])
+        las.change_freq(2, var2a[m])
+        las.change_angle(1, ch1[m, n])
+        Mlist, Mphase, tklist, Tdict = pc.phasematch.m_calc(samp1, las)
+        test1[m, n] = Mlist[1]
+
+
 data2 = wt.Data(name="angle for lower frequency beam, same side")
 data2.create_variable(name="w1", units="wn", values=var1)
 data2.create_variable(name="w2", units="wn", values=var2)
 data2.create_channel(name="angleforw1", values=ch1)
+data2.create_channel(name="test", values=test1)
 data2.transform("w2", "w1")
-wt.artists.quick2D(data2)
+wt.artists.quick2D(data2, channel=0)
+plt.show()
+
+wt.artists.quick2D(data2, channel=1)
 plt.show()
