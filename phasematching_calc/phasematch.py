@@ -548,6 +548,7 @@ def m_calc(Iso, Las):
     Tin, Tout = _calculate_trans(
         xmask, nvec, anglex, angley, pols, nout, angleoutx, angleouty, polout
     )
+
     Mctemp = 1
 
     koutx = 0.00
@@ -596,34 +597,31 @@ def m_calc(Iso, Las):
         k4 = np.sqrt(ksumx**2 + ksumy**2 + ksumz**2)
         dkl = k4 - kout
 
-        dal = 0.5 * (
-            aouttemp * tkeff
-            - (
-                np.abs(kcoeffs[0]) * avectemp[0] * tkeffvec[0]
-                + np.abs(kcoeffs[1]) * avectemp[1] * tkeffvec[1]
-                + np.abs(kcoeffs[2]) * avectemp[2] * tkeffvec[2]
-            )
-        )
+        dal = 0.5 * aouttemp * tkeff
+
+        for i in range(numfreqs):
+            dal = dal - (np.abs(kcoeffs[i]) * avectemp[i] * tkeffvec[i])
 
         Mc1 = np.exp(-aouttemp * tkeff)
-        if (dal == 0.00) & (dkl == 0.00):
+
+        if (dal == 0.00) & (dkl == 0.00):  # limiting case
             Mc2 = 1.00
-            Mphasedelta = 0.00            
-            #Mphasedelta=np.pi/2
+            Mphasedelta = 0.00
+            # Mphasedelta=np.pi/2
         else:
             Mc2 = ((1 - np.exp(dal)) ** 2 + 4 * np.exp(dal) * (np.sin(dkl / 2)) ** 2) / (
                 dal**2 + (dkl) ** 2
             )
-            
+
             Mphasedelta = np.arctan(
                 (dkl + np.exp(dal) * (-dkl * np.cos(dkl) + dal * np.sin(dkl)))
                 / (-dal + np.exp(dal) * (dal * np.cos(dkl) + dkl * np.sin(dkl)))
             )
-            '''
+            """
             Mphasedelta = np.arctan(
                 (-dal + np.exp(dal) * (dkl * np.sin(dkl) + dal * np.cos(dkl)))
                 / (dkl + np.exp(dal) * (-dkl * np.cos(dkl) + dal * np.sin(dkl)))
-            ) '''
+            ) """
         Mctemp = Mc1 * Mc2
 
         Mlist.append(Mctemp)
@@ -661,8 +659,9 @@ def angle(Iso, Las, layernum, freqnum, frequency=None):
 
     Return
     ------
-    tuple: {anglex,angley}
-        projected angles float (radians) for the selected frequency in that layer according
+    tuple: anglex,angley
+        anglex, angley: float
+        radians) for the selected frequency in that layer according
         to the geometry found in the Lasers object.  NOTE:  User must determine which (or both)
         are to be used.  The xmask or ymask of a geometry is used in methods in this module to do so.
     """
@@ -742,7 +741,12 @@ def solve_angle(Iso, Las, layernum, freqnum, frequency=None, isclose=False, amt=
 
     Return
     ----
-    Sympy: FiniteSet : {theta1,theta2}
+    tuple:  Sympy, Amount
+        Amount: float
+            passes out the most recent amount of changed used per step in the solver.  Useful for
+            speeding up the calculation of an "isclose" routine on repeated uses.
+
+        Sympy: FiniteSet : {theta1,theta2}
            theta1,theta2: float
               original angles in air (degrees) needed for that PM condition.
               theta1 and/or theta2 may be missing if either or both cannot be found as solution
@@ -803,34 +807,34 @@ def solve_angle(Iso, Las, layernum, freqnum, frequency=None, isclose=False, amt=
         iter = 50
         for k in range(layernum):
             Isotemp2.layers[k].suppress_absorbances()
-        
+
         if isclose:
-            if amt is not None:
+            if amt is None:
                 amt = 0.05
-            
+
             Mtest, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp2)
-            angle = Lastemp2.anglesairdeg[freqnum - 1] 
+            angle = Lastemp2.anglesairdeg[freqnum - 1]
             magMtestc = np.abs(Mtest[m])
-                        
+
             anglep = Lastemp2.anglesairdeg[freqnum - 1] + amt * 1.00
             Lastemp.change_angle(freqnum, anglep)
             Mtestp, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp)
             magMtestp = np.abs(Mtestp[m])
 
-            anglen = Lastemp2.anglesairdeg[freqnum - 1] + 2* amt * -1.00
+            anglen = Lastemp2.anglesairdeg[freqnum - 1] + 2 * amt * -1.00
             Lastemp.change_angle(freqnum, anglen)
             Mtestn, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp)
             magMtestn = np.abs(Mtestn[m])
 
-            errorp=magMtestp-magMtestc
-            errorn=magMtestn-magMtestc
+            errorp = magMtestp - magMtestc
+            errorn = magMtestn - magMtestc
 
             if errorp > errorn:
-                dir=1.00
-                magMtest=magMtestc
+                dir = 1.00
+                magMtest = magMtestc
             else:
-                dir=-1.00
-                magMtest=magMtestc
+                dir = -1.00
+                magMtest = magMtestc
 
             error2 = 1.000 - magMtestc
             error1 = error2
@@ -854,7 +858,7 @@ def solve_angle(Iso, Las, layernum, freqnum, frequency=None, isclose=False, amt=
                 flag2 = 0
             angle2 = float("nan")
             flag3 = 1
-        else:
+        else:  # if isclose is false, both solutions are located (two while loops)
             mlist = _m_plot(Isotemp2, Lastemp2, layernum, freqnum, side=1)
             mlist2 = _m_plot(Isotemp2, Lastemp2, layernum, freqnum, side=-1)
             mlist.reverse()
@@ -919,7 +923,7 @@ def solve_angle(Iso, Las, layernum, freqnum, frequency=None, isclose=False, amt=
                 flag3 = 0
 
         if (flag2 == 1) & (flag3 == 1):
-            return FiniteSet() , amt
+            return FiniteSet(), amt
         elif flag2 == 1:
             return FiniteSet(angle2), amt
         elif flag3 == 1:
@@ -1019,27 +1023,27 @@ def solve_frequency(Iso, Las, layernum, freqnum, amt=None, isclose=False):
 
         dir = 1.00
         Mtestc, Mdelta, tklist, Tdict = m_calc(Isotemp, Lastemp)
-        magMtestc = np.abs(Mtest[m])
-        
+        magMtestc = np.abs(Mtestc[m])
+
         freq = Lastemp.frequencies[freqnum - 1] + amt * dir
         Lastemp.change_freq(freqnum, freq)
         Mtestp, Mdelta, tklist, Tdict = m_calc(Isotemp, Lastemp)
         magMtestp = np.abs(Mtestp[m])
 
-        freq = Lastemp.frequencies[freqnum - 1] - 2* amt * dir
+        freq = Lastemp.frequencies[freqnum - 1] - 2 * amt * dir
         Lastemp.change_freq(freqnum, freq)
         Mtestn, Mdelta, tklist, Tdict = m_calc(Isotemp, Lastemp)
         magMtestn = np.abs(Mtestn[m])
 
-        errorp=magMtestp-magMtestc
-        errorn=magMtestn-magMtestc
+        errorp = magMtestp - magMtestc
+        errorn = magMtestn - magMtestc
 
         if errorp > errorn:
-            dir=1.00
-            magMtest=magMtestc
+            dir = 1.00
+            magMtest = magMtestc
         else:
-            dir=-1.00
-            magMtest=magMtestc
+            dir = -1.00
+            magMtest = magMtestc
 
         error1 = 1 - magMtest
         error2 = error1

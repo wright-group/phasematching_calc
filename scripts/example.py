@@ -10,6 +10,7 @@ manner and converted to a WrightTools data object.  Other methods can be employe
 in a WrightSim object or in other simulations.  The other methods found in the phasematching script
 are shown as well."""
 
+"""Example1.  Generation of 2D phasematching plot."""
 
 filepath = os.path.join(ROOT_DIR, "tests")
 
@@ -38,21 +39,6 @@ arr4 = [1, 1, 1]
 las.add_pols(arr4)
 las.change_geometry("planar")
 
-# Test scripts show how the above objects can be saved and loaded.
-
-# single point Mcalc check
-Mlist, Mphase, tklist, Tdict = pc.phasematch.m_calc(samp1, las)
-
-
-# angle estimation for laser 1 in layer 2 with frequency 1750 cm-1
-# using default geometry
-# angle=pc.phasematch.SolveAngle(samp1,las,2,1,1750)
-
-# frequency estimate for a laser 1 in layer 2 to allow for phasematching
-# with the angle in air shown in the Las object above.
-# freq=pc.phasematch.SolveFrequency(samp1, las, 2, 1)
-
-
 # A method for creating a 2D array of "Mcalcs" and converting into a
 # WrightTools data object for use in various simulations.
 var1 = np.linspace(2450.00, 2900.00, 46)[:, None]
@@ -67,7 +53,6 @@ for m in range(len(var1)):
         Mlist, Mphase, tklist, Tlist = pc.phasematch.m_calc(samp1, las)
         ch1[m, n] = np.abs(Mlist[1])
 
-
 data = wt.Data(name="FWM cell water CaF2 planar DOVE")
 data.create_variable(name="w1", units="wn", values=var1)
 data.create_variable(name="w2", units="wn", values=var2)
@@ -75,5 +60,3 @@ data.create_channel(name="Mfactor", values=ch1)
 data.transform("w1", "w2")
 wt.artists.quick2D(data)
 plt.show()
-
-pass

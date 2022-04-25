@@ -44,7 +44,6 @@ for m in range(len(var1)):
         Mlist, Mphase, tklist, Tlist = pc.phasematch.m_calc(samp1, las)
         ch1[m, n] = np.abs(Mlist[0])
 
-
 data = wt.Data(name="CaF2 300 micron boxcars DOVE")
 data.create_variable(name="w1", units="wn", values=var1)
 data.create_variable(name="w2", units="wn", values=var2)
