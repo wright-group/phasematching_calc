@@ -608,15 +608,22 @@ def m_calc(Iso, Las):
         Mc1 = np.exp(-aouttemp * tkeff)
         if (dal == 0.00) & (dkl == 0.00):
             Mc2 = 1.00
-            Mphasedelta = 0.00
+            Mphasedelta = 0.00            
+            #Mphasedelta=np.pi/2
         else:
             Mc2 = ((1 - np.exp(dal)) ** 2 + 4 * np.exp(dal) * (np.sin(dkl / 2)) ** 2) / (
                 dal**2 + (dkl) ** 2
             )
+            
             Mphasedelta = np.arctan(
                 (dkl + np.exp(dal) * (-dkl * np.cos(dkl) + dal * np.sin(dkl)))
                 / (-dal + np.exp(dal) * (dal * np.cos(dkl) + dkl * np.sin(dkl)))
             )
+            '''
+            Mphasedelta = np.arctan(
+                (-dal + np.exp(dal) * (dkl * np.sin(dkl) + dal * np.cos(dkl)))
+                / (dkl + np.exp(dal) * (-dkl * np.cos(dkl) + dal * np.sin(dkl)))
+            ) '''
         Mctemp = Mc1 * Mc2
 
         Mlist.append(Mctemp)
@@ -709,7 +716,7 @@ def _m_plot(Iso, Las, layernum, freqnum, side=1):
     return mlist
 
 
-def solve_angle(Iso, Las, layernum, freqnum, frequency=None, isclose=False):
+def solve_angle(Iso, Las, layernum, freqnum, frequency=None, isclose=False, amt=None):
     """
     Given an Isotropic Sample, a layer number and frequency number used in a geometry defined in Las object,
     determine the input angle (in air) required for phasematching that frequency. Uses Sympy Set.
@@ -789,21 +796,43 @@ def solve_angle(Iso, Las, layernum, freqnum, frequency=None, isclose=False):
 
     if flag == 1:
         angledeg = calculate_original_crit_angle(Iso, Las, layernum, freqnum, frequency)
-        return Interval(0, angledeg)
+        return Interval(0, angledeg), 0.00
     else:
         m = layernum - 1
-        tol = 0.000001
-        iter = 80
+        tol = 0.0001
+        iter = 50
         for k in range(layernum):
             Isotemp2.layers[k].suppress_absorbances()
-
+        
         if isclose:
-            amt = 0.05
+            if amt is not None:
+                amt = 0.05
+            
             Mtest, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp2)
-            angle = Lastemp.anglesairdeg[freqnum - 1]
-            magMtest1 = np.abs(Mtest[m])
-            error2 = 1.000 - magMtest1
-            dir = 1.000
+            angle = Lastemp2.anglesairdeg[freqnum - 1] 
+            magMtestc = np.abs(Mtest[m])
+                        
+            anglep = Lastemp2.anglesairdeg[freqnum - 1] + amt * 1.00
+            Lastemp.change_angle(freqnum, anglep)
+            Mtestp, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp)
+            magMtestp = np.abs(Mtestp[m])
+
+            anglen = Lastemp2.anglesairdeg[freqnum - 1] + 2* amt * -1.00
+            Lastemp.change_angle(freqnum, anglen)
+            Mtestn, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp)
+            magMtestn = np.abs(Mtestn[m])
+
+            errorp=magMtestp-magMtestc
+            errorn=magMtestn-magMtestc
+
+            if errorp > errorn:
+                dir=1.00
+                magMtest=magMtestc
+            else:
+                dir=-1.00
+                magMtest=magMtestc
+
+            error2 = 1.000 - magMtestc
             error1 = error2
             b = 0
             while error2 > tol:
@@ -816,12 +845,12 @@ def solve_angle(Iso, Las, layernum, freqnum, frequency=None, isclose=False):
                 angle = Lastemp2.anglesairdeg[freqnum - 1] + amt * dir
                 Lastemp2.change_angle(freqnum, angle)
                 Mtest, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp2)
-                magMtest1 = np.abs(Mtest[m])
-                error2 = 1 - magMtest1
+                magMtest = np.abs(Mtest[m])
+                error2 = 1 - magMtest
                 if b > iter:
                     flag2 = 1
                     break
-            if np.isclose(magMtest1, 1.00, rtol=tol * 10):
+            if np.isclose(magMtest, 1.00, rtol=tol * 10):
                 flag2 = 0
             angle2 = float("nan")
             flag3 = 1
@@ -890,13 +919,13 @@ def solve_angle(Iso, Las, layernum, freqnum, frequency=None, isclose=False):
                 flag3 = 0
 
         if (flag2 == 1) & (flag3 == 1):
-            return FiniteSet()
+            return FiniteSet() , amt
         elif flag2 == 1:
-            return FiniteSet(angle2)
+            return FiniteSet(angle2), amt
         elif flag3 == 1:
-            return FiniteSet(angle)
+            return FiniteSet(angle), amt
         else:
-            return FiniteSet(angle, angle2)
+            return FiniteSet(angle, angle2), amt
 
 
 def solve_frequency(Iso, Las, layernum, freqnum, amt=None, isclose=False):
@@ -989,9 +1018,29 @@ def solve_frequency(Iso, Las, layernum, freqnum, amt=None, isclose=False):
             Isotemp.layers[k].suppress_absorbances()
 
         dir = 1.00
-        Mtest, Mdelta, tklist, Tdict = m_calc(Isotemp, Lastemp)
-        magMtest = np.abs(Mtest[m])
-        freq = Lastemp.frequencies[freqnum - 1]
+        Mtestc, Mdelta, tklist, Tdict = m_calc(Isotemp, Lastemp)
+        magMtestc = np.abs(Mtest[m])
+        
+        freq = Lastemp.frequencies[freqnum - 1] + amt * dir
+        Lastemp.change_freq(freqnum, freq)
+        Mtestp, Mdelta, tklist, Tdict = m_calc(Isotemp, Lastemp)
+        magMtestp = np.abs(Mtestp[m])
+
+        freq = Lastemp.frequencies[freqnum - 1] - 2* amt * dir
+        Lastemp.change_freq(freqnum, freq)
+        Mtestn, Mdelta, tklist, Tdict = m_calc(Isotemp, Lastemp)
+        magMtestn = np.abs(Mtestn[m])
+
+        errorp=magMtestp-magMtestc
+        errorn=magMtestn-magMtestc
+
+        if errorp > errorn:
+            dir=1.00
+            magMtest=magMtestc
+        else:
+            dir=-1.00
+            magMtest=magMtestc
+
         error1 = 1 - magMtest
         error2 = error1
         iter = 500
