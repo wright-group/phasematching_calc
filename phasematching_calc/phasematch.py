@@ -600,7 +600,7 @@ def m_calc(Iso, Las):
         dal = 0.5 * aouttemp * tkeff
 
         for i in range(numfreqs):
-            dal = dal - (np.abs(kcoeffs[i]) * avectemp[i] * tkeffvec[i])
+            dal = dal - 0.5 * (np.abs(kcoeffs[i]) * avectemp[i] * tkeffvec[i])
 
         Mc1 = np.exp(-aouttemp * tkeff)
 

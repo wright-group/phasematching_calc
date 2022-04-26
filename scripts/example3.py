@@ -73,17 +73,21 @@ for m in range(len(var1a)):
             if np.any(list(angleair2)):
                 ch1[m, n] = list(angleair2)[0]
                 las.change_angle(1, list(angleair2)[0])
+            else:
+                ch1[m, n] = float("nan")
         else:
             """This final step is testing whether it is better to use the original solve upon a
             new scanline or to stick with the recent solve.  Currently in place is to roll back to
             the original solve.  It then updates angletemp for the next scanline."""
             las.change_angle(1, angletemp)
-            angleair2, amt = pc.phasematch.solve_angle(samp1, las, 2, 1, isclose=True, amt=amount)
+            angleair2, amt = pc.phasematch.solve_angle(samp1, las, 2, 1, isclose=True)
             mold = m
             if np.any(list(angleair2)):
                 ch1[m, n] = list(angleair2)[0]
                 angletemp = list(angleair2)[0]
                 las.change_angle(1, list(angleair2)[0])
+            else:
+                ch1[m, n] = float("nan")
 
 data = wt.Data(name="angle solves")
 data.create_variable(name="w1", units="wn", values=var1)
@@ -106,14 +110,19 @@ for m in range(len(var1a)):
             if np.any(list(angleair2)):
                 ch2[m, n] = list(angleair2)[0]
                 las.change_angle(1, list(angleair2)[0])
+            else:
+                ch2[m, n] = float("nan")
         else:
             las.change_angle(1, angletemp)
-            angleair2, amt = pc.phasematch.solve_angle(samp1, las, 2, 1, isclose=True, amt=amount)
+            angleair2, amt = pc.phasematch.solve_angle(samp1, las, 2, 1, isclose=True)
             mold = m
             if np.any(list(angleair2)):
-                ch2[m, n] = list(angleair2)[0]
-                angletemp = list(angleair2)[0]
-                las.change_angle(1, list(angleair2)[0])
+                ch2[m, n] = list(angleair2)[-1]
+                angletemp = list(angleair2)[-1]
+                las.change_angle(1, list(angleair2)[-1])
+            else:
+                ch2[m, n] = float("nan")
+
 time2 = time.time()
 
 print(time2 - time1)

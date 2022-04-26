@@ -44,7 +44,7 @@ def test_pm_mcalcs():
 
     # angle estimation for laser 1 in layer 2 with frequency 2600 cm-1
     # using boxcars..test for all angles
-    angle = pc.phasematch.solve_angle(samp1, las, 2, 1, 2600)
+    angle, amt = pc.phasematch.solve_angle(samp1, las, 2, 1, 2600)
     assert np.isclose(
         float(angle.end), float(77.9637423)
     )  # angle is an Interval, Interval.end is a Sympy function
@@ -103,7 +103,7 @@ def test_emptyset():
     las2.add_pols(arr4)
     las2.change_geometry("boxcars")
 
-    angle = pc.phasematch.solve_angle(samp1, las2, 2, 1, 6000)
+    angle, amt = pc.phasematch.solve_angle(samp1, las2, 2, 1, 6000)
     out = angle
     assert out == S.EmptySet
 
