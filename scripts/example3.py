@@ -5,7 +5,7 @@ import numpy as np
 import os
 from config.definitions import ROOT_DIR
 from sympy import *
-import time
+
 
 """Example 3.  Simulation of a map of expected angles to achieve phasematching in the liquid layer
 of a multilayer cell.  Plots separate both possible solutions (negative and positive)."""
@@ -46,7 +46,7 @@ las.change_geometry("planar")
 var1 = np.linspace(1600.0, 2200.0, 61)[None, :]
 var1a = np.linspace(1600.0, 2200.0, 61)
 var2 = np.linspace(2600.00, 3200.00, 61)[:, None]
-var2a = np.linspace(1600.0, 2200.0, 61)
+var2a = np.linspace(2600.0, 3200.0, 61)
 
 ch1 = np.zeros([len(var1a), len(var2a)])
 ch2 = np.zeros([len(var1a), len(var2a)])
@@ -80,7 +80,7 @@ for m in range(len(var1a)):
             new scanline or to stick with the recent solve.  Currently in place is to roll back to
             the original solve.  It then updates angletemp for the next scanline."""
             las.change_angle(1, angletemp)
-            angleair2, amt = pc.phasematch.solve_angle(samp1, las, 2, 1, isclose=True)
+            angleair2, amt = pc.phasematch.solve_angle(samp1, las, 2, 1, isclose=True, amt=amount)
             mold = m
             if np.any(list(angleair2)):
                 ch1[m, n] = list(angleair2)[0]
@@ -93,7 +93,7 @@ data = wt.Data(name="angle solves")
 data.create_variable(name="w1", units="wn", values=var1)
 data.create_variable(name="w2", units="wn", values=var2)
 
-time1 = time.time()
+
 # Other solution.
 for m in range(len(var1a)):
     for n in range(len(var2a)):
@@ -123,10 +123,6 @@ for m in range(len(var1a)):
             else:
                 ch2[m, n] = float("nan")
 
-time2 = time.time()
-
-print(time2 - time1)
-
 for m in range(len(var1a)):
     for n in range(len(var2a)):
         las.change_freq(1, var1a[n])
@@ -136,13 +132,15 @@ for m in range(len(var1a)):
         las.change_angle(1, ch2[m, n])
         Mlist2, Mphase, tklist, Tdict = pc.phasematch.m_calc(samp1, las)
         test1[m, n] = -np.log10(Mlist[1])
+        # test1[m, n] = Mlist[1]
         test2[m, n] = -np.log10(Mlist2[1])
-
+        # test2[m, n] = Mlist2[1]
 
 data.create_channel(name="angleforw1_negative", values=ch1)
-data.channels[0].signed = True
+# data.channels[0].signed = True
 data.create_channel(name="angleforw1_positive", values=ch2)
-data.channels[1].signed = True
+# data.channels[1].signed = True
+data.channels[1].null = 0
 data.create_channel(
     name="test1", values=test1
 )  # Tests to see if all M factors calculated are good

@@ -1,10 +1,8 @@
-from distutils.log import error
 import numpy as np
 from ._lasers import Lasers
 from ._isosample import IsoSample
 from ._isosample import Layer
 from sympy import S, FiniteSet, Interval, oo
-import matplotlib.pyplot as plt
 import time
 
 # prototypes
@@ -486,7 +484,7 @@ def m_calc(Iso, Las):
     tklist :  list(float)
         the effective thickness of each layer as pertaining to the launched output wave, i.e.
         layer thickness / cosine(angleout)
-    Tdict :
+    Tdict :  dict
         dictionary with entries related to transmission coefficients of the lasers and output
         through the sample layers.  NOTE:  This application has not been performed on the entries in Mlist.
         The coefficients rely on linear polarizations defined in the Laser object.  User must perform
@@ -695,10 +693,14 @@ def angle(Iso, Las, layernum, freqnum, frequency=None):
 
 
 def _m_plot(Iso, Las, layernum, freqnum, side=1):
+    """Returns a full list of M factors for a complete input list of angles down to or up to zero.
+    The parameter determines which of the two."""
+    limit = int(75)  # degrees
+
     if side == 1:
-        anglelist = list(range(75, 0, -1))
+        anglelist = list(range(limit, 0, -1))
     else:
-        anglelist = list(range(-75, 0, 1))
+        anglelist = list(range(-limit, 0, 1))
 
     mlist = list()
     Lastemp2 = Las
@@ -742,9 +744,6 @@ def solve_angle(Iso, Las, layernum, freqnum, frequency=None, isclose=False, amt=
     Return
     ----
     tuple:  Sympy, Amount
-        Amount: float
-            passes out the most recent amount of changed used per step in the solver.  Useful for
-            speeding up the calculation of an "isclose" routine on repeated uses.
 
         Sympy: FiniteSet : {theta1,theta2}
            theta1,theta2: float
@@ -753,6 +752,11 @@ def solve_angle(Iso, Las, layernum, freqnum, frequency=None, isclose=False, amt=
               if isclose is set to True, only one solution at most will be found.
            OR Interval(0,anglemax)
               anglemax (deg) if all angles allowed until restricted by a critical angle before the layernum
+
+        Amount: float
+            passes out the most recent amount of changed used per step in the solver.  Useful for
+            speeding up the calculation of an "isclose" routine on repeated uses.
+
     """
     if isinstance(Iso, IsoSample) == False:
         return ValueError("first argument not an object of class IsotropicSample")
@@ -803,8 +807,8 @@ def solve_angle(Iso, Las, layernum, freqnum, frequency=None, isclose=False, amt=
         return Interval(0, angledeg), 0.00
     else:
         m = layernum - 1
-        tol = 0.0001
-        iter = 50
+        tol = 0.001
+        iter = 80
         for k in range(layernum):
             Isotemp2.layers[k].suppress_absorbances()
 
@@ -858,7 +862,7 @@ def solve_angle(Iso, Las, layernum, freqnum, frequency=None, isclose=False, amt=
                 flag2 = 0
             angle2 = float("nan")
             flag3 = 1
-        else:  # if isclose is false, both solutions are located (two while loops)
+        else:  # if isclose is false, both (if possible) solutions are located (two while loops)
             mlist = _m_plot(Isotemp2, Lastemp2, layernum, freqnum, side=1)
             mlist2 = _m_plot(Isotemp2, Lastemp2, layernum, freqnum, side=-1)
             mlist.reverse()
@@ -947,18 +951,22 @@ def solve_frequency(Iso, Las, layernum, freqnum, amt=None, isclose=False):
        layer number in which to solve for angle
     freqnum : int
        laser position to solve for(defined by geometry)
-    amount : float (optional)
+    amt : float (optional)
        amount to change frequency by per convergence step.  Approximates internally if set to None.
     isclose : bool (optional)
        uses finer algorithm if set to True
 
     Return
     ----
-    Sympy: FiniteSet : {frequency} : frequency float
-         (cm-1) of frequency needed for that PM condition.
-         OR FiniteSet {} if a solution cannot be found.
-         OR Interval(0,oo) if all real frequencies greater than zero are found
-         OR Interval(0,upperfreq) : upperfreq float if restricted via some critical angle before the layernum.
+    tuple:  Sympy, amount
+        Sympy: FiniteSet : {frequency} : frequency float
+             (cm-1) of frequency needed for that PM condition.
+             OR FiniteSet {} if a solution cannot be found.
+             OR Interval(0,oo) if all real frequencies greater than zero are found
+        amount:  float
+            Last amount of frequency per convergence step.  Useful as a return for future solves (see Inputs)
+
+    Interval is not restricted to critical angle assessments at this time.
     """
     if isinstance(Iso, IsoSample) == False:
         return ValueError("first argument not an object of class IsotropicSample")
@@ -974,6 +982,7 @@ def solve_frequency(Iso, Las, layernum, freqnum, amt=None, isclose=False):
     numfreqs = len(freqs)
 
     Isotemp = Iso
+    Isotemp2 = Iso
     Lastemp = Las
 
     if isclose:
@@ -981,12 +990,14 @@ def solve_frequency(Iso, Las, layernum, freqnum, amt=None, isclose=False):
             amt = 0.001 * freqs[freqnum - 1]
             tol = 0.0001
         else:
+
             tol = 0.0001
     else:
         if amt is None:
             amt = 0.01 * freqs[freqnum - 1]  # a guess
             tol = 0.001
         else:
+
             tol = 0.001
 
     output = _calculate_internals(Isotemp, Lastemp, zerofreq=True, zerofreqnum=freqnum)
@@ -1019,20 +1030,20 @@ def solve_frequency(Iso, Las, layernum, freqnum, amt=None, isclose=False):
         m = layernum - 1
 
         for k in range(layernum):
-            Isotemp.layers[k].suppress_absorbances()
+            Isotemp2.layers[k].suppress_absorbances()
 
         dir = 1.00
-        Mtestc, Mdelta, tklist, Tdict = m_calc(Isotemp, Lastemp)
+        Mtestc, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp)
         magMtestc = np.abs(Mtestc[m])
 
         freq = Lastemp.frequencies[freqnum - 1] + amt * dir
         Lastemp.change_freq(freqnum, freq)
-        Mtestp, Mdelta, tklist, Tdict = m_calc(Isotemp, Lastemp)
+        Mtestp, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp)
         magMtestp = np.abs(Mtestp[m])
 
         freq = Lastemp.frequencies[freqnum - 1] - 2 * amt * dir
         Lastemp.change_freq(freqnum, freq)
-        Mtestn, Mdelta, tklist, Tdict = m_calc(Isotemp, Lastemp)
+        Mtestn, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp)
         magMtestn = np.abs(Mtestn[m])
 
         errorp = magMtestp - magMtestc
@@ -1058,7 +1069,7 @@ def solve_frequency(Iso, Las, layernum, freqnum, amt=None, isclose=False):
             error1 = error2
             freq = Lastemp.frequencies[freqnum - 1] + amt * dir
             Lastemp.change_freq(freqnum, freq)
-            Mtest, Mdelta, tklist, Tdict = m_calc(Isotemp, Lastemp)
+            Mtest, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp)
             magMtest = np.abs(Mtest[m])
             error2 = 1 - magMtest
             if b > iter:
@@ -1066,9 +1077,9 @@ def solve_frequency(Iso, Las, layernum, freqnum, amt=None, isclose=False):
                 break
 
         if flag == 2:
-            return FiniteSet()
+            return FiniteSet(), amt
         else:
-            return FiniteSet(freq)
+            return FiniteSet(freq), amt
 
 
 def calculate_ts(Iso, Las):
