@@ -24,8 +24,7 @@ _Applied Spectroscopy_ 43(7) 1195.  The M factors are calculated in each layer a
 layers by the Snell angle of refractions.   The M factor is a "squared norm" term and is therefore a real number.
 The complex term found inside the term prior to squaring implies that each layer could have a "phase factor"
 (exp(i*Delta)) relative to the previous layer(s), should more accurate modeling of phase effects between layers
-be necessary.    Otherwise, to low order, the M factor does not contain dependences on specific four-wave mixing
-processes relative to others, and so it is not necessary to leave the expression in its complex form.
+be necessary.
 
 Mcalc returns a tuple (1,2,3,4) of 4 outputs:
 
@@ -52,7 +51,7 @@ a "squared" term) or not (if one is just using the program to model beam transmi
 terms have a different tracking consideration.  More to follow in the "applyfresneltrans" function.
 
 
-`solve_angle(Iso,Las,layernum,freqnum, frequency=None, isclose=False)`
+`solve_angle(Iso,Las,layernum,freqnum, frequency=None, amt=None, isclose=False)`
 ----------------------------------------------------
 Given the two objects, the functions attempts to solve through brute force iteration the angle that the
 input at freqnum needs to make in the layernum to achieve phasematching.   The iteration proceeds through
@@ -60,11 +59,14 @@ directional and smaller amounts until convergence is met by an internal toleranc
 the function will work with that frequency in place of the one found in the Lasers object.  The brute force
 algorithm starts at the angle originally specified in the Lasers object.
 
-`solve_angle` returns a Sympy Set of Angles.  It could be a single item `FiniteSet`, a double item
+`solve_angle` returns a tuple: Sympy Set of Angles, amount.  It could be a single item `FiniteSet`, a double item
 `FiniteSet`, an `Interval`, or an `EmptySet` if no solution is found.  An `Interval`` indicates a full range of
 angles are possible, which can happen if the process can be phasematcheable in that manner.  The endpoint of the
 interval is determined by critical angles that may be found between layers.  The return is for the original angle
-in air of that input in degrees.
+in air of that input in degrees.  Amount is a value that can be used as an argument in later calls.
+
+The keyword arg `amt` if not None directs the solver to work in increments given by its value.  This can
+speed up the solving process for ``isclose``.  Use the amount from the tuple returns if needed.
 
 The brute force algorithm is greatly speeded if ``isclose`` is set to ``True``.  However, only one solution will
 be found this way.
@@ -82,10 +84,11 @@ roughly 1% of the original frequency of the input.
 Setting `isclose` to `True` is not equivalent to that in `solve_angle`.  In this application, the tolerance is
 improved.
 
-`solve_frequency` returns a Sympy Set of Frequencies.  It could be a single item `FiniteSet`, an `Interval`, or an `EmptySet`
-if no solution is found.  An `Interval`` indicates a full range of angles are possible, which can happen if
+`solve_frequency` returns a tuple:  Sympy Set of Frequencies, amount.  It could be a single item `FiniteSet`, an `Interval`,
+or an `EmptySet` if no solution is found.  An `Interval`` indicates a full range of angles are possible, which can happen if
 the process can be phasematcheable in that manner.  The endpoint is usually set to Infinity (`oo`), though a future
-modification may end up limiting the frequency to a critical angle that may be found between layers.
+modification may end up limiting the frequency to a critical angle that may be found between layers.  See `solve_angle` for
+information on what `amount` means.
 
 
 `calculate_absorbances(Iso, Las)`

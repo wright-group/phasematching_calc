@@ -33,7 +33,7 @@ flycheck_*.el
 # images
 *.jpg
 *.gif
-*.png
+#*.png
 *.svg
 *.ico
 

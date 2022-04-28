@@ -432,6 +432,31 @@ def _stack_critical_angles(narr, critarr, layernum, freqnum):
     return crit
 
 
+def _m_plot(Iso, Las, layernum, freqnum, side=1):
+    """Returns a full list of M factors for a complete input list of angles down to or up to zero.
+    The parameter determines which of the two."""
+    limit = int(75)  # degrees
+
+    if side == 1:
+        anglelist = list(range(limit, 0, -1))
+    else:
+        anglelist = list(range(-limit, 0, 1))
+
+    mlist = list()
+    Lastemp2 = Las
+    Isotemp2 = Iso
+    for k in range(layernum):
+        Isotemp2.layers[k].suppress_absorbances()
+
+    for m in range(len(anglelist)):
+        Lastemp2.change_angle(freqnum, anglelist[m])
+        Mfac, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp2)
+        # alist.append(m)
+        mlist.append(Mfac[layernum - 1])
+
+    return mlist
+
+
 def calculate_original_crit_angle(Iso, Las, layernum, freqnum, frequency=None):
     """calculates the maximum original angle in air to result in the critical angle at the
     layernum : layernum+1 interface (or numpy pi/2 if there are no critical angles, or
@@ -690,31 +715,6 @@ def angle(Iso, Las, layernum, freqnum, frequency=None):
         lasanglex = np.arcsin(nold / n * np.sin(lasanglex))
         lasangley = np.arcsin(nold / n * np.sin(lasangley))
     return lasanglex, lasangley
-
-
-def _m_plot(Iso, Las, layernum, freqnum, side=1):
-    """Returns a full list of M factors for a complete input list of angles down to or up to zero.
-    The parameter determines which of the two."""
-    limit = int(75)  # degrees
-
-    if side == 1:
-        anglelist = list(range(limit, 0, -1))
-    else:
-        anglelist = list(range(-limit, 0, 1))
-
-    mlist = list()
-    Lastemp2 = Las
-    Isotemp2 = Iso
-    for k in range(layernum):
-        Isotemp2.layers[k].suppress_absorbances()
-
-    for m in range(len(anglelist)):
-        Lastemp2.change_angle(freqnum, anglelist[m])
-        Mfac, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp2)
-        # alist.append(m)
-        mlist.append(Mfac[layernum - 1])
-
-    return mlist
 
 
 def solve_angle(Iso, Las, layernum, freqnum, frequency=None, isclose=False, amt=None):
