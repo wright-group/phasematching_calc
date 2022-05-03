@@ -19,7 +19,8 @@ lay2file = os.path.join(filepath, "H2O_1.txt")
 
 
 tkcaf2 = 0.02  # cm
-tkwater = 0.01  # cm
+tkwater = 0.006  # cm
+
 
 # generation of a IsoSample
 samp1 = pc.IsoSample.IsoSample(description="FWM Cell")
