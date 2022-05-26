@@ -14,20 +14,21 @@ are shown as well."""
 
 filepath = os.path.join(ROOT_DIR, "tests")
 
-lay1file = os.path.join(filepath, "CaF2_Malitson.txt")
-lay2file = os.path.join(filepath, "H2O_1.txt")
+lay1file = os.path.join(filepath, "sapphire1.txt")
+lay2file = os.path.join(filepath, "D2O_paste.txt")
+lay3file = os.path.join(filepath, "H2O_1.txt")
 
-
-tkcaf2 = 0.02  # cm
+tksap = 0.02  # cm
 tkwater = 0.006  # cm
 
 
 # generation of a IsoSample
 samp1 = pc.IsoSample.IsoSample(description="FWM Cell")
 
-samp1.load_layer(lay1file, tkcaf2, label="caf2fw")
-samp1.load_layer(lay2file, tkwater, label="water")
-samp1.load_layer(lay1file, tkcaf2, label="caf2bw")
+samp1.load_layer(lay1file, tksap, label="sapfw")
+# samp1.load_layer(lay2file, tkwater, label="water")
+samp1.load_layer(lay3file, tkwater, label="water")
+samp1.load_layer(lay1file, tksap, label="sapbw")
 
 # generation of a Lasers object.
 las = pc.Lasers.Lasers()
@@ -43,9 +44,9 @@ las.change_geometry("planar")
 
 # A method for creating a 2D array of "Mcalcs" and converting into a
 # WrightTools data object for use in various simulations.
-var1 = np.linspace(2450.00, 2850.00, 41)[:, None]
-var2 = np.linspace(1450.0, 2000.0, 56)[None, :]
-var2a = np.linspace(1450.0, 2000.0, 56)
+var1 = np.linspace(2500.00, 4500.00, 201)[:, None]
+var2 = np.linspace(1200.0, 2000.0, 81)[None, :]
+var2a = np.linspace(1200.0, 2000.0, 81)
 
 ch1 = np.zeros([len(var1), len(var2a)])
 for m in range(len(var1)):

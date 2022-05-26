@@ -611,14 +611,23 @@ def m_calc(Iso, Las):
         for i in range(numfreqs):
             if xmask[i] == 0.00:
                 tkeffvec[i] = tktemp / np.cos(angleytemp[i])
+                k = np.sqrt(kytemp[i] ** 2 + kztemp[i] ** 2)
+                kproj = k * np.cos(angleytemp[i] - angleoutytemp)
             else:
                 tkeffvec[i] = tktemp / np.cos(anglextemp[i])
-            ksumx = (kcoeffs[i] * kxtemp[i]) * tkeffvec[i] + ksumx
-            ksumy = (kcoeffs[i] * kytemp[i]) * tkeffvec[i] + ksumy
-            ksumz = (kcoeffs[i] * kztemp[i]) * tkeffvec[i] + ksumz
-            # ksumx = (kcoeffs[i] * kxtemp[i]) * tkeff + ksumx
-            # ksumy = (kcoeffs[i] * kytemp[i]) * tkeff + ksumy
-            # ksumz = (kcoeffs[i] * kztemp[i]) * tkeff + ksumz
+                k = np.sqrt(kxtemp[i] ** 2 + kztemp[i] ** 2)
+                kproj = k * np.cos(anglextemp[i] - angleoutxtemp)
+            """
+            #ksumx = (kcoeffs[i] * kxtemp[i]) * tkeffvec[i] + ksumx
+            #ksumy = (kcoeffs[i] * kytemp[i]) * tkeffvec[i] + ksumy
+            #ksumz = (kcoeffs[i] * kztemp[i]) * tkeffvec[i] + ksumz
+            #ksumx = (kcoeffs[i] * kxtemp[i]) * tkeff + ksumx #B
+            #ksumy = (kcoeffs[i] * kytemp[i]) * tkeff + ksumy #B
+            #ksumz = (kcoeffs[i] * kztemp[i]) * tkeff + ksumz #B
+            """
+            ksumx = 0  # C
+            ksumy = 0
+            ksumz = (kcoeffs[i] * kproj) * tkeff + ksumz
 
         k4 = np.sqrt(ksumx**2 + ksumy**2 + ksumz**2)
         dkl = k4 - kout
@@ -626,7 +635,7 @@ def m_calc(Iso, Las):
         dal = 0.5 * aouttemp * tkeff
 
         for i in range(numfreqs):
-            dal = dal - 0.5 * (np.abs(kcoeffs[i]) * avectemp[i] * tkeffvec[i])
+            dal = dal - 0.5 * (np.abs(kcoeffs[i]) * avectemp[i] * tkeffvec[i])  # C, #A
             # dal = dal - 0.5 * (np.abs(kcoeffs[i]) * avectemp[i] * tkeff)
 
         Mc1 = np.exp(-aouttemp * tkeff)

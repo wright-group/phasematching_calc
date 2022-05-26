@@ -12,7 +12,7 @@ of a multilayer cell.  Plots separate both possible solutions (negative and posi
 
 filepath = os.path.join(ROOT_DIR, "tests")
 
-lay1file = os.path.join(filepath, "CH3CN_paste_1.txt")
+lay1file = os.path.join(filepath, "D2O_paste.txt")
 lay2file = os.path.join(filepath, "sapphire1.txt")
 lay3file = os.path.join(filepath, "CaF2_Malitson.txt")
 
@@ -24,18 +24,18 @@ tkcaf2 = 0.02
 samp1 = pc.IsoSample.IsoSample()
 desc = "FWM cell"
 samp1.description = desc
-# samp1.load_layer(lay1file, tksap, label="sapphire")
-samp1.load_layer(lay3file, tkcaf2, label="caf2")
-samp1.load_layer(lay1file, tkacn, label="acn")
-samp1.load_layer(lay3file, tkcaf2, label="caf2bw")
-# samp1.load_layer(lay1file, tksap, label="sapphire")
+samp1.load_layer(lay1file, tksap, label="sapphire")
+samp1.load_layer(lay3file, tkcaf2, label="d2o")
+# samp1.load_layer(lay1file, tkacn, label="acn")
+# samp1.load_layer(lay3file, tkcaf2, label="caf2bw")
+samp1.load_layer(lay1file, tksap, label="sapphire")
 
 
 # generation of a Lasers object.
 las = pc.Lasers.Lasers()
 arr1 = [2200.0, 3150.0, 17200.0]
 las.add_frequencies(arr1)
-arr2 = [18.0, 8.0, 0.0]
+arr2 = [23.0, -8.0, 0.0]
 las.add_angles(arr2)
 arr3 = [-1, 1, 1]
 las.add_k_coeffs(arr3)
@@ -43,10 +43,10 @@ arr4 = [1, 1, 1]
 las.add_pols(arr4)
 las.change_geometry("planar")
 
-var1 = np.linspace(1600.0, 2200.0, 61)[None, :]
-var1a = np.linspace(1600.0, 2200.0, 61)
-var2 = np.linspace(2600.00, 3200.00, 61)[:, None]
-var2a = np.linspace(2600.0, 3200.0, 61)
+var1 = np.linspace(1200.0, 2100.0, 91)[None, :]
+var1a = np.linspace(1200.0, 2100.0, 91)
+var2 = np.linspace(2500.00, 4500.00, 201)[:, None]
+var2a = np.linspace(2500.0, 4500.0, 201)
 
 ch1 = np.zeros([len(var1a), len(var2a)])
 ch2 = np.zeros([len(var1a), len(var2a)])
