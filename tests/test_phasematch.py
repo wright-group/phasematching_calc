@@ -40,7 +40,7 @@ def test_pm_mcalcs():
     # single point Mcalc check
     Mlist, Mdeltalist, tklist, Tdict = pc.phasematch.m_calc(samp1, las)
     testoutput = np.abs(Mlist[1])
-    assert np.isclose(testoutput, 0.02978188)
+    assert np.isclose(testoutput, 0.029799686)
 
     # angle estimation for laser 1 in layer 2 with frequency 2600 cm-1
     # using boxcars..test for all angles
@@ -70,7 +70,7 @@ def test_pm_mcalcs():
     assert np.isclose(Mlistout[2], 5.5515857e-15)
 
     Mlistout2 = pc.phasematch.apply_trans(Mlist, Tdict)
-    assert np.isclose(Mlistout2[2], 0.967159)
+    assert np.isclose(Mlistout2[2], 0.97078472)
     ####### END SECTION that can be improved next round ##########
 
 
