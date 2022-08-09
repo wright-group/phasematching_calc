@@ -8,8 +8,8 @@ from sympy import S, FiniteSet, Interval, oo
 
 
 def test_pm_mcalcs():
-    filepath = os.path.join(ROOT_DIR, "tests")
-
+    # filepath = os.path.join(ROOT_DIR, "tests")
+    filepath = os.path.join(os.getcwd(), "tests")
     lay1file = os.path.join(filepath, "CaF2_Malitson.txt")
     lay2file = os.path.join(filepath, "H2O_1.txt")
 
@@ -76,7 +76,8 @@ def test_pm_mcalcs():
 
 def test_emptyset():
     # new lasers object:  unphasematchable geometry TSF
-    filepath = os.path.join(ROOT_DIR, "tests")
+    # filepath = os.path.join(ROOT_DIR, "tests")
+    filepath = os.path.join(os.getcwd(), "tests")
 
     lay1file = os.path.join(filepath, "CaF2_Malitson.txt")
     lay2file = os.path.join(filepath, "H2O_1.txt")

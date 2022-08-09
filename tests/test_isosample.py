@@ -6,8 +6,8 @@ from config.definitions import ROOT_DIR
 
 
 def test_save_load():
-    filepath = os.path.join(ROOT_DIR, "tests")
-
+    # filepath = os.path.join(ROOT_DIR, "tests")
+    filepath = os.path.join(os.getcwd(), "tests")
     jsonfile = os.path.join(filepath, "samp1.json")
     lay1file = os.path.join(filepath, "sapphire1.txt")
     lay2file = os.path.join(filepath, "H2O_1.txt")
