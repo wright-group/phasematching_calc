@@ -615,7 +615,7 @@ def m_calc(Iso, Las):
             kox = ko * np.sin(angleoutxtemp)
 
         ksumx = ksumy = ksumz = 0.0000
-        kz = 0.000
+        # kz=0.000
 
         for i in range(numfreqs):
             if xmask[i] == 0.00:
@@ -637,12 +637,12 @@ def m_calc(Iso, Las):
             ksumx = 0  # C
             ksumy = 0
             ksumz = (kcoeffs[i] * kproj) * tkeff + ksumz
-            kz = (kcoeffs[i] * kproj) + ksumz
+            # kz = (kcoeffs[i] * kproj) + ksumz
 
         k4 = np.sqrt(ksumx**2 + ksumy**2 + ksumz**2)
         dkl = k4 - kout
 
-        dk = kz - ko
+        # dk = kz-ko
 
         dal = aouttemp * tkeff * 0.5
         da = aouttemp * 0.5
@@ -673,8 +673,6 @@ def m_calc(Iso, Las):
                 (dkl + np.exp(dal) * (-dkl * np.cos(dkl) + dal * np.sin(dkl)))
                 / (-dal + np.exp(dal) * (dal * np.cos(dkl) + dkl * np.sin(dkl)))
             )
-
-            # Mphasedelta = -np.arctan(1/np.tan(dkl/2))  #dal == 0 limit
 
             """
             Mphasedelta = np.arctan(
