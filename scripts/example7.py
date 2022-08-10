@@ -7,8 +7,8 @@ from config.definitions import ROOT_DIR
 from sympy import *
 
 
-filepath = os.path.join(ROOT_DIR, "tests")
-
+# filepath = os.path.join(ROOT_DIR, "tests")
+filepath = os.path.join(os.getcwd(), "tests")
 lay1file = os.path.join(filepath, "sapphire1.txt")
 lay2file = os.path.join(filepath, "H2O_1.txt")
 tksap = 0.02

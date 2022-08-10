@@ -7,20 +7,20 @@ from config.definitions import ROOT_DIR
 from sympy import *
 
 
-filepath = os.path.join(ROOT_DIR, "tests")
-
+# filepath = os.path.join(ROOT_DIR, "tests")
+filepath = os.path.join(os.getcwd(), "tests")
 lay3file = os.path.join(filepath, "CaF2_Malitson.txt")
 lay4file = os.path.join(filepath, "CH3CN_paste_1.txt")
 
-tksapph = 0.02  # cm
+tkcaf2 = 0.02  # cm
 tkacn = 0.01  # cm
 
 samp1 = pc.IsoSample.IsoSample()
 desc = "FWM cell"
 samp1.description = desc
-samp1.load_layer(lay3file, tksapph, label="caf2fw")
-samp1.load_layer(lay4file, tkacn, label="ACN")
-samp1.load_layer(lay3file, tksapph, label="caf2bw")
+samp1.load_layer(lay3file, tkcaf2, label="caf2fw")
+samp1.load_layer(lay4file, tkacn, label="acn")
+samp1.load_layer(lay3file, tkcaf2, label="caf2bw")
 
 las4 = pc.Lasers.Lasers()
 arr1 = [3150.0, 2200.0, 17200.0]

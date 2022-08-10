@@ -7,8 +7,8 @@ from config.definitions import ROOT_DIR
 from sympy import *
 
 
-filepath = os.path.join(ROOT_DIR, "tests")
-
+# filepath = os.path.join(ROOT_DIR, "tests")
+filepath = os.path.join(os.getcwd(), "tests")
 lay3file = os.path.join(filepath, "CaF2_Malitson.txt")
 lay4file = os.path.join(filepath, "CH3CN_paste_1.txt")
 lay5file = os.path.join(filepath, "CaF2_Malitson.txt")

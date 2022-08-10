@@ -13,11 +13,11 @@ the calculation works.  Calculation does not perform absorbance of the output ve
 (water, visible output) expected little absorbance there.  This example tests the validity of the phase
 portion of the m_calc method."""
 
-filepath = os.path.join(ROOT_DIR, "tests")
-
+# filepath = os.path.join(ROOT_DIR, "tests")
+filepath = os.path.join(os.getcwd(), "tests")
 lay1file = os.path.join(filepath, "CaF2_Malitson.txt")
 lay2file = os.path.join(filepath, "H2O_1.txt")
-tksap = 0.02
+tkcaf2 = 0.02
 tkwat = 0.0008
 
 thins = 30
@@ -101,8 +101,8 @@ for m in range(len(var1a)):
                 np.cos(w4t * (2 * np.pi) * (thick - tktemp) + Mphase[0])
                 + np.sin(w4t * (2 * np.pi) * (thick - tktemp) + Mphase[0]) * 1j
             )
-            # if i ==(thins-1):
-            #  Mphasedelta=0.000
+            # if i == (thins-1):
+            #    Mphasedelta=0.000
             Mconjtemp = Mlisttemp * (Mphasedelta)
             Mconjsum = Mconjsum + Mconjtemp * tkwat
         ch1[m, n] = np.abs(Mconjsum) * np.abs(Mconjsum)
