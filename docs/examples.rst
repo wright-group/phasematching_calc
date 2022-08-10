@@ -7,6 +7,7 @@ Example 1. A 2D calculation of M factors and conversion into a ``WrightTools.dat
 First, the files are loaded into an IsoSample object:
 
 .. plot::
+    filepath = os.path.join(os.getcwd(), "tests")
     lay1file=os.path.join(filepath, 'CaF2_Malitson.txt')
     lay2file=os.path.join(filepath, 'H2O_1.txt')
 
@@ -43,29 +44,28 @@ coordinates, the k1 and -k2 inputs.  Then a for loop cycles through each series 
 into a channel array that gets placed into a Data object.  The remaining code follows the WrightTools methodology
 of using the linspaces as variables and plotting the result using the ``WrightTools.artists.quick2D`` method.
 
-
 .. plot::
-    var1=np.linspace(2450.00,2900.00,46)[:,None]
-    var2=np.linspace(1300.0,1900.0,61)[None, :]
-    var2a=np.linspace(1300.0,1900.0,61)
+    # A method for creating a 2D array of "Mcalcs" and converting into a
+    # WrightTools data object for use in various simulations.
+    var1 = np.linspace(2450.00, 2900.00, 46)[:, None]
+    var2 = np.linspace(1300.0, 2000.0, 81)[None, :]
+    var2a = np.linspace(1300.0, 2000.0, 81)
 
-    ch1= np.zeros([len(var1), len(var2a)])
+    ch1 = np.zeros([len(var1), len(var2a)])
     for m in range(len(var1)):
         for n in range(len(var2a)):
-            las.changefreq(1,var1[m])
-            las.changefreq(2,var2a[n])
-            Mlist,tklist,Tlist=pc.phasematch.m_calc(samp1,las)
-            ch1[m,n]=np.abs(Mlist[1])
+            las.change_freq(1, var1[m])
+            las.change_freq(2, var2a[n])
+            Mlist, Mphase, tklist, Tlist = pc.phasematch.m_calc(samp1, las)
+            ch1[m, n] = np.abs(Mlist[1])
 
-
-    data=wt.Data(name="FWM cell water w/CaF2 planar DOVE")
-    data.create_variable(name="w1", units="wn", values= var1)
-    data.create_variable(name="w2", units="wn", values= var2)
-    data.create_channel(name='Mfactor', values=ch1)
-    data.transform("w1","w2")
+    data = wt.Data(name="FWM cell water caf2 planar DOVE")
+    data.create_variable(name="w1", units="wn", values=var1)
+    data.create_variable(name="w2", units="wn", values=var2)
+    data.create_channel(name="Mfactor", values=ch1)
+    data.transform("w1", "w2")
     wt.artists.quick2D(data)
     plt.show()
-
 
 .. image:: Figure_1.png
 
@@ -74,45 +74,51 @@ of using the linspaces as variables and plotting the result using the ``WrightTo
 in this case a `boxcars` geometry.
 
 .. plot::
-    lay1file=os.path.join(filepath, 'CaF2_Malitson.txt')
+    filepath = os.path.join(os.getcwd(), "tests")
+    lay1file = os.path.join(filepath, "CaF2_Malitson.txt")
 
-    tkcaf2=0.03 #cm
+    tkcaf2 = 0.03
 
-    samp1=pc.IsoSample.IsoSample()
-    desc="caf2window300um"
-    samp1.description=desc
+    # generation of a IsoSample
+    samp1 = pc.IsoSample.IsoSample()
+    desc = "caf2window300um"
+    samp1.description = desc
     samp1.load_layer(lay1file, tkcaf2, label="caf2")
 
-    las=pc.Lasers.Lasers()
-    arr1=[1800.0,2700.0,18400.0]
+
+    # generation of a Lasers object.
+    las = pc.Lasers.Lasers()
+    arr1 = [1800.0, 2700.0, 18400.0]
     las.add_frequencies(arr1)
-    arr2=[8.0,8.0, 8.0]
+    arr2 = [8.0, 8.0, 8.0]
     las.add_angles(arr2)
-    arr3=[-1,1,1]
+    arr3 = [-1, 1, 1]
     las.add_k_coeffs(arr3)
-    arr4=[1,1,1]
+    arr4 = [1, 1, 1]
     las.add_pols(arr4)
     las.change_geometry("boxcars")
 
-    var1=np.linspace(2600.00,3200.00,61)[:,None]
-    var2=np.linspace(1600.0,2200.0,61)[None, :]
-    var2a=np.linspace(1600.0,2200.0,61)
 
-    ch1= np.zeros([len(var1), len(var2a)])
+    var1 = np.linspace(2600.00, 3200.00, 61)[:, None]
+    var2 = np.linspace(1600.0, 2200.0, 61)[None, :]
+    var2a = np.linspace(1600.0, 2200.0, 61)
+
+    ch1 = np.zeros([len(var1), len(var2a)])
     for m in range(len(var1)):
         for n in range(len(var2a)):
-            las.changefreq(1,var1[m])
-            las.changefreq(2,var2a[n])
-            Mlist,tklist,Tlist=pc.phasematch.m_calc(samp1,las)
-            ch1[m,n]=np.abs(Mlist[0])
+            las.change_freq(1, var1[m])
+            las.change_freq(2, var2a[n])
+            Mlist, Mphase, tklist, Tlist = pc.phasematch.m_calc(samp1, las)
+            ch1[m, n] = np.abs(Mlist[0])
 
-    data=wt.Data(name="CaF2 300 micron boxcars DOVE")
-    data.create_variable(name="w1", units="wn", values= var1)
-    data.create_variable(name="w2", units="wn", values= var2)
-    data.create_channel(name='Mfactor', values=ch1)
-    data.transform("w2","w1")
+    data = wt.Data(name="CaF2 300 micron boxcars DOVE")
+    data.create_variable(name="w1", units="wn", values=var1)
+    data.create_variable(name="w2", units="wn", values=var2)
+    data.create_channel(name="Mfactor", values=ch1)
+    data.transform("w2", "w1")
     wt.artists.quick2D(data)
     plt.show()
+
 
 
 .. image:: Figure_2.png
@@ -130,106 +136,150 @@ The double for loops shown can be consolidated if one sets up separate ``Lasers`
 
 
 .. plot::
-    lay1file=os.path.join(filepath, 'CH3CN_paste_1.txt')
-    lay2file=os.path.join(filepath, 'sapphire1.txt')
-    lay3file=os.path.join(filepath, 'CaF2_Malitson.txt')
+    filepath = os.path.join(os.getcwd(), "tests")
+    lay1file = os.path.join(filepath, "CH3CN_paste_1.txt")
+    lay2file = os.path.join(filepath, "CaF2_Malitson.txt")
 
-    tksap=0.02
-    tkacn=0.01
-    tkcaf2=0.02
+    tkacn = 0.01
+    tkcaf2 = 0.02
+
 
     # generation of a IsoSample
-    samp1=pc.IsoSample.IsoSample()
-    desc="FWM cell"
-    samp1.description=desc
-    #samp1.load_layer(lay1file, tksap, label="sapphire")
-    samp1.load_layer(lay3file, tkcaf2, label="caf2")
+    samp1 = pc.IsoSample.IsoSample()
+    desc = "FWM cell"
+    samp1.description = desc
+    samp1.load_layer(lay2file, tkcaf2, label="caf2")
     samp1.load_layer(lay1file, tkacn, label="acn")
-    samp1.load_layer(lay3file, tkcaf2, label="caf2bw")
-    #samp1.load_layer(lay1file, tksap, label="sapphire")
+    samp1.load_layer(lay2file, tkcaf2, label="caf2")
 
-    #generation of a Lasers object.
-    las=pc.Lasers.Lasers()
-    arr1=[2200.0, 3150.0,17200.0]
+
+    # generation of a Lasers object.
+    las = pc.Lasers.Lasers()
+    arr1 = [2600.0, 3150.0, 20000.0]
     las.add_frequencies(arr1)
-    arr2=[-13.0,6.0, 0.0]
+    arr2 = [15.0, -6.0, 0.0]
     las.add_angles(arr2)
-    arr3=[-1,1,1]
+    arr3 = [-1, 1, 1]
     las.add_k_coeffs(arr3)
-    arr4=[1,1,1]
+    arr4 = [1, 1, 1]
     las.add_pols(arr4)
     las.change_geometry("planar")
 
-    var1=np.linspace(1600.0,2200.0,61)[None, :]
-    var1a=np.linspace(1600.0,2200.0,61)
-    var2=np.linspace(2600.00,3200.00,61)[:,None]
-    var2a=np.linspace(1600.0,2200.0,61)
+    var1 = np.linspace(1600.0, 2300.0, 71)[None, :]
+    var1a = np.linspace(1600.0, 2300.0, 71)
+    var2 = np.linspace(2600.00, 3200.00, 61)[:, None]
+    var2a = np.linspace(2600.0, 3200.0, 61)
 
-    ch1= np.zeros([len(var1a), len(var2a)])
-    mold=int(0)
+    ch1 = np.zeros([len(var1a), len(var2a)])
+    ch2 = np.zeros([len(var1a), len(var2a)])
+    test1 = np.zeros([len(var1a), len(var2a)])
+    test2 = np.zeros([len(var1a), len(var2a)])
+
+    mold = int(0)
     for m in range(len(var1a)):
         for n in range(len(var2a)):
-            las.change_freq(1,var1a[n])
-            las.change_freq(2,var2a[m])
-            if ((m==0) & (n==0)):
-                angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=False))
-                angletemp=angleair2[0]   # this needs to solve for remainder to work
-                if np.any(angleair2):
-                    ch1[m,n]=(angleair2)[0]
-                    las.change_angle(1,angleair2[0])
-            elif (mold==m):
-                angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=True))
-                if np.any(angleair2):
-                    ch1[m,n]=(angleair2)[0]
-                    las.change_angle(1,angleair2[0])
+            las.change_freq(1, var1a[m])
+            las.change_freq(2, var2a[n])
+            if (m == 0) & (n == 0):
+                """The first data point calculates the angle in a slow method."""
+                angleair2, amount = pc.phasematch.solve_angle(samp1, las, 2, 1, isclose=False)
+                angletemp = list(angleair2)[0]  # this needs to solve for remainder to work
+                if np.any(list(angleair2)):
+                    ch1[m, n] = angletemp
+                    las.change_angle(1, angletemp)
+            elif mold == m:
+                """Afterwards it proceeds with a solve using the faster method. Unfortunately, this
+                method may skip to the other solution if conditions are (un)favorable.   (Un)favorable conditions
+                include heavy oscillations and bad initial guess for the isclose value."""
+                angleair2a, amt = pc.phasematch.solve_angle(samp1, las, 2, 1, isclose=True, amt=amount)
+                if np.any(list(angleair2)):
+                    ch1[m, n] = list(angleair2)[0]
+                    las.change_angle(1, list(angleair2)[0])
+                else:
+                    ch1[m, n] = float("nan")
             else:
-                las.change_angle(1,angletemp)
-                angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=True))
-                mold=m
-                if np.any(angleair2):
-                    ch1[m,n]=angleair2[0]
-                    angletemp=angleair2[0]
-                    las.change_angle(1,angleair2[0])
+                """This final step is testing whether it is better to use the original solve upon a
+                new scanline or to stick with the recent solve.  Currently in place is to roll back to
+                the original solve.  It then updates angletemp for the next scanline."""
+                las.change_angle(1, angletemp)
+                angleair2, amt = pc.phasematch.solve_angle(samp1, las, 2, 1, isclose=True, amt=amount)
+                mold = m
+                if np.any(list(angleair2)):
+                    ch1[m, n] = list(angleair2)[0]
+                    angletemp = list(angleair2)[0]
+                    las.change_angle(1, list(angleair2)[0])
+                else:
+                    ch1[m, n] = float("nan")
 
-    data=wt.Data(name="angle for lower frequency input, opp side")
-    data.create_variable(name="w1", units="wn", values= var1)
-    data.create_variable(name="w2", units="wn", values= var2)
-    data.create_channel(name='angleforw1', values=ch1)
-    data.transform("w2","w1")
-    wt.artists.quick2D(data)
+    data = wt.Data(name="angle solves")
+    data.create_variable(name="w1", units="wn", values=var1)
+    data.create_variable(name="w2", units="wn", values=var2)
+
+
+    # Other solution.
+    for m in range(len(var1a)):
+        for n in range(len(var2a)):
+            las.change_freq(1, var1a[m])
+            las.change_freq(2, var2a[n])
+            if (m == 0) & (n == 0):
+                angleair2, amount = pc.phasematch.solve_angle(samp1, las, 2, 1, isclose=False)
+                angletemp = list(angleair2)[1]  # this needs to solve for remainder to work
+                if np.any(list(angleair2)):
+                    ch2[m, n] = angletemp
+                    las.change_angle(1, angletemp)
+            elif mold == m:
+                angleair2, amt = pc.phasematch.solve_angle(samp1, las, 2, 1, isclose=True, amt=amount)
+                if np.any(list(angleair2)):
+                    ch2[m, n] = list(angleair2)[0]
+                    las.change_angle(1, list(angleair2)[0])
+                else:
+                    ch2[m, n] = float("nan")
+            else:
+                las.change_angle(1, angletemp)
+                angleair2, amt = pc.phasematch.solve_angle(samp1, las, 2, 1, isclose=True)
+                mold = m
+                if np.any(list(angleair2)):
+                    ch2[m, n] = list(angleair2)[-1]
+                    angletemp = list(angleair2)[-1]
+                    las.change_angle(1, list(angleair2)[-1])
+                else:
+                    ch2[m, n] = float("nan")
+
+    for m in range(len(var1a)):
+        for n in range(len(var2a)):
+            las.change_freq(1, var1a[m])
+            las.change_freq(2, var2a[n])
+            las.change_angle(1, ch1[m, n])
+            Mlist, Mphase, tklist, Tdict = pc.phasematch.m_calc(samp1, las)
+            las.change_angle(1, ch2[m, n])
+            Mlist2, Mphase, tklist, Tdict = pc.phasematch.m_calc(samp1, las)
+            test1[m, n] = -np.log10(Mlist[1])
+            # test1[m, n] = Mlist[1]
+            test2[m, n] = -np.log10(Mlist2[1])
+            # test2[m, n] = Mlist2[1]
+
+    data.create_channel(name="angleforw1_negative", values=ch1.T)
+    # data.channels[0].signed = True
+    data.create_channel(name="angleforw1_positive", values=ch2.T)
+    # data.channels[1].signed = True
+    data.channels[1].null = 0
+    data.create_channel(
+        name="test1", values=test1.T
+    )  # Tests to see if all M factors calculated are good
+    data.create_channel(
+        name="test2", values=test2.T
+    )  # Tests to see if all M factors calculated are good
+    data.transform("w2", "w1")
+    wt.artists.quick2D(data, channel=0)
     plt.show()
 
+    wt.artists.quick2D(data, channel=1)
+    plt.show()
 
-    for m in range(len(var1a)):
-        for n in range(len(var2a)):
-            las.change_freq(1,var1a[n])
-            las.change_freq(2,var2a[m])
-            if ((m==0) & (n==0)):
-                angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=False))
-                angletemp=angleair2[1]   # this needs to solve for remainder to work
-                if np.any(angleair2):
-                    ch1[m,n]=(angleair2)[1]
-                    las.change_angle(1,angleair2[1])
-            elif (mold==m):
-                angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=True))
-                if np.any(angleair2):
-                    ch1[m,n]=(angleair2)[0]
-                    las.change_angle(1,angleair2[0])
-            else:
-                las.change_angle(1,angletemp)
-                angleair2=list(pc.phasematch.solve_angle(samp1,las,2,1,isclose=True))
-                mold=m
-                if np.any(angleair2):
-                    ch1[m,n]=angleair2[0]
-                    angletemp=angleair2[0]
-                    las.change_angle(1,angleair2[0])
+    wt.artists.quick2D(data, channel=2)
+    plt.show()
 
-    data2=wt.Data(name="angle for lower frequency beam, same side")
-    data2.create_variable(name="w1", units="wn", values= var1)
-    data2.create_variable(name="w2", units="wn", values= var2)
-    data2.create_channel(name='angleforw1', values=ch1)
-    data2.transform("w2","w1")
-    wt.artists.quick2D(data2)
+    wt.artists.quick2D(data, channel=3)
     plt.show()
 
 .. image:: Figure_3.png
@@ -249,8 +299,12 @@ line ``angleair2=pc.phasematch.solve_angle(samp1,las,2,1)`` with ``angleair2=pc.
 
 .. image:: Figure_4.png
 
-The expected w3 colors range from 30000 cm-1 at right to almost 19000 cm-1 at left, suggesting a very large change of colors
+The expected w3 colors range from 30000 cm-1 at UL to almost 26000 at right, suggesting a large change of colors
 required that may obviate the method or require some additional laser modification for assistance.
+
+A hypothesis for the programmer:   Can this difference be made smaller with better choices of input angles?
+The range of input angles would depend on the practicality of the optics needed and whether spatial isolation
+of the output is desireable.
 
 
 **Example 5**.  A delta t check of the inputs in a thick sample between two caf2 windows.  A thick (1 mm) sample of
@@ -383,21 +437,19 @@ how much of either should be made to achieve phasematching for both points.
 
 
 .. plot::
-
-    filepath=os.path.join(ROOT_DIR, 'tests')
-
+    filepath = os.path.join(os.getcwd(), "tests")
     lay3file = os.path.join(filepath, "CaF2_Malitson.txt")
     lay4file = os.path.join(filepath, "CH3CN_paste_1.txt")
 
-    tksapph = 0.02  # cm
+    tkcaf2 = 0.02  # cm
     tkacn = 0.01  # cm
 
     samp1 = pc.IsoSample.IsoSample()
     desc = "FWM cell"
     samp1.description = desc
-    samp1.load_layer(lay3file, tksapph, label="caf2fw")
-    samp1.load_layer(lay4file, tkacn, label="ACN")
-    samp1.load_layer(lay3file, tksapph, label="caf2bw")
+    samp1.load_layer(lay3file, tkcaf2, label="caf2fw")
+    samp1.load_layer(lay4file, tkacn, label="acn")
+    samp1.load_layer(lay3file, tkcaf2, label="caf2bw")
 
     las4 = pc.Lasers.Lasers()
     arr1 = [3150.0, 2200.0, 17200.0]
@@ -433,17 +485,18 @@ how much of either should be made to achieve phasematching for both points.
 
 Results are:
 .. code-block:: python
-[-38.0000000000000, 39.0000000000000]
+[-14.0000000000000, 15.5000000000000]
 [17180.0000000000]
-[17580.0000000000]
-[-37.0000000000000, 38.0000000000000]
+[17500.0000000000]
+[-13.5000000000000, 15.2000000000000]
 
-
-In this example, changing w3 by +400 cm-1 would result in the same phasematching as an angle change of -1.00 degrees
-(likely rounded to tenths), for a -10 cm-1 change in the low frequency infrared input.  Changes in w3 in this range
+In this example, changing w3 by +320 cm-1 would result in the same phasematching as an angle change of -0.5 degrees
+for a -10 cm-1 change in the low frequency infrared input.  Changes in w3 in this range
 would result in very large wavelength changes needed over an entire scan.  On the other hand, phasematching angle
 changes may be restricted to a small range due to aberrations.  It is possible that the two can be modified in tandem
-in some studies...for example, moving w3 by 100 cm-1 and angle by -0.25 deg.
+in some studies...for example, moving w3 by 100 cm-1 and angle by -0.25 deg.  This kind of optimization method would
+require weighing of the advantages/disadvantages of one vs. the other.   The weights would become numerical and be
+part of the optimization method.
 
 
 **Example 7**.  Comparison of DOVE vs TSF signal intensity.  WIth the oriented sapphire:water:sapphire sample,
@@ -454,66 +507,85 @@ smaller relative to k3, and so phasemismatching becomes less problematic for DOV
 
 
 .. plot::
-    lay1file=os.path.join(filepath, 'sapphire1.txt')
-    lay2file=os.path.join(filepath, "H2O_1.txt")
-    tksap=0.02
-    tkwat=0.01
+    filepath = os.path.join(os.getcwd(), "tests")
+    lay1file = os.path.join(filepath, "sapphire1.txt")
+    lay2file = os.path.join(filepath, "H2O_1.txt")
+    tksap = 0.02
+    tkwat = 0.01
 
-    samp1=pc.IsoSample.IsoSample()
-    desc="sapphwatersapph"
-    samp1.description=desc
+
+    # generation of a IsoSample
+    samp1 = pc.IsoSample.IsoSample()
+    desc = "sapphwatersapph"
+    samp1.description = desc
     samp1.load_layer(lay1file, tksap, label="saphfw")
     samp1.load_layer(lay2file, tkwat, label="h2o")
     samp1.load_layer(lay1file, tksap, label="saphfw")
 
-    las=pc.Lasers.Lasers()
-    arr1=[1800.0,2700.0,30000.0]
+
+    # generation of a Lasers object.
+    las = pc.Lasers.Lasers()
+    arr1 = [1800.0, 2700.0, 30000.0]
     las.add_frequencies(arr1)
-    arr2=[-18.0,8.0, 0.0]
+    arr2 = [-18.0, 8.0, 0.0]
     las.add_angles(arr2)
-    arr3=[-1,1,1]
+    arr3 = [-1, 1, 1]
     las.add_k_coeffs(arr3)
-    arr4=[1,1,1]
+    arr4 = [1, 1, 1]
     las.add_pols(arr4)
     las.change_geometry("planar")
 
-    var1=np.linspace(2450.00,2900.00,91)[:,None]
-    var2=np.linspace(1300.0,1900.0,161)[None, :]
-    var2a=np.linspace(1300.0,1900.0,161)
+    var1 = np.linspace(2450.00, 2900.00, 91)[:, None]
+    var2 = np.linspace(1300.0, 1900.0, 161)[None, :]
+    var2a = np.linspace(1300.0, 1900.0, 161)
 
-    ch1= np.zeros([len(var1), len(var2a)])
-    ch2=np.zeros([len(var1), len(var2a)])
-    ch3=np.zeros([len(var1), len(var2a)])
-
-    for m in range(len(var1)):
-        for n in range(len(var2a)):
-            las.changefreq(1,var1[m])
-            las.changefreq(2,var2a[n])
-            Mlist,tklist,Tdict=pc.phasematch.m_calc(samp1,las)
-            Alist, Alistout=pc.phasematch.calculate_absorbances(samp1,las)
-            Mlist1a=pc.phasematch.apply_absorbances(Mlist,Alist,Alistout)
-            Mlist1b=pc.phasematch.apply_trans(Mlist1a, Tdict)
-            ch1[m,n]=Mlist[1]
-
-    vec2=[1,1,1]
-    las.addkcoeffs(vec2)
+    ch1 = np.zeros([len(var1), len(var2a)])
+    ch1a = np.zeros([len(var1), len(var2a)])
+    ch2 = np.zeros([len(var1), len(var2a)])
+    ch2a = np.zeros([len(var1), len(var2a)])
+    ch3 = np.zeros([len(var1), len(var2a)])
+    ch3a = np.zeros([len(var1), len(var2a)])
 
     for m in range(len(var1)):
         for n in range(len(var2a)):
-            las.changefreq(1,var1[m])
-            las.changefreq(2,var2a[n])
-            Mlist2,tklist2,Tlist2=pc.phasematch.m_calc(samp1,las)
-            ch2[m,n]=Mlist2[1]
+            las.change_freq(1, var1[m])
+            las.change_freq(2, var2a[n])
+            Mlist, Mphase, tklist, Tdict = pc.phasematch.m_calc(samp1, las)
+            Alist, Alistout = pc.phasematch.calculate_absorbances(samp1, las)
+            Mlista = pc.phasematch.apply_absorbances(Mlist, Alist, Alistout)
+            Mlistb = pc.phasematch.apply_trans(Mlista, Tdict)
+            samp1.change_layer(2, thickness=0.0001)
+            Mlist1a, Mphase1a, tklist1a, Tdict1a = pc.phasematch.m_calc(samp1, las)
+            ch1[m, n] = Mlist[1]
+            ch1a[m, n] = Mlist1a[1]
+            samp1.change_layer(2, thickness=tkwat)
 
-    ch3=ch1/ch2
+    vec2 = [1, 1, 1]
+    las.add_k_coeffs(vec2)
 
-    data=wt.Data(name="example")
-    data.create_variable(name="w1", units="wn", values= var1)
-    data.create_variable(name="w2", units="wn", values= var2)
-    data.create_channel(name='DOVE', values=ch1)
-    data.create_channel(name='TSF', values=ch2)
+    for m in range(len(var1)):
+        for n in range(len(var2a)):
+            las.change_freq(1, var1[m])
+            las.change_freq(2, var2a[n])
+            Mlist2, Mphase, tklist2, Tlist2 = pc.phasematch.m_calc(samp1, las)
+            ch2[m, n] = Mlist2[1]
+            samp1.change_layer(2, thickness=0.0001)
+            Mlist2a, Mphase2a, tklist2a, Tdict2a = pc.phasematch.m_calc(samp1, las)
+            ch2a[m, n] = Mlist2a[1]
+            samp1.change_layer(2, thickness=tkwat)
+
+    ch3 = ch1 / ch2
+    ch3a = ch1a / ch2a
+
+
+    data = wt.Data(name="example")
+    data.create_variable(name="w1", units="wn", values=var1)
+    data.create_variable(name="w2", units="wn", values=var2)
+    data.create_channel(name="DOVE", values=ch1)
+    data.create_channel(name="TSF", values=ch2)
     data.create_channel(name="DOVE_TSF_RATIO", values=ch3)
-    data.transform("w1","w2")
+    data.create_channel(name="DOVE_TSF_RATIO_thinfilm", values=ch3a)
+    data.transform("w1", "w2")
     wt.artists.quick2D(data, channel=0)
     plt.show()
 
@@ -522,6 +594,9 @@ smaller relative to k3, and so phasemismatching becomes less problematic for DOV
 
     wt.artists.quick2D(data, channel=2)
     plt.show()
+
+    wt.artists.quick2D(data, channel=3)
+    plt.show()  # should be 1 for all data points or very close to it
 
 
 .. image:: Figure_7a.png
@@ -550,12 +625,15 @@ thin layers by incorporating the accuring phase of each successive layer, while 
 the factor in the normal manner.   Both loops multiply by the effective thickness squared (the first
 essentially by dividing by the number of thinlayers) to obtain a value more appropriate for comparison.
 
-
+.. plot::
+    filepath = os.path.join(os.getcwd(), "tests")
+    lay1file = os.path.join(filepath, "CaF2_Malitson.txt")
     lay2file = os.path.join(filepath, "H2O_1.txt")
-    tksap = 0.02
-    tkwat = 0.0001
+    tkcaf2 = 0.02
+    tkwat = 0.0008
 
-    thins = 100
+    thins = 30
+    thick = thins * tkwat
 
     # generation of a IsoSample
     samp1 = pc.IsoSample.IsoSample()
@@ -563,14 +641,13 @@ essentially by dividing by the number of thinlayers) to obtain a value more appr
     samp1.description = desc
 
     samp1.load_layer(lay2file, tkwat, label="h2o")
-
-    # samp1.layers[0].suppress_absorbances()
+    # use lay1file for a limit where absorbance is zero
 
     # generation of a Lasers object.
     las = pc.Lasers.Lasers()
     arr1 = [1800.0, 2700.0, 30000.0]
     las.add_frequencies(arr1)
-    arr2 = [-5.0, 2.0, 0.0]
+    arr2 = [5.0, -2.0, 0.0]
     las.add_angles(arr2)
     arr3 = [-1, 1, 1]
     las.add_k_coeffs(arr3)
@@ -578,52 +655,73 @@ essentially by dividing by the number of thinlayers) to obtain a value more appr
     las.add_pols(arr4)
     las.change_geometry("planar")
 
-    var2 = np.linspace(2450.00, 2900.00, 91)[None, :]
-    var2a = np.linspace(2450.00, 2900.00, 91)
-    var1 = np.linspace(1300.0, 1900.0, 161)[:, None]
-    var1a = np.linspace(1300.0, 1900.0, 161)
+    var2 = np.linspace(2150.00, 3650.00, 151)[None, :]
+    var2a = np.linspace(2150.00, 3650.00, 151)
+    var1 = np.linspace(1200.0, 1900.0, 71)[:, None]
+    var1a = np.linspace(1200.0, 1900.0, 71)
 
     ch1 = np.zeros([len(var1a), len(var2a)])
-    ch1p = np.zeros([len(var1a), len(var2a)])
-    ch1c = np.zeros([len(var1a), len(var2a)])
     A1list = np.zeros([len(var1a), len(var2a)])
     A2list = np.zeros([len(var1a), len(var2a)])
     A3list = np.zeros([len(var1a), len(var2a)])
+    w4 = np.zeros([len(var1a), len(var2a)])
 
-    newtk = thins * tkwat
 
+    # thin DOVE summation calculations...it needs to tabulate absorbance changes
+    # as each thin layer is added (A1list, A2list, A3list).   The phase change
+    # as a result in changing absorbances is found in ch1p.   The ch1 calculates
+    # a single thin layer m factor.
+
+    #  ---  Absorbance list in a single thin layer determined.
     for m in range(len(var1a)):
         for n in range(len(var2a)):
             las.change_freq(1, var1a[m])
             las.change_freq(2, var2a[n])
-            Mlist, Mphase, tklist, Tdict = pc.phasematch.m_calc(samp1, las)
+            w4t = (
+                las.frequencies[0] * las.k_coeffs[0]
+                + las.frequencies[1] * las.k_coeffs[1]
+                + las.frequencies[2] * las.k_coeffs[2]
+            )
+            w4t2, a, n4t = samp1["layers"][0].estimate(w4t)
             Alist, Alistout = pc.phasematch.calculate_absorbances(samp1, las)
-            ch1[m, n] = np.sqrt(Mlist[0])
-            ch1p[m, n] = Mphase[0]
             A1list[m, n] = Alist[0][0]
             A2list[m, n] = Alist[0][1]
             A3list[m, n] = Alist[0][2]
+            w4[m, n] = w4t
 
+    #  ---  following is a slow algorithm.
     for m in range(len(var1a)):
         for n in range(len(var2a)):
-            Mconjsum = 0 + 0 * 1j
+            Mconjsum = 0.000 + 0.000 * 1j
+            las.change_freq(1, var1a[m])
+            las.change_freq(2, var2a[n])
+            w4t = w4[m, n]
             for i in range(thins):
-                Mphasedelta = (i + 1) * ch1p[m, n]
-                Mconjdelta = np.cos(Mphasedelta) + np.sin(Mphasedelta) * 1j
-                Mconj = (
-                    ch1[m, n]
-                    * Mconjdelta
-                    * 10 ** (-i * A1list[m, n])
-                    * 10 ** (-i * A2list[m, n])
-                    * 10 ** (-i * A3list[m, n])
-                    * tkwat
+                if i == 0:
+                    Mphaseprev = 0.000
+                else:
+                    Mphaseprev = Mphase[0]
+                E1power = np.sqrt(10 ** (-i * A1list[m, n] / 2.00))  # 2.00 converts I/Io to E/Eo
+                E2power = np.sqrt(10 ** (-i * A2list[m, n] / 2.00))
+                E3power = np.sqrt(10 ** (-i * A3list[m, n] / 2.00))
+                tktemp = i * thins
+                Mlist, Mphase, tklist, Tdict = pc.phasematch.m_calc(samp1, las)
+                Mphase[0] = Mphase[0] + Mphaseprev
+                Mlisttemp = np.sqrt(Mlist[0]) * E1power * E2power * E3power
+                # Phase differential is calculated backwards from the final layer
+                Mphasedelta = (
+                    np.cos(w4t * (2 * np.pi) * (thick - tktemp) + Mphase[0])
+                    + np.sin(w4t * (2 * np.pi) * (thick - tktemp) + Mphase[0]) * 1j
                 )
-                Mconjsum = Mconjsum + Mconj
-            ch1c[m, n] = np.abs(Mconjsum) * np.abs(Mconjsum)
-            pass
+                #if i == (thins-1):
+                #    Mphasedelta=0.000
+                Mconjtemp = Mlisttemp * (Mphasedelta)
+                Mconjsum = Mconjsum + Mconjtemp * tkwat
+            ch1[m, n] = np.abs(Mconjsum) * np.abs(Mconjsum)
 
-    samp1.change_layer(1, thickness=newtk)
 
+    # thick Dove calculations
+    samp1.change_layer(1, thickness=thick)
     ch2 = np.zeros([len(var1a), len(var2a)])
 
     for m in range(len(var1a)):
@@ -631,38 +729,28 @@ essentially by dividing by the number of thinlayers) to obtain a value more appr
             las.change_freq(1, var1a[m])
             las.change_freq(2, var2a[n])
             Mlist, Mphase, tklist, Tdict = pc.phasematch.m_calc(samp1, las)
-            ch2[m, n] = Mlist[0] * newtk * newtk
-
-    A1list_t = np.zeros([len(var1a), len(var2a)])
-    A2list_t = np.zeros([len(var1a), len(var2a)])
-
-    A1list_t = A1list * thins
-    A2list_t = A2list * thins
+            ch2[m, n] = Mlist[0] * thick * thick
 
     data = wt.Data(name="example")
     data.create_variable(name="w1", units="wn", values=var1)
     data.create_variable(name="w2", units="wn", values=var2)
-    data.create_channel(name="DOVE", values=ch1)
-    data.create_channel(name="DOVESUM", values=ch1c)
+    data.create_channel(name="DOVESUM", values=ch1)
     data.create_channel(name="DOVETHICK", values=ch2)
-    data.create_channel(name="A1", values=(A1list_t))
-    data.create_channel(name="A2", values=(A2list_t))
     data.transform("w1", "w2")
+
     wt.artists.quick2D(data, channel=0)
     plt.show()
 
     wt.artists.quick2D(data, channel=1)
     plt.show()
 
-    wt.artists.quick2D(data, channel=2)
-    plt.show()
-
-    wt.artists.quick2D(data, channel=3)
-    plt.show()
-
-    wt.artists.quick2D(data, channel=4)
-    plt.show()
-
 .. image:: Figure_8a.png
 
 .. image:: Figure_8b.png
+
+The slow algorithm may be replaceable by faster versions.  It is important to note that phase
+is being processed from the back end of the sample, i.e., from where it emits.
+
+The errors between the two figures do not appear to be from the differences between discrete
+integrals and a single analytical function and could require some refinement of the m_calc
+method in the future.

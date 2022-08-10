@@ -6,8 +6,8 @@ from config.definitions import ROOT_DIR
 
 
 def test_laser_save_load():
-    filepath = os.path.join(ROOT_DIR, "tests")
-
+    # filepath = os.path.join(ROOT_DIR, "tests")
+    filepath = os.path.join(os.getcwd(), "tests")
     jsonfile = os.path.join(filepath, "las.json")
 
     las = pc.Lasers.Lasers()

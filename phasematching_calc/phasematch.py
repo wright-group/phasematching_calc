@@ -599,14 +599,23 @@ def m_calc(Iso, Las):
             koutx = 0.00
             koutz = kout * np.cos(angleoutytemp)
             kouty = kout * np.sin(angleoutytemp)
+            ko = 2.00 * np.pi * freqout * nouttemp
+            kox = 0.00
+            koz = ko * np.cos(angleoutytemp)
+            koy = ko * np.sin(angleoutytemp)
         else:
             tkeff = tktemp / np.cos(angleoutxtemp)
             kout = 2.00 * np.pi * freqout * nouttemp * tkeff
             kouty = 0.00
             koutz = kout * np.cos(angleoutxtemp)
             koutx = kout * np.sin(angleoutxtemp)
+            ko = 2.00 * np.pi * freqout * nouttemp
+            koy = 0.00
+            koz = ko * np.cos(angleoutxtemp)
+            kox = ko * np.sin(angleoutxtemp)
 
         ksumx = ksumy = ksumz = 0.0000
+        # kz=0.000
 
         for i in range(numfreqs):
             if xmask[i] == 0.00:
@@ -628,14 +637,19 @@ def m_calc(Iso, Las):
             ksumx = 0  # C
             ksumy = 0
             ksumz = (kcoeffs[i] * kproj) * tkeff + ksumz
+            # kz = (kcoeffs[i] * kproj) + ksumz
 
         k4 = np.sqrt(ksumx**2 + ksumy**2 + ksumz**2)
         dkl = k4 - kout
 
-        dal = 0.5 * aouttemp * tkeff
+        # dk = kz-ko
+
+        dal = aouttemp * tkeff * 0.5
+        da = aouttemp * 0.5
 
         for i in range(numfreqs):
-            dal = dal - 0.5 * (np.abs(kcoeffs[i]) * avectemp[i] * tkeffvec[i])  # C, #A
+            dal = dal - (np.abs(kcoeffs[i]) * avectemp[i] * tkeffvec[i]) * 0.5  # C, #A
+            da = da - (np.abs(kcoeffs[i]) * avectemp[i]) * 0.5  # C, #A
             # dal = dal - 0.5 * (np.abs(kcoeffs[i]) * avectemp[i] * tkeff)
 
         Mc1 = np.exp(-aouttemp * tkeff)
@@ -645,21 +659,28 @@ def m_calc(Iso, Las):
             Mphasedelta = 0.00
             # Mphasedelta=np.pi/2
         else:
+
             Mc2 = ((1 - np.exp(dal)) ** 2 + 4 * np.exp(dal) * (np.sin(dkl / 2)) ** 2) / (
                 dal**2 + (dkl) ** 2
             )
+            """
+            Mc2 = (1+ np.exp(2*dal)-2*np.exp(dal)*np.cos(dkl)) / (
+                dal**2 + (dkl) ** 2
+            )
+            """
 
             Mphasedelta = np.arctan(
                 (dkl + np.exp(dal) * (-dkl * np.cos(dkl) + dal * np.sin(dkl)))
                 / (-dal + np.exp(dal) * (dal * np.cos(dkl) + dkl * np.sin(dkl)))
             )
+
             """
             Mphasedelta = np.arctan(
                 (-dal + np.exp(dal) * (dkl * np.sin(dkl) + dal * np.cos(dkl)))
                 / (dkl + np.exp(dal) * (-dkl * np.cos(dkl) + dal * np.sin(dkl)))
-            ) """
-        Mctemp = Mc1 * Mc2
+            ) """  # old
 
+        Mctemp = Mc1 * Mc2
         Mlist.append(Mctemp)
         tklist.append(tkeff)
         Mphaselist.append(Mphasedelta)
