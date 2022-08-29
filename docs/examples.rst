@@ -6,7 +6,7 @@ Example 1. A 2D calculation of M factors and conversion into a ``WrightTools.dat
 
 First, the files are loaded into an IsoSample object:
 
-
+.. plot::
     filepath = os.path.join(os.getcwd(), "tests")
     lay1file=os.path.join(filepath, 'CaF2_Malitson.txt')
     lay2file=os.path.join(filepath, 'H2O_1.txt')
@@ -23,7 +23,7 @@ First, the files are loaded into an IsoSample object:
 
 Then, the Lasers object is created from the Python commands (as opposed to being loaded from file):
 
-
+.. plot::
     las=pc.Lasers.Lasers()
     arr1=[1800.0,2700.0,30000.0]
     las.add_frequencies(arr1)
@@ -73,7 +73,7 @@ of using the linspaces as variables and plotting the result using the ``WrightTo
 **Example 2**. A similar calculation with a single 300 micron CaF2 window and different input geometries,
 in this case a `boxcars` geometry.
 
-
+.. plot::
     filepath = os.path.join(os.getcwd(), "tests")
     lay1file = os.path.join(filepath, "CaF2_Malitson.txt")
 
@@ -135,7 +135,7 @@ use the "isclose" feature when possible.  One would need to calculate the angles
 The double for loops shown can be consolidated if one sets up separate ``Lasers`` objects.
 
 
-
+.. plot::
     filepath = os.path.join(os.getcwd(), "tests")
     lay1file = os.path.join(filepath, "CH3CN_paste_1.txt")
     lay2file = os.path.join(filepath, "CaF2_Malitson.txt")
@@ -313,7 +313,7 @@ geometrical interactions tend to limit thicknesses.  (Geometrical calculations m
 
 The code starts normally:
 
-
+.. plot::
     lay3file=os.path.join(filepath, 'CaF2_Malitson.txt')
     lay4file=os.path.join(filepath, 'CH3CN_paste_1.txt')
     lay5file=os.path.join(filepath, 'CaF2_Malitson.txt')
@@ -345,7 +345,7 @@ The code starts normally:
 Some additonal code is needed to convert the times into more meaningful ones.  For example, the mean of
 all 4 inputs and output was determined per layer, and the difference from that mean plotted per input.
 
-
+.. plot::
     for m in range(len(tin)):
         if m == 0:
             pass
@@ -436,7 +436,7 @@ a set of two frequency and angle solves are made for what may be considered two 
 how much of either should be made to achieve phasematching for both points.
 
 
-
+.. plot::
     filepath = os.path.join(os.getcwd(), "tests")
     lay3file = os.path.join(filepath, "CaF2_Malitson.txt")
     lay4file = os.path.join(filepath, "CH3CN_paste_1.txt")
@@ -506,7 +506,7 @@ However, it is important to note that as w3 increases, the vector contributions 
 smaller relative to k3, and so phasemismatching becomes less problematic for DOVE.
 
 
-
+.. plot::
     filepath = os.path.join(os.getcwd(), "tests")
     lay1file = os.path.join(filepath, "sapphire1.txt")
     lay2file = os.path.join(filepath, "H2O_1.txt")
@@ -625,7 +625,7 @@ thin layers by incorporating the accuring phase of each successive layer, while 
 the factor in the normal manner.   Both loops multiply by the effective thickness squared (the first
 essentially by dividing by the number of thinlayers) to obtain a value more appropriate for comparison.
 
-
+.. plot::
     filepath = os.path.join(os.getcwd(), "tests")
     lay1file = os.path.join(filepath, "CaF2_Malitson.txt")
     lay2file = os.path.join(filepath, "H2O_1.txt")
