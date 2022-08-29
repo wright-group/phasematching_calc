@@ -44,7 +44,7 @@ coordinates, the k1 and -k2 inputs.  Then a for loop cycles through each series 
 into a channel array that gets placed into a Data object.  The remaining code follows the WrightTools methodology
 of using the linspaces as variables and plotting the result using the ``WrightTools.artists.quick2D`` method.
 
-
+.. plot::
     # A method for creating a 2D array of "Mcalcs" and converting into a
     # WrightTools data object for use in various simulations.
     var1 = np.linspace(2450.00, 2900.00, 46)[:, None]
