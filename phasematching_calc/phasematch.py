@@ -485,6 +485,41 @@ def calculate_original_crit_angle(Iso, Las, layernum, freqnum, frequency=None):
     return angledeg
 
 
+def launchangle(Iso, Las):
+    """
+    Calculates the launch angle in degrees for wavemixing for an IsotropicSample,
+
+    Parameters
+    ----
+    Iso: an IsotropicSample object
+    Las: a Lasers object
+
+    Return
+    ---
+    tuple (angleoutx, angleouty) consisting of:
+
+    angleoutx x-component of launchangle after the sample of the FWM output.
+    angleouty y-component of launchangle after the sample of the FWM output.
+    """
+    output = _calculate_internals(Iso, Las, zerofreq=False, zerofreqnum=1)
+
+    angleoutx = output["angleoutx"]
+    angleouty = output["angleouty"]
+
+    nout = output["nout"]
+
+    numlayers = output["numlayers"]
+
+    noutf = nout[numlayers - 1]
+    angleoutxf = angleoutx[numlayers - 1]
+    angleoutyf = angleouty[numlayers - 1]
+
+    launchanglex = np.arcsin(noutf * np.sin(angleoutxf)) * 180 / np.pi
+    launchangley = np.arcsin(noutf * np.sin(angleoutyf)) * 180 / np.pi
+
+    return launchanglex, launchangley
+
+
 def m_calc(Iso, Las):
     """
     Calculates the phase mismatching factors for wavemixing for an IsotropicSample, which can then
