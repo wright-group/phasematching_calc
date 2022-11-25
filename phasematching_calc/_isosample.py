@@ -19,6 +19,181 @@ class IsoSample:
     def __setitem__(self, key):
         return setattr(self, key)
 
+    def create_layer2(
+        self,
+        csvfile1,
+        molfrac1=1.00,
+        csvfile2=None,
+        molfrac2=0.00,
+        csvfile3=None,
+        molfrac3=0.00,
+        wspacing=1.0,
+        thickness=0.01,
+        label="",
+    ):
+        """create layer from an array of a_n_datas, each data must contain three columns (L-R):  freq (cm-1), absorption coeff (cm-1), n
+        Freqs should be in increasing order.
+
+        Parameters:
+        -----------
+        csvfile1, csvfile2, csvfile3:  paths
+            path to tab-delimited spreadsheet file
+        molfrac1, molfrac2, molfrac3:
+            mole fractions of each component
+        thickness: float
+           thickness of layer in cm
+        label: str
+           description of layer (str)
+
+        """
+
+        wbeg = list()
+        wend = list()
+
+        data1 = np.loadtxt(csvfile1)
+        wp1 = np.asarray(data1[:, 0], dtype=float)
+
+        if wp1[0] > wp1[1]:
+            return IndexError("freqs of csvfile1 must be increasing order")
+        wbeg.append(wp1[0])
+        wend.append(wp1[len(wp1) - 1])
+
+        if csvfile2 is not None:
+            data2 = np.loadtxt(csvfile2)
+            wp2 = np.asarray(data2[:, 0], dtype=float)
+            if wp2[0] > wp2[1]:
+                return IndexError("freqs of csvfile2 must be increasing order")
+            wbeg.append(wp2[0])
+            wend.append(wp2[len(wp2) - 1])
+
+        if csvfile3 is not None:
+            data3 = np.loadtxt(csvfile3)
+            wp3 = np.asarray(data3[:, 0], dtype=float)
+            if wp3[0] > wp3[1]:
+                return IndexError("freqs of csvfile3 must be increasing order")
+            wbeg.append(wp3[0])
+            wend.append(wp3[len(wp3) - 1])
+
+        wbegt = np.max(wbeg)
+        wendt = np.min(wend)
+        number = int((wendt - wbegt) / wspacing)
+        wvec = np.linspace(wbegt, wendt, number)
+
+        layapoints = list()
+        laynpoints = list()
+
+        for i in range(len(wvec)):
+            w = wvec[i]
+            a1 = np.asarray(data1[:, 1], dtype=float)
+            n1 = np.asarray(data1[:, 2], dtype=float)
+            ncalc1 = np.interp(w, wp1, n1)
+            acalc1 = np.interp(w, wp1, a1)
+
+            if csvfile2 is not None:
+                a2 = np.asarray(data2[:, 1], dtype=float)
+                n2 = np.asarray(data2[:, 2], dtype=float)
+                ncalc2 = np.interp(w, wp2, n2)
+                acalc2 = np.interp(w, wp2, a2)
+            else:
+                ncalc2 = 0.00
+                acalc2 = 0.00
+
+            if csvfile3 is not None:
+                a3 = np.asarray(data3[:, 1], dtype=float)
+                n3 = np.asarray(data3[:, 2], dtype=float)
+                ncalc3 = np.interp(w, wp3, n3)
+                acalc3 = np.interp(w, wp3, a3)
+            else:
+                ncalc3 = 0.00
+                acalc3 = 0.00
+
+            ntemp = ncalc1 * molfrac1 + ncalc2 * molfrac2 + ncalc3 * molfrac3
+            atemp = acalc1 * molfrac1 + acalc2 * molfrac2 + acalc3 * molfrac3
+
+            laynpoints.append(ntemp)
+            layapoints.append(atemp)
+
+        layer = Layer()
+        layer["label"] = label
+        layer["thickness"] = thickness
+        layer["w_points"] = np.asarray(wvec, dtype=float)
+        layer["n_points"] = np.asarray(laynpoints, dtype=float)
+        layer["a_points"] = np.asarray(layapoints, dtype=float)
+        self.layers.append(layer)
+        return 0
+
+    def create_layer(self, csvfilelist, molfraclist, wspacing=1.0, thickness=0.01, label=""):
+        """create layer from a list of csvfiles, each file must contain three columns (L-R):  freq (cm-1), absorption coeff (cm-1), n
+        Freqs should be in increasing order.
+
+        Parameters:
+        -----------
+        csvfilelist:  list (str)
+            list of string paths to tab-delimited spreadsheet files
+        molfraclist:  list (float)
+            mole fractions of each component, which should sum to 1.000 but is not checked as such
+        thickness: float
+           thickness of layer in cm
+        label: str
+           description of layer
+
+        """
+        wbeg = list()
+        wend = list()
+        wdatalist = list()
+        adatalist = list()
+        ndatalist = list()
+
+        for i in range(len(csvfilelist)):
+            csvfile = csvfilelist[i]
+            data = np.loadtxt(csvfile)
+            w_i = np.asarray(data[:, 0], dtype=float)
+            a_i = np.asarray(data[:, 1], dtype=float)
+            n_i = np.asarray(data[:, 2], dtype=float)
+
+            if w_i[0] > w_i[1]:
+                return IndexError(f"freqs for list object {i} must be increasing order")
+
+            wbeg.append(w_i[0])
+            wend.append(w_i[len(w_i) - 1])
+            wdatalist.append(w_i)
+            adatalist.append(a_i)
+            ndatalist.append(n_i)
+
+        wbegt = np.max(wbeg)
+        wendt = np.min(wend)
+        number = int((wendt - wbegt) / wspacing) + 1
+        wvec = np.linspace(wbegt, wendt, number)
+
+        a2array = np.zeros([len(wvec), i + 1], dtype=float)
+        n2array = np.zeros([len(wvec), i + 1], dtype=float)
+
+        for n in range(len(wvec)):
+            w = wvec[n]
+
+            for i in range(len(csvfilelist)):
+                wi = wdatalist[i]
+                ai = adatalist[i]
+                ni = ndatalist[i]
+
+                acalc1 = np.interp(w, wi, ai)
+                ncalc1 = np.interp(w, wi, ni)
+
+                a2array[n, i] = acalc1 * molfraclist[i]
+                n2array[n, i] = ncalc1 * molfraclist[i]
+
+        aout = np.sum(a2array, 1)
+        nout = np.sum(n2array, 1)
+
+        layer = Layer()
+        layer["label"] = label
+        layer["thickness"] = thickness
+        layer["w_points"] = wvec
+        layer["a_points"] = aout
+        layer["n_points"] = nout
+        self.layers.append(layer)
+        return 0
+
     def load_layer(self, csvfile, thickness, label=""):
         """load a layer from a tab-delimited spreadsheet file
         File must contain three columns (L-R):  freq (cm-1), absorption coeff (cm-1), n
