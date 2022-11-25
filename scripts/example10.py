@@ -7,7 +7,7 @@ from config.definitions import ROOT_DIR
 from sympy import *
 
 
-"""Example `10`.  Simulation of a map of expected angles to achieve phasematching in planar geometry in the liquid layer
+"""Simulation of a map of expected angles to achieve phasematching in planar geometry in the liquid layer
 of a multilayer sapphire cell.   Positive solutions for w2 only, then M factor plotted for a single angle.   Test of
 the create_layer w/ mole fraction method.   Note that the mole fractioned values of n and alpha do not necssarily
 sum correctly because mixtures can interact with each other to modify results."""
@@ -125,7 +125,6 @@ data.channels[0].null = np.min(ch2)
 data.create_channel(name=f"Mfactor at angle1={angle1} deg", values=ch3)
 data.channels[1].null = 0
 # data.channels[0].null = 0
-
 
 wt.artists.quick2D(data, channel=0)
 plt.show()

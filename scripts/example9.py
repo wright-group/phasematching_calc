@@ -6,12 +6,9 @@ import os
 from config.definitions import ROOT_DIR
 from sympy import *
 
-"""The following example slices a single, thick layer into multiple very small layers and compares
-the sum (with phases) to the single layer to see if they are nearly equal.  Errors in how the phase
-or M factor are calculated may manifest as difference and so this example is actually a test for how well
-the calculation works.  Calculation does not perform absorbance of the output vector as the conditions
-(water, visible output) expected little absorbance there.  This example tests the validity of the phase
-portion of the m_calc method."""
+"""The following example calculates the changes in launch angle of DOVE FWM signal for an x planar geometry input with
+fixed input angles but varying frequencies for w1 and w2.  This can be useful for making certain the full output is
+captured by collection optics for any change of inputs, and can extend to other changes such as angles and w3."""
 
 # filepath = os.path.join(ROOT_DIR, "tests")
 filepath = os.path.join(os.getcwd(), "tests")
@@ -57,7 +54,7 @@ for m in range(len(var1a)):
         angleoutx, angleouty = pc.phasematch.launchangle(samp1, las)
         ch1[m, n] = angleoutx
 
-data = wt.Data(name="example")
+data = wt.Data(name="example 9")
 data.create_variable(name="w1", units="wn", values=var1)
 data.create_variable(name="w2", units="wn", values=var2)
 data.create_channel(name="angleoutx(deg)", values=ch1)
