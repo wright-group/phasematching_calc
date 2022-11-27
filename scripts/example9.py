@@ -10,6 +10,7 @@ from sympy import *
 fixed input angles but varying frequencies for w1 and w2.  This can be useful for making certain the full output is
 captured by collection optics for any change of inputs, and can extend to other changes such as angles and w3."""
 
+
 # filepath = os.path.join(ROOT_DIR, "tests")
 filepath = os.path.join(os.getcwd(), "tests")
 # filepath=os.getcwd()

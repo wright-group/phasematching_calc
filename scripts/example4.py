@@ -18,7 +18,7 @@ tkacn = 0.01
 
 # generation of a IsoSample
 samp1 = pc.IsoSample.IsoSample()
-desc = "FWM cell"
+desc = "FWM cell with fw sapphire, sample acn, and bw sapphire"
 samp1.description = desc
 samp1.load_layer(lay1file, tksap, label="sapphire")
 samp1.load_layer(lay2file, tkacn, label="acn")

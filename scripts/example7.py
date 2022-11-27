@@ -17,7 +17,7 @@ tkwat = 0.01
 
 # generation of a IsoSample
 samp1 = pc.IsoSample.IsoSample()
-desc = "sapphwatersapph"
+desc = "FWM cell with fw sapphire, sample water, and bw sapphire"
 samp1.description = desc
 samp1.load_layer(lay1file, tksap, label="saphfw")
 samp1.load_layer(lay2file, tkwat, label="h2o")

@@ -16,7 +16,7 @@ tkcaf2 = 0.02  # cm
 tkacn = 0.01  # cm
 
 samp1 = pc.IsoSample.IsoSample()
-desc = "FWM cell"
+desc = "FWM cell with fw caf2, sample acn, and bw caf2"
 samp1.description = desc
 samp1.load_layer(lay3file, tkcaf2, label="caf2fw")
 samp1.load_layer(lay4file, tkacn, label="acn")
