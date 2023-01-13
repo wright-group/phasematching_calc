@@ -4,6 +4,7 @@ from ._isosample import IsoSample
 from ._isosample import Layer
 from sympy import S, FiniteSet, Interval, oo
 import time
+import copy
 
 # prototypes
 Iso = IsoSample()
@@ -443,8 +444,8 @@ def _m_plot(Iso, Las, layernum, freqnum, side=1):
         anglelist = list(range(-limit, 0, 1))
 
     mlist = list()
-    Lastemp2 = Las
-    Isotemp2 = Iso
+    Lastemp2 = copy.deepcopy(Las)
+    Isotemp2 = copy.deepcopy(Iso)
     for k in range(layernum):
         Isotemp2.layers[k].suppress_absorbances()
 
@@ -835,10 +836,10 @@ def solve_angle(Iso, Las, layernum, freqnum, frequency=None, isclose=False, amt=
         return ValueError("freqnum cannot be less than 1")
 
     freqs = Las.frequencies
-    Lastemp = Las
-    Isotemp = Iso
-    Lastemp2 = Las
-    Isotemp2 = Iso
+    Lastemp = copy.deepcopy(Las)
+    Isotemp = copy.deepcopy(Iso)
+    Lastemp2 = copy.deepcopy(Las)
+    Isotemp2 = copy.deepcopy(Iso)
 
     numfreqs = len(freqs)
 
@@ -1050,9 +1051,9 @@ def solve_frequency(Iso, Las, layernum, freqnum, amt=None, isclose=False):
     flag = int(0)
     numfreqs = len(freqs)
 
-    Isotemp = Iso
-    Isotemp2 = Iso
-    Lastemp = Las
+    Isotemp = copy.deepcopy(Iso)
+    Isotemp2 = copy.deepcopy(Iso)
+    Lastemp = copy.deepcopy(Las)
 
     if isclose:
         if amt is None:

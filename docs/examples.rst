@@ -943,8 +943,7 @@ sum correctly because mixtures can interact with each other to modify results.
 .. image:: Figure_10b.png
 
 As mentioned above, it is important to note that the effective refractive index and absorption coefficient does not
-necessarily equate with the mole fractions of the components of each mixture.   In this case, breakup of methanol
-clusters by the dichloromethane would alter the Hydrogen bonding of the methanol and therefore affect its infrared spectrum.
-(The visible portion of the refractive index and absorption coeffecient is less likely to be affected as neither solvent
-is strongly absorptive in the Visible.)  Nevertheless, there is a pretext for using this additive method to estimate
+necessarily equate with the mole fractions of the components of each mixture.   Hydrogen bonded liquids are an example
+where if made very dilute in an inert solvent would have greatly narrowed lineshapes and thus have a different spectrum.
+Nevertheless, there is a pretext for using this additive method to estimate
 phasematching geometries as it may give the user a location to which to begin experimentally finding optimal conditions.

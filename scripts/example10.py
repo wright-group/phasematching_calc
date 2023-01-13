@@ -5,51 +5,48 @@ import numpy as np
 import os
 from config.definitions import ROOT_DIR
 from sympy import *
-
+import copy
 
 """Simulation of a map of expected angles to achieve phasematching in planar geometry in the liquid layer
 of a multilayer sapphire cell.   Positive solutions for w2 only, then M factor plotted for a single angle.   Test of
 the create_layer w/ mole fraction method.   Note that the mole fractioned values of n and alpha do not necssarily
 sum correctly because mixtures can interact with each other to modify results."""
 
+
 # filepath = os.path.join(ROOT_DIR, "tests")
 filepath = os.path.join(os.getcwd(), "tests")
-lay1file = os.path.join(filepath, "Ch2Cl2n_paste.txt")
+lay1afile = os.path.join(filepath, "CCl4_paste.txt")
 lay2file = os.path.join(filepath, "MeOH_kozma_ApplSpec_paste.txt")
-# lay4file = os.path.join(filepath, "CH3CN_kn_ApplSpec_Kozma_paste.dat")
 lay3file = os.path.join(filepath, "sapphire1.txt")
 
-tkdcm = 0.01  # cm
-# tkacn= 0.01 #cm
-tksap = 0.02  # cm
+tkccl4 = 0.0127  # cm
+tksap = 0.016  # cm
 
 # generation of a IsoSample
 samp1 = pc.IsoSample.IsoSample()
-desc = "FWM cell with fw sapphire, sample dcm:meoh, and bw sapphire"
+desc = "FWM cell with fw sapphire, sample ccl4:meoh, and bw sapphire"
 samp1.description = desc
 samp1.load_layer(lay3file, tksap, label="sapfw")
 
 layfilelist = list()
-molfraclist = [0.75, 0.25]
-layfilelist.append(lay1file)
+molfraclist = [0.9, 0.10]
+layfilelist.append(lay1afile)
 layfilelist.append(lay2file)
 
-samp1.create_layer(layfilelist, molfraclist, thickness=tkdcm, label="dcm_meoh")
-samp1.load_layer(lay2file, tksap, label="sapbw")
-
+samp1.create_layer(layfilelist, molfraclist, thickness=tkccl4, label="ccl4_meoh")
+samp1.load_layer(lay3file, tksap, label="sapbw")
 
 # generation of a Lasers object.
 las = pc.Lasers.Lasers()
-arr1 = [2200.0, 3150.0, 19000.0]
+arr1 = [2200.0, 3150.0, 18500.0]
 las.add_frequencies(arr1)
-arr2 = [15.0, -7.0, 0.0]
+arr2 = [13.0, -8.0, 0.0]
 las.add_angles(arr2)
 arr3 = [-1, 1, 1]
 las.add_k_coeffs(arr3)
 arr4 = [1, 1, 1]
 las.add_pols(arr4)
 las.change_geometry("planar")
-
 
 w1start = 1800.00
 w1end = 2000.00
@@ -58,8 +55,8 @@ w2end = 3000.00
 
 var1 = np.linspace(w1start, w1end, 41)[None, :]
 var1a = np.linspace(w1start, w1end, 41)
-var2 = np.linspace(w2start, w2end, 61)[:, None]
-var2a = np.linspace(w2start, w2end, 61)
+var2 = np.linspace(w2start, w2end, 41)[:, None]
+var2a = np.linspace(w2start, w2end, 41)
 
 ch1 = np.zeros([len(var1a), len(var2a)])
 ch2 = np.zeros([len(var1a), len(var2a)])
@@ -72,7 +69,6 @@ mold = int(0)
 data = wt.Data(name="angle solve positive")
 data.create_variable(name="w1", units="wn", values=var1.T)
 data.create_variable(name="w2", units="wn", values=var2.T)
-
 
 #  positive solution.
 for m in range(len(var1a)):
@@ -103,9 +99,8 @@ for m in range(len(var1a)):
             else:
                 ch2[m, n] = float("nan")
 
-
 # fixed angle M factor solver
-angle1 = 10.5
+angle1 = 13
 
 las.change_angle(1, angle1)
 las.change_angle(2, arr2[1])
@@ -116,6 +111,9 @@ for m in range(len(var1a)):
         las.change_freq(2, var2a[n])
         Mlist, Mphase, tklist, Tlist = pc.phasematch.m_calc(samp1, las)
         ch3[m, n] = np.abs(Mlist[1])
+
+
+Mlist, Mphase, tklist, Tlist = pc.phasematch.m_calc(samp1, las)
 
 data.transform("w2", "w1")
 
@@ -131,3 +129,5 @@ plt.show()
 
 wt.artists.quick2D(data, channel=1)
 plt.show()
+
+pass

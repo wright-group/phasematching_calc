@@ -51,8 +51,10 @@ for m in range(len(var1)):
     for n in range(len(var2a)):
         las.change_freq(1, var1[m])
         las.change_freq(2, var2a[n])
+
         Mlist, Mphase, tklist, Tlist = pc.phasematch.m_calc(samp1, las)
         ch1[m, n] = np.abs(Mlist[1])
+
 
 data = wt.Data(name="FWM cell water caf2 planar DOVE")
 data.create_variable(name="w1", units="wn", values=var1)

@@ -44,3 +44,6 @@ flycheck_*.el
 coverage.xml
 *,cover
 .pytest_cache/*
+
+# VSCode
+.vscode/*
