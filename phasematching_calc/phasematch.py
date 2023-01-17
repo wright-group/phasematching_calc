@@ -253,6 +253,9 @@ def _calculate_internals(Iso, Las, zerofreq=False, zerofreqnum=1):
     for m in range(numfreqs):
         freqout = freqout + kcoeffs[m] * freqs[m]
 
+    if freqout < 0:
+        return ValueError("output frequency is less than zero")
+
     # These are 2D arrays where the 1st D is layer (1st and last are air) and 2nd are the input freqs
     anglex = list()
     angley = list()
@@ -502,28 +505,32 @@ def launchangle(Iso, Las):
     angleoutx x-component of launchangle after the sample of the FWM output.
     angleouty y-component of launchangle after the sample of the FWM output.
     """
-    output = _calculate_internals(Iso, Las, zerofreq=False, zerofreqnum=1)
+    try:
+        output = _calculate_internals(Iso, Las, zerofreq=False, zerofreqnum=1)
 
-    angleoutx = output["angleoutx"]
-    angleouty = output["angleouty"]
+        angleoutx = output["angleoutx"]
+        angleouty = output["angleouty"]
 
-    nout = output["nout"]
+        nout = output["nout"]
 
-    numlayers = output["numlayers"]
+        numlayers = output["numlayers"]
 
-    noutf = nout[numlayers - 1]
-    angleoutxf = angleoutx[numlayers - 1]
-    angleoutyf = angleouty[numlayers - 1]
+        noutf = nout[numlayers - 1]
+        angleoutxf = angleoutx[numlayers - 1]
+        angleoutyf = angleouty[numlayers - 1]
 
-    launchanglex = np.arcsin(noutf * np.sin(angleoutxf)) * 180 / np.pi
-    launchangley = np.arcsin(noutf * np.sin(angleoutyf)) * 180 / np.pi
+        launchanglex = np.arcsin(noutf * np.sin(angleoutxf)) * 180 / np.pi
+        launchangley = np.arcsin(noutf * np.sin(angleoutyf)) * 180 / np.pi
 
-    return launchanglex, launchangley
+        return launchanglex, launchangley
+    except:
+        print("cannot calculate Launch Angle because output frequency is less than zero")
+        return ValueError("output frequency is less than zero")
 
 
 def m_calc(Iso, Las):
     """
-    Calculates the phase mismatching factors for wavemixing for an IsotropicSample, which can then
+    Calculates the phase mismatching factors for four wave mixing for an IsotropicSample, which can then
     be incorporated into plots or simulations (WrightSim)
 
     Parameters
@@ -571,167 +578,172 @@ def m_calc(Iso, Las):
     tklist = list()
     Mphaselist = list()
 
-    output = _calculate_internals(Iso, Las, zerofreq=False, zerofreqnum=1)
-    anglex = output["anglex"]
-    angley = output["angley"]
-    angleoutx = output["angleoutx"]
-    angleouty = output["angleouty"]
-    nvec = output["n"]
-    avec = output["a"]
-    nout = output["nout"]
-    aout = output["aout"]
-    tk = output["thicknesses"]
-    kx = output["kx"]
-    ky = output["ky"]
-    kz = output["kz"]
-    freqout = output["freqout"]
-    numlayers = output["numlayers"]
-    numfreqs = output["numfreqs"]
-    xmask = output["xmask"]
-    kcoeffs = output["kcoeffs"]
+    try:
+        output = _calculate_internals(Iso, Las, zerofreq=False, zerofreqnum=1)
 
-    noutf = nout[numlayers - 1]
-    angleoutxf = angleoutx[numlayers - 1]
-    angleoutyf = angleouty[numlayers - 1]
+        anglex = output["anglex"]
+        angley = output["angley"]
+        angleoutx = output["angleoutx"]
+        angleouty = output["angleouty"]
+        nvec = output["n"]
+        avec = output["a"]
+        nout = output["nout"]
+        aout = output["aout"]
+        tk = output["thicknesses"]
+        kx = output["kx"]
+        ky = output["ky"]
+        kz = output["kz"]
+        freqout = output["freqout"]
+        numlayers = output["numlayers"]
+        numfreqs = output["numfreqs"]
+        xmask = output["xmask"]
+        kcoeffs = output["kcoeffs"]
 
-    launchanglex = np.arcsin(noutf * np.sin(angleoutxf))
-    launchangley = np.arcsin(noutf * np.sin(angleoutyf))
+        noutf = nout[numlayers - 1]
+        angleoutxf = angleoutx[numlayers - 1]
+        angleoutyf = angleouty[numlayers - 1]
 
-    angleoutx.append(launchanglex)
-    angleouty.append(launchangley)
+        launchanglex = np.arcsin(noutf * np.sin(angleoutxf))
+        launchangley = np.arcsin(noutf * np.sin(angleoutyf))
 
-    tkeffvec = np.zeros(numfreqs)
+        angleoutx.append(launchanglex)
+        angleouty.append(launchangley)
 
-    polout = _guess_output_pol(pols)
+        tkeffvec = np.zeros(numfreqs)
 
-    Tin, Tout = _calculate_trans(
-        xmask, nvec, anglex, angley, pols, nout, angleoutx, angleouty, polout
-    )
+        polout = _guess_output_pol(pols)
 
-    Mctemp = 1
+        Tin, Tout = _calculate_trans(
+            xmask, nvec, anglex, angley, pols, nout, angleoutx, angleouty, polout
+        )
 
-    koutx = 0.00
-    kouty = 0.00
-    koutz = 0.00
+        Mctemp = 1
 
-    n = len(xmask) - 1
-    for m in range(numlayers):
-        avectemp = avec[m]
-        kztemp = kz[m]
-        kytemp = ky[m]
-        kxtemp = kx[m]
+        koutx = 0.00
+        kouty = 0.00
+        koutz = 0.00
 
-        tktemp = tk[m]
-        anglextemp = anglex[m]
-        angleytemp = angley[m]
-        aouttemp = aout[m]
-        angleoutxtemp = angleoutx[m]
-        angleoutytemp = angleouty[m]
-        nouttemp = nout[m]
+        n = len(xmask) - 1
+        for m in range(numlayers):
+            avectemp = avec[m]
+            kztemp = kz[m]
+            kytemp = ky[m]
+            kxtemp = kx[m]
 
-        if xmask[n] == 0.00:
-            tkeff = tktemp / np.cos(angleoutytemp)
-            kout = 2.00 * np.pi * freqout * nouttemp * tkeff
-            koutx = 0.00
-            koutz = kout * np.cos(angleoutytemp)
-            kouty = kout * np.sin(angleoutytemp)
-            ko = 2.00 * np.pi * freqout * nouttemp
-            kox = 0.00
-            koz = ko * np.cos(angleoutytemp)
-            koy = ko * np.sin(angleoutytemp)
-        else:
-            tkeff = tktemp / np.cos(angleoutxtemp)
-            kout = 2.00 * np.pi * freqout * nouttemp * tkeff
-            kouty = 0.00
-            koutz = kout * np.cos(angleoutxtemp)
-            koutx = kout * np.sin(angleoutxtemp)
-            ko = 2.00 * np.pi * freqout * nouttemp
-            koy = 0.00
-            koz = ko * np.cos(angleoutxtemp)
-            kox = ko * np.sin(angleoutxtemp)
+            tktemp = tk[m]
+            anglextemp = anglex[m]
+            angleytemp = angley[m]
+            aouttemp = aout[m]
+            angleoutxtemp = angleoutx[m]
+            angleoutytemp = angleouty[m]
+            nouttemp = nout[m]
 
-        ksumx = ksumy = ksumz = 0.0000
-        # kz=0.000
-
-        for i in range(numfreqs):
-            if xmask[i] == 0.00:
-                tkeffvec[i] = tktemp / np.cos(angleytemp[i])
-                k = np.sqrt(kytemp[i] ** 2 + kztemp[i] ** 2)
-                kproj = k * np.cos(angleytemp[i] - angleoutytemp)
+            if xmask[n] == 0.00:
+                tkeff = tktemp / np.cos(angleoutytemp)
+                kout = 2.00 * np.pi * freqout * nouttemp * tkeff
+                koutx = 0.00
+                koutz = kout * np.cos(angleoutytemp)
+                kouty = kout * np.sin(angleoutytemp)
+                ko = 2.00 * np.pi * freqout * nouttemp
+                kox = 0.00
+                koz = ko * np.cos(angleoutytemp)
+                koy = ko * np.sin(angleoutytemp)
             else:
-                tkeffvec[i] = tktemp / np.cos(anglextemp[i])
-                k = np.sqrt(kxtemp[i] ** 2 + kztemp[i] ** 2)
-                kproj = k * np.cos(anglextemp[i] - angleoutxtemp)
-            """
-            #ksumx = (kcoeffs[i] * kxtemp[i]) * tkeffvec[i] + ksumx
-            #ksumy = (kcoeffs[i] * kytemp[i]) * tkeffvec[i] + ksumy
-            #ksumz = (kcoeffs[i] * kztemp[i]) * tkeffvec[i] + ksumz
-            #ksumx = (kcoeffs[i] * kxtemp[i]) * tkeff + ksumx #B
-            #ksumy = (kcoeffs[i] * kytemp[i]) * tkeff + ksumy #B
-            #ksumz = (kcoeffs[i] * kztemp[i]) * tkeff + ksumz #B
-            """
-            ksumx = 0  # C
-            ksumy = 0
-            ksumz = (kcoeffs[i] * kproj) * tkeff + ksumz
-            # kz = (kcoeffs[i] * kproj) + ksumz
+                tkeff = tktemp / np.cos(angleoutxtemp)
+                kout = 2.00 * np.pi * freqout * nouttemp * tkeff
+                kouty = 0.00
+                koutz = kout * np.cos(angleoutxtemp)
+                koutx = kout * np.sin(angleoutxtemp)
+                ko = 2.00 * np.pi * freqout * nouttemp
+                koy = 0.00
+                koz = ko * np.cos(angleoutxtemp)
+                kox = ko * np.sin(angleoutxtemp)
 
-        k4 = np.sqrt(ksumx**2 + ksumy**2 + ksumz**2)
-        dkl = k4 - kout
+            ksumx = ksumy = ksumz = 0.0000
+            # kz=0.000
 
-        # dk = kz-ko
+            for i in range(numfreqs):
+                if xmask[i] == 0.00:
+                    tkeffvec[i] = tktemp / np.cos(angleytemp[i])
+                    k = np.sqrt(kytemp[i] ** 2 + kztemp[i] ** 2)
+                    kproj = k * np.cos(angleytemp[i] - angleoutytemp)
+                else:
+                    tkeffvec[i] = tktemp / np.cos(anglextemp[i])
+                    k = np.sqrt(kxtemp[i] ** 2 + kztemp[i] ** 2)
+                    kproj = k * np.cos(anglextemp[i] - angleoutxtemp)
+                """
+                #ksumx = (kcoeffs[i] * kxtemp[i]) * tkeffvec[i] + ksumx
+                #ksumy = (kcoeffs[i] * kytemp[i]) * tkeffvec[i] + ksumy
+                #ksumz = (kcoeffs[i] * kztemp[i]) * tkeffvec[i] + ksumz
+                #ksumx = (kcoeffs[i] * kxtemp[i]) * tkeff + ksumx #B
+                #ksumy = (kcoeffs[i] * kytemp[i]) * tkeff + ksumy #B
+                #ksumz = (kcoeffs[i] * kztemp[i]) * tkeff + ksumz #B
+                """
+                ksumx = 0  # C
+                ksumy = 0
+                ksumz = (kcoeffs[i] * kproj) * tkeff + ksumz
+                # kz = (kcoeffs[i] * kproj) + ksumz
 
-        dal = aouttemp * tkeff * 0.5
-        da = aouttemp * 0.5
+            k4 = np.sqrt(ksumx**2 + ksumy**2 + ksumz**2)
+            dkl = k4 - kout
 
-        for i in range(numfreqs):
-            dal = dal - (np.abs(kcoeffs[i]) * avectemp[i] * tkeffvec[i]) * 0.5  # C, #A
-            da = da - (np.abs(kcoeffs[i]) * avectemp[i]) * 0.5  # C, #A
-            # dal = dal - 0.5 * (np.abs(kcoeffs[i]) * avectemp[i] * tkeff)
+            # dk = kz-ko
 
-        Mc1 = np.exp(-aouttemp * tkeff)
+            dal = aouttemp * tkeff * 0.5
+            da = aouttemp * 0.5
 
-        if (dal == 0.00) & (dkl == 0.00):  # limiting case
-            Mc2 = 1.00
-            Mphasedelta = 0.00
-            # Mphasedelta=np.pi/2
+            for i in range(numfreqs):
+                dal = dal - (np.abs(kcoeffs[i]) * avectemp[i] * tkeffvec[i]) * 0.5  # C, #A
+                da = da - (np.abs(kcoeffs[i]) * avectemp[i]) * 0.5  # C, #A
+                # dal = dal - 0.5 * (np.abs(kcoeffs[i]) * avectemp[i] * tkeff)
+
+            Mc1 = np.exp(-aouttemp * tkeff)
+
+            if (dal == 0.00) & (dkl == 0.00):  # limiting case
+                Mc2 = 1.00
+                Mphasedelta = 0.00
+                # Mphasedelta=np.pi/2
+            else:
+
+                Mc2 = ((1 - np.exp(dal)) ** 2 + 4 * np.exp(dal) * (np.sin(dkl / 2)) ** 2) / (
+                    dal**2 + (dkl) ** 2
+                )
+                """
+                Mc2 = (1+ np.exp(2*dal)-2*np.exp(dal)*np.cos(dkl)) / (
+                    dal**2 + (dkl) ** 2
+                )
+                """
+
+                Mphasedelta = np.arctan(
+                    (dkl + np.exp(dal) * (-dkl * np.cos(dkl) + dal * np.sin(dkl)))
+                    / (-dal + np.exp(dal) * (dal * np.cos(dkl) + dkl * np.sin(dkl)))
+                )
+
+                """
+                Mphasedelta = np.arctan(
+                    (-dal + np.exp(dal) * (dkl * np.sin(dkl) + dal * np.cos(dkl)))
+                    / (dkl + np.exp(dal) * (-dkl * np.cos(dkl) + dal * np.sin(dkl)))
+                ) """  # old
+
+            Mctemp = Mc1 * Mc2
+            Mlist.append(Mctemp)
+            tklist.append(tkeff)
+            Mphaselist.append(Mphasedelta)
+        # angleoutxtemp and angleoutytemp can be converted to launch angles via Snell's Law to calculate
+        # launch angle in air afterwards
+        if xmask[n] == 0:
+            launchangledeg = np.arcsin(nouttemp * np.sin(angleoutytemp)) * 180.00 / np.pi
         else:
+            launchangledeg = np.arcsin(nouttemp * np.sin(angleoutxtemp)) * 180.00 / np.pi
 
-            Mc2 = ((1 - np.exp(dal)) ** 2 + 4 * np.exp(dal) * (np.sin(dkl / 2)) ** 2) / (
-                dal**2 + (dkl) ** 2
-            )
-            """
-            Mc2 = (1+ np.exp(2*dal)-2*np.exp(dal)*np.cos(dkl)) / (
-                dal**2 + (dkl) ** 2
-            )
-            """
-
-            Mphasedelta = np.arctan(
-                (dkl + np.exp(dal) * (-dkl * np.cos(dkl) + dal * np.sin(dkl)))
-                / (-dal + np.exp(dal) * (dal * np.cos(dkl) + dkl * np.sin(dkl)))
-            )
-
-            """
-            Mphasedelta = np.arctan(
-                (-dal + np.exp(dal) * (dkl * np.sin(dkl) + dal * np.cos(dkl)))
-                / (dkl + np.exp(dal) * (-dkl * np.cos(dkl) + dal * np.sin(dkl)))
-            ) """  # old
-
-        Mctemp = Mc1 * Mc2
-        Mlist.append(Mctemp)
-        tklist.append(tkeff)
-        Mphaselist.append(Mphasedelta)
-    # angleoutxtemp and angleoutytemp can be converted to launch angles via Snell's Law to calculate
-    # launch angle in air afterwards
-    if xmask[n] == 0:
-        launchangledeg = np.arcsin(nouttemp * np.sin(angleoutytemp)) * 180.00 / np.pi
-    else:
-        launchangledeg = np.arcsin(nouttemp * np.sin(angleoutxtemp)) * 180.00 / np.pi
-
-    Tdict = dict()
-    Tdict["Tout"] = Tout
-    Tdict["Tin"] = Tin
-    Tdict["launchangledeg"] = launchangledeg
-    return Mlist, Mphaselist, tklist, Tdict
+        Tdict = dict()
+        Tdict["Tout"] = Tout
+        Tdict["Tin"] = Tin
+        Tdict["launchangledeg"] = launchangledeg
+        return Mlist, Mphaselist, tklist, Tdict
+    except:
+        print("cannot calculate M factor because output frequency is less than zero")
+        return ValueError("output frequency is less than zero")
 
 
 def angle(Iso, Las, layernum, freqnum, frequency=None):
@@ -853,157 +865,162 @@ def solve_angle(Iso, Las, layernum, freqnum, frequency=None, isclose=False, amt=
             return ValueError("frequency cannot be less than 0")
         Lastemp.change_freq(freqnum, frequency)
 
-    output = _calculate_internals(Isotemp, Lastemp, zerofreq=True, zerofreqnum=freqnum)
-    kx = output["kx"]
-    ky = output["ky"]
-    kz = output["kz"]
-    kcoeffs = output["kcoeffs"]
-    kxtemp = kx[layernum - 1]
-    kytemp = ky[layernum - 1]
-    kztemp = kz[layernum - 1]
-    ksumx = ksumy = ksumz = 0.000
+    try:
+        output = _calculate_internals(Isotemp, Lastemp, zerofreq=True, zerofreqnum=freqnum)
 
-    for i in range(numfreqs):
-        ksumx = kcoeffs[i] * kxtemp[i] + ksumx
-        ksumy = kcoeffs[i] * kytemp[i] + ksumy
-        ksumz = kcoeffs[i] * kztemp[i] + ksumz
-    if (ksumx == ksumz) & (ksumx == 0.00):
-        flag = 1
-    elif (ksumy == ksumz) & (ksumx == 0.00):
-        flag = 1
+        kx = output["kx"]
+        ky = output["ky"]
+        kz = output["kz"]
+        kcoeffs = output["kcoeffs"]
+        kxtemp = kx[layernum - 1]
+        kytemp = ky[layernum - 1]
+        kztemp = kz[layernum - 1]
+        ksumx = ksumy = ksumz = 0.000
 
-    if flag == 1:
-        angledeg = calculate_original_crit_angle(Iso, Las, layernum, freqnum, frequency)
-        return Interval(0, angledeg), 0.00
-    else:
-        m = layernum - 1
-        tol = 0.001
-        iter = 80
-        for k in range(layernum):
-            Isotemp2.layers[k].suppress_absorbances()
+        for i in range(numfreqs):
+            ksumx = kcoeffs[i] * kxtemp[i] + ksumx
+            ksumy = kcoeffs[i] * kytemp[i] + ksumy
+            ksumz = kcoeffs[i] * kztemp[i] + ksumz
+        if (ksumx == ksumz) & (ksumx == 0.00):
+            flag = 1
+        elif (ksumy == ksumz) & (ksumx == 0.00):
+            flag = 1
 
-        if isclose:
-            if amt is None:
-                amt = 0.05
-
-            Mtest, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp2)
-            angle = Lastemp2.anglesairdeg[freqnum - 1]
-            magMtestc = np.abs(Mtest[m])
-
-            anglep = Lastemp2.anglesairdeg[freqnum - 1] + amt * 1.00
-            Lastemp.change_angle(freqnum, anglep)
-            Mtestp, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp)
-            magMtestp = np.abs(Mtestp[m])
-
-            anglen = Lastemp2.anglesairdeg[freqnum - 1] + 2 * amt * -1.00
-            Lastemp.change_angle(freqnum, anglen)
-            Mtestn, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp)
-            magMtestn = np.abs(Mtestn[m])
-
-            errorp = magMtestp - magMtestc
-            errorn = magMtestn - magMtestc
-
-            if errorp > errorn:
-                dir = 1.00
-                magMtest = magMtestc
-            else:
-                dir = -1.00
-                magMtest = magMtestc
-
-            error2 = 1.000 - magMtestc
-            error1 = error2
-            b = 0
-            while error2 > tol:
-                b = b + 1
-                if error2 > error1:
-                    dir = (-1.00) * dir
-                if np.abs(error2) < 0.33 * np.abs(error1):
-                    amt = 0.1 * amt
-                error1 = error2
-                angle = Lastemp2.anglesairdeg[freqnum - 1] + amt * dir
-                Lastemp2.change_angle(freqnum, angle)
-                Mtest, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp2)
-                magMtest = np.abs(Mtest[m])
-                error2 = 1 - magMtest
-                if b > iter:
-                    flag2 = 1
-                    break
-            if np.isclose(magMtest, 1.00, rtol=tol * 10):
-                flag2 = 0
-            angle2 = float("nan")
-            flag3 = 1
-        else:  # if isclose is false, both (if possible) solutions are located (two while loops)
-            mlist = _m_plot(Isotemp2, Lastemp2, layernum, freqnum, side=1)
-            mlist2 = _m_plot(Isotemp2, Lastemp2, layernum, freqnum, side=-1)
-            mlist.reverse()
-            max1 = max(mlist)
-            max1ind = mlist.index(max(mlist))
-            max2 = max(mlist2)
-            max2ind = mlist2.index(max(mlist2)) - 75
-
-            dir = 1.000
-            amt = 0.5
-            Lastemp2.change_angle(freqnum, max1ind)
-            Mtest, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp2)
-            angle = Lastemp2.anglesairdeg[freqnum - 1]
-            magMtest1 = np.abs(Mtest[m])
-            error2 = 1.000 - magMtest1
-            error1 = error2
-            b = 0
-            while error2 > tol:
-                b = b + 1
-                if error2 > error1:
-                    dir = (-1.00) * dir
-                if np.abs(error2) < 0.33 * np.abs(error1):
-                    amt = 0.1 * amt
-                error1 = error2
-                angle = Lastemp2.anglesairdeg[freqnum - 1] + amt * dir
-                Lastemp2.change_angle(freqnum, angle)
-                Mtest, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp2)
-                magMtest1 = np.abs(Mtest[m])
-                error2 = 1 - magMtest1
-                if b > iter:
-                    flag2 = 1
-                    break
-
-            dir = 1.00
-            amt = 0.5
-            Lastemp2.change_angle(freqnum, max2ind)
-            Mtest, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp2)
-            angle2 = Lastemp2.anglesairdeg[freqnum - 1]
-            magMtest2 = np.abs(Mtest[m])
-            error2 = 1.000 - magMtest2
-            error1 = error2
-            b = 0
-            while error2 > tol:
-                b = b + 1
-                if error2 > error1:
-                    dir = (-1.00) * dir
-                if np.abs(error2) < 0.33 * np.abs(error1):
-                    amt = 0.1 * amt
-                error1 = error2
-                angle2 = Lastemp2.anglesairdeg[freqnum - 1] + amt * dir
-                Lastemp2.change_angle(freqnum, angle2)
-                Mtest, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp2)
-                magMtest2 = np.abs(Mtest[m])
-                error2 = 1 - magMtest2
-                if b > iter:
-                    flag3 = 1
-                    break
-
-            if np.isclose(magMtest1, 1.00, rtol=tol * 10):
-                flag2 = 0
-            if np.isclose(magMtest2, 1.00, rtol=tol * 10):
-                flag3 = 0
-
-        if (flag2 == 1) & (flag3 == 1):
-            return FiniteSet(), amt
-        elif flag2 == 1:
-            return FiniteSet(angle2), amt
-        elif flag3 == 1:
-            return FiniteSet(angle), amt
+        if flag == 1:
+            angledeg = calculate_original_crit_angle(Iso, Las, layernum, freqnum, frequency)
+            return Interval(0, angledeg), 0.00
         else:
-            return FiniteSet(angle, angle2), amt
+            m = layernum - 1
+            tol = 0.001
+            iter = 80
+            for k in range(layernum):
+                Isotemp2.layers[k].suppress_absorbances()
+
+            if isclose:
+                if amt is None:
+                    amt = 0.05
+
+                Mtest, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp2)
+                angle = Lastemp2.anglesairdeg[freqnum - 1]
+                magMtestc = np.abs(Mtest[m])
+
+                anglep = Lastemp2.anglesairdeg[freqnum - 1] + amt * 1.00
+                Lastemp.change_angle(freqnum, anglep)
+                Mtestp, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp)
+                magMtestp = np.abs(Mtestp[m])
+
+                anglen = Lastemp2.anglesairdeg[freqnum - 1] + 2 * amt * -1.00
+                Lastemp.change_angle(freqnum, anglen)
+                Mtestn, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp)
+                magMtestn = np.abs(Mtestn[m])
+
+                errorp = magMtestp - magMtestc
+                errorn = magMtestn - magMtestc
+
+                if errorp > errorn:
+                    dir = 1.00
+                    magMtest = magMtestc
+                else:
+                    dir = -1.00
+                    magMtest = magMtestc
+
+                error2 = 1.000 - magMtestc
+                error1 = error2
+                b = 0
+                while error2 > tol:
+                    b = b + 1
+                    if error2 > error1:
+                        dir = (-1.00) * dir
+                    if np.abs(error2) < 0.33 * np.abs(error1):
+                        amt = 0.1 * amt
+                    error1 = error2
+                    angle = Lastemp2.anglesairdeg[freqnum - 1] + amt * dir
+                    Lastemp2.change_angle(freqnum, angle)
+                    Mtest, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp2)
+                    magMtest = np.abs(Mtest[m])
+                    error2 = 1 - magMtest
+                    if b > iter:
+                        flag2 = 1
+                        break
+                if np.isclose(magMtest, 1.00, rtol=tol * 10):
+                    flag2 = 0
+                angle2 = float("nan")
+                flag3 = 1
+            else:  # if isclose is false, both (if possible) solutions are located (two while loops)
+                mlist = _m_plot(Isotemp2, Lastemp2, layernum, freqnum, side=1)
+                mlist2 = _m_plot(Isotemp2, Lastemp2, layernum, freqnum, side=-1)
+                mlist.reverse()
+                max1 = max(mlist)
+                max1ind = mlist.index(max(mlist))
+                max2 = max(mlist2)
+                max2ind = mlist2.index(max(mlist2)) - 75
+
+                dir = 1.000
+                amt = 0.5
+                Lastemp2.change_angle(freqnum, max1ind)
+                Mtest, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp2)
+                angle = Lastemp2.anglesairdeg[freqnum - 1]
+                magMtest1 = np.abs(Mtest[m])
+                error2 = 1.000 - magMtest1
+                error1 = error2
+                b = 0
+                while error2 > tol:
+                    b = b + 1
+                    if error2 > error1:
+                        dir = (-1.00) * dir
+                    if np.abs(error2) < 0.33 * np.abs(error1):
+                        amt = 0.1 * amt
+                    error1 = error2
+                    angle = Lastemp2.anglesairdeg[freqnum - 1] + amt * dir
+                    Lastemp2.change_angle(freqnum, angle)
+                    Mtest, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp2)
+                    magMtest1 = np.abs(Mtest[m])
+                    error2 = 1 - magMtest1
+                    if b > iter:
+                        flag2 = 1
+                        break
+
+                dir = 1.00
+                amt = 0.5
+                Lastemp2.change_angle(freqnum, max2ind)
+                Mtest, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp2)
+                angle2 = Lastemp2.anglesairdeg[freqnum - 1]
+                magMtest2 = np.abs(Mtest[m])
+                error2 = 1.000 - magMtest2
+                error1 = error2
+                b = 0
+                while error2 > tol:
+                    b = b + 1
+                    if error2 > error1:
+                        dir = (-1.00) * dir
+                    if np.abs(error2) < 0.33 * np.abs(error1):
+                        amt = 0.1 * amt
+                    error1 = error2
+                    angle2 = Lastemp2.anglesairdeg[freqnum - 1] + amt * dir
+                    Lastemp2.change_angle(freqnum, angle2)
+                    Mtest, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp2)
+                    magMtest2 = np.abs(Mtest[m])
+                    error2 = 1 - magMtest2
+                    if b > iter:
+                        flag3 = 1
+                        break
+
+                if np.isclose(magMtest1, 1.00, rtol=tol * 10):
+                    flag2 = 0
+                if np.isclose(magMtest2, 1.00, rtol=tol * 10):
+                    flag3 = 0
+
+            if (flag2 == 1) & (flag3 == 1):
+                return FiniteSet(), amt
+            elif flag2 == 1:
+                return FiniteSet(angle2), amt
+            elif flag3 == 1:
+                return FiniteSet(angle), amt
+            else:
+                return FiniteSet(angle, angle2), amt
+    except:
+        print("cannot solve angle because output frequency is less than zero")
+        return ValueError("output frequency is less than zero")
 
 
 def solve_frequency(Iso, Las, layernum, freqnum, amt=None, isclose=False):
@@ -1070,86 +1087,91 @@ def solve_frequency(Iso, Las, layernum, freqnum, amt=None, isclose=False):
 
             tol = 0.001
 
-    output = _calculate_internals(Isotemp, Lastemp, zerofreq=True, zerofreqnum=freqnum)
-    kx = output["kx"]
-    ky = output["ky"]
-    kz = output["kz"]
-    numfreqs = output["numfreqs"]
-    kcoeffs = output["kcoeffs"]
+    try:
+        output = _calculate_internals(Isotemp, Lastemp, zerofreq=True, zerofreqnum=freqnum)
 
-    ksumx = ksumy = ksumz = 0.000
+        kx = output["kx"]
+        ky = output["ky"]
+        kz = output["kz"]
+        numfreqs = output["numfreqs"]
+        kcoeffs = output["kcoeffs"]
 
-    kxtemp = kx[layernum - 1]
-    kytemp = ky[layernum - 1]
-    kztemp = kz[layernum - 1]
+        ksumx = ksumy = ksumz = 0.000
 
-    for i in range(numfreqs):
-        ksumx = kcoeffs[i] * kxtemp[i] + ksumx
-        ksumy = kcoeffs[i] * kytemp[i] + ksumy
-        ksumz = kcoeffs[i] * kztemp[i] + ksumz
+        kxtemp = kx[layernum - 1]
+        kytemp = ky[layernum - 1]
+        kztemp = kz[layernum - 1]
 
-    if (ksumx == ksumz) & (ksumx == 0.00):
-        flag = 1
-    elif (ksumy == ksumz) & (ksumx == 0.00):
-        flag = 1
+        for i in range(numfreqs):
+            ksumx = kcoeffs[i] * kxtemp[i] + ksumx
+            ksumy = kcoeffs[i] * kytemp[i] + ksumy
+            ksumz = kcoeffs[i] * kztemp[i] + ksumz
 
-    if flag == 1:
-        return Interval(0, oo)  # currently does not attempt a walkback of high frequencies
-        # at the given angle to see if it is reflected at a critical angle
-    else:
-        m = layernum - 1
+        if (ksumx == ksumz) & (ksumx == 0.00):
+            flag = 1
+        elif (ksumy == ksumz) & (ksumx == 0.00):
+            flag = 1
 
-        for k in range(layernum):
-            Isotemp2.layers[k].suppress_absorbances()
-
-        dir = 1.00
-        Mtestc, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp)
-        magMtestc = np.abs(Mtestc[m])
-
-        freq = Lastemp.frequencies[freqnum - 1] + amt * dir
-        Lastemp.change_freq(freqnum, freq)
-        Mtestp, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp)
-        magMtestp = np.abs(Mtestp[m])
-
-        freq = Lastemp.frequencies[freqnum - 1] - 2 * amt * dir
-        Lastemp.change_freq(freqnum, freq)
-        Mtestn, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp)
-        magMtestn = np.abs(Mtestn[m])
-
-        errorp = magMtestp - magMtestc
-        errorn = magMtestn - magMtestc
-
-        if errorp > errorn:
-            dir = 1.00
-            magMtest = magMtestc
+        if flag == 1:
+            return Interval(0, oo)  # currently does not attempt a walkback of high frequencies
+            # at the given angle to see if it is reflected at a critical angle
         else:
-            dir = -1.00
-            magMtest = magMtestc
+            m = layernum - 1
 
-        error1 = 1 - magMtest
-        error2 = error1
-        iter = 500
-        b = 0
-        while error2 > tol:
-            b = b + 1
-            if error2 > error1:
-                dir = (-1.00) * dir
-            if np.abs(error2) < 0.33 * np.abs(error1):  # the 0.33 is a guess
-                amt = 0.1 * amt
-            error1 = error2
+            for k in range(layernum):
+                Isotemp2.layers[k].suppress_absorbances()
+
+            dir = 1.00
+            Mtestc, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp)
+            magMtestc = np.abs(Mtestc[m])
+
             freq = Lastemp.frequencies[freqnum - 1] + amt * dir
             Lastemp.change_freq(freqnum, freq)
-            Mtest, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp)
-            magMtest = np.abs(Mtest[m])
-            error2 = 1 - magMtest
-            if b > iter:
-                flag = 2
-                break
+            Mtestp, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp)
+            magMtestp = np.abs(Mtestp[m])
 
-        if flag == 2:
-            return FiniteSet(), amt
-        else:
-            return FiniteSet(freq), amt
+            freq = Lastemp.frequencies[freqnum - 1] - 2 * amt * dir
+            Lastemp.change_freq(freqnum, freq)
+            Mtestn, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp)
+            magMtestn = np.abs(Mtestn[m])
+
+            errorp = magMtestp - magMtestc
+            errorn = magMtestn - magMtestc
+
+            if errorp > errorn:
+                dir = 1.00
+                magMtest = magMtestc
+            else:
+                dir = -1.00
+                magMtest = magMtestc
+
+            error1 = 1 - magMtest
+            error2 = error1
+            iter = 500
+            b = 0
+            while error2 > tol:
+                b = b + 1
+                if error2 > error1:
+                    dir = (-1.00) * dir
+                if np.abs(error2) < 0.33 * np.abs(error1):  # the 0.33 is a guess
+                    amt = 0.1 * amt
+                error1 = error2
+                freq = Lastemp.frequencies[freqnum - 1] + amt * dir
+                Lastemp.change_freq(freqnum, freq)
+                Mtest, Mdelta, tklist, Tdict = m_calc(Isotemp2, Lastemp)
+                magMtest = np.abs(Mtest[m])
+                error2 = 1 - magMtest
+                if b > iter:
+                    flag = 2
+                    break
+
+            if flag == 2:
+                return FiniteSet(), amt
+            else:
+                return FiniteSet(freq), amt
+    except:
+        print("cannot solve frequency because output frequency is less than zero")
+        return ValueError("output frequency is less than zero")
 
 
 def calculate_ts(Iso, Las):
@@ -1190,56 +1212,61 @@ def calculate_ts(Iso, Las):
     t_chart_in = np.zeros([numlayers, numfreqs])
     t_chart_out = np.zeros(numlayers)
 
-    output = _calculate_internals(Iso, Las, zerofreq=False, zerofreqnum=1)
-    anglex = output["anglex"]
-    angley = output["angley"]
-    angleoutx = output["angleoutx"]
-    angleouty = output["angleouty"]
-    nvec = output["n"]
-    nout = output["nout"]
-    tk = output["thicknesses"]
-    numlayers = output["numlayers"]
-    numfreqs = output["numfreqs"]
-    xmask = output["xmask"]
+    try:
+        output = _calculate_internals(Iso, Las, zerofreq=False, zerofreqnum=1)
 
-    noutf = nout[numlayers - 1]
-    angleoutxf = angleoutx[numlayers - 1]
-    angleoutyf = angleouty[numlayers - 1]
+        anglex = output["anglex"]
+        angley = output["angley"]
+        angleoutx = output["angleoutx"]
+        angleouty = output["angleouty"]
+        nvec = output["n"]
+        nout = output["nout"]
+        tk = output["thicknesses"]
+        numlayers = output["numlayers"]
+        numfreqs = output["numfreqs"]
+        xmask = output["xmask"]
 
-    launchanglex = np.arcsin(noutf * np.sin(angleoutxf))
-    launchangley = np.arcsin(noutf * np.sin(angleoutyf))
+        noutf = nout[numlayers - 1]
+        angleoutxf = angleoutx[numlayers - 1]
+        angleoutyf = angleouty[numlayers - 1]
 
-    angleoutx.append(launchanglex)
-    angleouty.append(launchangley)
+        launchanglex = np.arcsin(noutf * np.sin(angleoutxf))
+        launchangley = np.arcsin(noutf * np.sin(angleoutyf))
 
-    for i in range(numfreqs):
+        angleoutx.append(launchanglex)
+        angleouty.append(launchangley)
+
+        for i in range(numfreqs):
+            dttemp = float(0.00)
+            for m in range(numlayers):
+                anglextemp = anglex[m][i]
+                angleytemp = angley[m][i]
+                ntemp = nvec[m][i]
+                thick = tk[m]
+                if xmask[i] == 0:
+                    tkeff = thick / np.cos(angleytemp)
+                else:
+                    tkeff = thick / np.cos(anglextemp)
+                dttemp = dttemp + tkeff * ntemp / cvac * 1e15
+                t_chart_in[m][i] = dttemp
+
         dttemp = float(0.00)
         for m in range(numlayers):
-            anglextemp = anglex[m][i]
-            angleytemp = angley[m][i]
-            ntemp = nvec[m][i]
+            anglextemp = angleoutx[m]
+            angleytemp = angleouty[m]
+            ntemp = nout[m]
             thick = tk[m]
-            if xmask[i] == 0:
+            if xmask[numfreqs] == 0:
                 tkeff = thick / np.cos(angleytemp)
             else:
                 tkeff = thick / np.cos(anglextemp)
             dttemp = dttemp + tkeff * ntemp / cvac * 1e15
-            t_chart_in[m][i] = dttemp
+            t_chart_out[m] = dttemp
 
-    dttemp = float(0.00)
-    for m in range(numlayers):
-        anglextemp = angleoutx[m]
-        angleytemp = angleouty[m]
-        ntemp = nout[m]
-        thick = tk[m]
-        if xmask[numfreqs] == 0:
-            tkeff = thick / np.cos(angleytemp)
-        else:
-            tkeff = thick / np.cos(anglextemp)
-        dttemp = dttemp + tkeff * ntemp / cvac * 1e15
-        t_chart_out[m] = dttemp
-
-    return t_chart_in, t_chart_out
+        return t_chart_in, t_chart_out
+    except:
+        print("cannot calculate delta ts because output frequency is less than zero")
+        return ValueError("output frequency is less than zero")
 
 
 def calculate_absorbances(Iso, Las):
@@ -1265,7 +1292,12 @@ def calculate_absorbances(Iso, Las):
     if isinstance(Las, Lasers) == False:
         return ValueError("second argument not an object of class Lasers")
 
-    output = _calculate_internals(Iso, Las, zerofreq=False, zerofreqnum=1)
+    try:
+        output = _calculate_internals(Iso, Las, zerofreq=False, zerofreqnum=1)
+    except:
+        print("cannot calculate absorbances because output frequency is less than zero")
+        return ValueError("output frequency is less than zero")
+
     anglex = output["anglex"]
     angley = output["angley"]
     angleoutx = output["angleoutx"]
@@ -1445,49 +1477,3 @@ def apply_trans(Mlist, Tdict=None):
         Mlistnew.append(Mlistnewtemp)
 
     return Mlistnew
-
-
-def generate_csv(
-    savefile, csvfile1, molfrac1=1.00, csvfile2=None, molfrac2=None, csvfile3=None, molfrac3=None
-):
-    """generate a new tab delimited freq,absorp,n file based on up to 3 input files and the mole fractions of each component.
-
-    Parameters
-    ----------
-    savefile : path
-        tab delimited savefile
-    csvfile1, csvfile2 (optional), csvfile3 (optional) :  paths
-        filenames of tab delimited w,a,n files
-    molfract1, molfract2 (optional), molfract3 (optional):  float
-        respective mole fractions of each
-    """
-    data = np.loadtxt(csvfile1)
-    wp = np.asarray(data[:, 0], dtype=float)
-    if wp[0] > wp[1]:
-        return IndexError("freqs must be increasing order")
-
-    apoints = data[:, 1] * molfrac1
-    npoints = data[:, 2] * molfrac2
-
-    samptemp = IsoSample()
-    samptemp2 = IsoSample()
-
-    if csvfile2 is not None:
-        samptemp.load_layer(csvfile=csvfile2, thickness=0.01, label="")
-        for i in range(len(wp)):
-            wtemp, apointtemp, npointtemp = samptemp.layers[0].estimate(wp[i])
-            apoints[i] = apoints[i] + apointtemp * molfrac2
-            npoints[i] = npoints[i] + npointtemp * molfrac2
-
-    if csvfile3 is not None:
-        samptemp2.load_layer(csvfile=csvfile3, thickness=0.01, label="")
-        for i in range(len(wp)):
-            wtemp, apointtemp, npointtemp = samptemp2.layers[0].estimate(wp[i])
-            apoints[i] = apoints[i] + apointtemp * molfrac3
-            npoints[i] = npoints[i] + npointtemp * molfrac2
-
-    data[:, 1] = apoints[:]
-    data[:, 2] = npoints[:]
-
-    data = np.savetxt(savefile, data, delimiter="\t")
-    return 0

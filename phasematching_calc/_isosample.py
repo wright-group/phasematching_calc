@@ -119,40 +119,6 @@ class IsoSample:
         self.layers.append(layer)
         return 0
 
-    def change_layer(self, layernum, csvfile=None, thickness=None, label=None):
-        """Replace a layer with the given number as per the csvfile, thickness, and label.
-
-        Parameters:
-        -----------
-        layernum : int
-           layer number to change
-        csvfile: path (optional)
-           path to tab-delimited spreadsheet file
-        thickness: float (optional)
-           thickness of layer in cm
-        label: str (optional)
-           description of layer (str)
-        """
-
-        if csvfile is not None:
-            data = np.loadtxt(csvfile)
-            wp = np.asarray(data[:, 0], dtype=float)
-
-            if wp[0] > wp[1]:
-                return IndexError("freqs must be increasing order")
-
-            self.layers[layernum - 1]["w_points"] = wp
-            self.layers[layernum - 1]["a_points"] = np.asarray(data[:, 1], dtype=float)
-            self.layers[layernum - 1]["n_points"] = np.asarray(data[:, 2], dtype=float)
-
-        if thickness is not None:
-            self.layers[layernum - 1]["thickness"] = thickness
-
-        if label is not None:
-            self.layers[layernum - 1]["label"] = label
-
-        return 0
-
     def as_dict(self):
         """dict representation for this IsoSample class."""
         out = dict()

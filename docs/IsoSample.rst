@@ -41,12 +41,6 @@ the absorption coefficient in cm-1, and n is the real refractive index.  The row
 order.
 
 
-`change_layer(layernum, csvfile, thickness, label="")`
--------------------------
-Changes the layer specified by layernum to the csvfile on disk, and/or the thickness of the layer, and/or its label
-
-
-
 `save(file)`
 -----------------
 Once an IsoSample object is initialized, any methods can be applied to it.  It can then be saved as a JSON
