@@ -3,7 +3,6 @@ import WrightTools as wt
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-from config.definitions import ROOT_DIR
 from sympy import *
 import copy
 
@@ -13,7 +12,6 @@ the create_layer w/ mole fraction method.   Note that the mole fractioned values
 sum correctly because mixtures can interact with each other to modify results."""
 
 
-# filepath = os.path.join(ROOT_DIR, "tests")
 filepath = os.path.join(os.getcwd(), "tests")
 lay1afile = os.path.join(filepath, "CCl4_paste.txt")
 lay2file = os.path.join(filepath, "MeOH_kozma_ApplSpec_paste.txt")
@@ -23,7 +21,8 @@ tkccl4 = 0.0127  # cm
 tksap = 0.016  # cm
 
 # generation of a IsoSample
-samp1 = pc.IsoSample.IsoSample()
+# samp1 = pc.IsoSample.IsoSample()
+samp1 = pc.IsoSample()
 desc = "FWM cell with fw sapphire, sample ccl4:meoh, and bw sapphire"
 samp1.description = desc
 samp1.load_layer(lay3file, tksap, label="sapfw")
@@ -37,7 +36,8 @@ samp1.create_layer(layfilelist, molfraclist, thickness=tkccl4, label="ccl4_meoh"
 samp1.load_layer(lay3file, tksap, label="sapbw")
 
 # generation of a Lasers object.
-las = pc.Lasers.Lasers()
+# las = pc.Lasers.Lasers()
+las = pc.Lasers()
 arr1 = [2200.0, 3150.0, 18500.0]
 las.add_frequencies(arr1)
 arr2 = [13.0, -8.0, 0.0]

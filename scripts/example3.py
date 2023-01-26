@@ -3,14 +3,12 @@ import WrightTools as wt
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-from config.definitions import ROOT_DIR
 from sympy import *
 
 
 """Example 3.  Simulation of a map of expected angles to achieve phasematching in the liquid layer
 of a multilayer cell.  Plots separate both possible solutions (negative and positive)."""
 
-# filepath = os.path.join(ROOT_DIR, "tests")
 filepath = os.path.join(os.getcwd(), "tests")
 lay1file = os.path.join(filepath, "CH3CN_paste_1.txt")
 lay2file = os.path.join(filepath, "CaF2_Malitson.txt")
@@ -20,7 +18,8 @@ tkcaf2 = 0.02
 
 
 # generation of a IsoSample
-samp1 = pc.IsoSample.IsoSample()
+# samp1 = pc.IsoSample.IsoSample()
+samp1 = pc.IsoSample()
 desc = "FWM cell with fw caf2, sample acn, and bw caf2"
 samp1.description = desc
 samp1.load_layer(lay2file, tkcaf2, label="caf2")
@@ -29,7 +28,8 @@ samp1.load_layer(lay2file, tkcaf2, label="caf2")
 
 
 # generation of a Lasers object.
-las = pc.Lasers.Lasers()
+# las = pc.Lasers.Lasers()
+las = pc.Lasers()
 arr1 = [2600.0, 3150.0, 20000.0]
 las.add_frequencies(arr1)
 arr2 = [15.0, -6.0, 0.0]
@@ -134,7 +134,8 @@ for m in range(len(var1a)):
         # test2[m, n] = Mlist2[1]
 
 data.create_channel(name="angleforw1_negative", values=ch1.T)
-# data.channels[0].signed = True
+data.channels[0].signed = True
+# data.channels[0].null = np.min(data.channels[0][:])
 data.create_channel(name="angleforw1_positive", values=ch2.T)
 # data.channels[1].signed = True
 data.channels[1].null = 0

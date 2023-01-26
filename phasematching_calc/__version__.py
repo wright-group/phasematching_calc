@@ -16,6 +16,7 @@ if p.is_file():
     with p.open() as f:
         __branch__ = f.readline().rstrip().split(r"/")[-1]
     if __branch__ != "master":
-        __version__ += "-" + __branch__
+        # __version__ += "-" + __branch__
+        pass
 else:
     __branch__ = None

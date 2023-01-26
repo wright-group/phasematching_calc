@@ -3,7 +3,6 @@ import WrightTools as wt
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-from config.definitions import ROOT_DIR
 from sympy import *
 
 """The following example slices a single, thick layer into multiple very small layers and compares
@@ -13,7 +12,7 @@ the calculation works.  Calculation does not perform absorbance of the output ve
 (water, visible output) expected little absorbance there.  This example tests the validity of the phase
 portion of the m_calc method."""
 
-# filepath = os.path.join(ROOT_DIR, "tests")
+
 filepath = os.path.join(os.getcwd(), "tests")
 lay1file = os.path.join(filepath, "CaF2_Malitson.txt")
 lay2file = os.path.join(filepath, "H2O_1.txt")
@@ -24,7 +23,8 @@ thins = 30
 thick = thins * tkwat
 
 # generation of a IsoSample
-samp1 = pc.IsoSample.IsoSample()
+# samp1 = pc.IsoSample.IsoSample()
+samp1 = pc.IsoSample()
 desc = "water"
 samp1.description = desc
 
@@ -32,7 +32,8 @@ samp1.load_layer(lay2file, tkwat, label="h2o")
 # use lay1file for a limit where absorbance is zero
 
 # generation of a Lasers object.
-las = pc.Lasers.Lasers()
+# las = pc.Lasers.Lasers()
+las = pc.Lasers()
 arr1 = [1800.0, 2700.0, 30000.0]
 las.add_frequencies(arr1)
 arr2 = [5.0, -2.0, 0.0]
@@ -109,7 +110,11 @@ for m in range(len(var1a)):
 
 
 # thick Dove calculations
-samp1.change_layer(1, thickness=thick)
+samp1 = pc.IsoSample()
+desc = "water"
+samp1.description = desc
+samp1.load_layer(lay2file, thick, label="h2o")
+
 ch2 = np.zeros([len(var1a), len(var2a)])
 
 for m in range(len(var1a)):

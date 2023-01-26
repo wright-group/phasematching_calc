@@ -3,24 +3,22 @@ import WrightTools as wt
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-from config.definitions import ROOT_DIR
 from sympy import *
 
 """The following example calculates the changes in launch angle of DOVE FWM signal for an x planar geometry input with
 fixed input angles but varying frequencies for w1 and w2.  This can be useful for making certain the full output is
 captured by collection optics for any change of inputs, and can extend to other changes such as angles and w3."""
 
-
-# filepath = os.path.join(ROOT_DIR, "tests")
 filepath = os.path.join(os.getcwd(), "tests")
-# filepath=os.getcwd()
 lay1file = os.path.join(filepath, "sapphire1.txt")
 lay2file = os.path.join(filepath, "H2O_1.txt")
+
 tksap = 0.02
 tkwat = 0.01
 
 # generation of a IsoSample
-samp1 = pc.IsoSample.IsoSample()
+# samp1 = pc.IsoSample.IsoSample()
+samp1 = pc.IsoSample()
 desc = "sapphire fw, water sample, sapphire bw"
 samp1.description = desc
 samp1.load_layer(lay1file, tksap, label="saphfw")
@@ -29,7 +27,8 @@ samp1.load_layer(lay1file, tksap, label="saphfw")
 
 
 # generation of a Lasers object.
-las = pc.Lasers.Lasers()
+# las = pc.Lasers.Lasers()
+las = pc.Lasers()
 arr1 = [1800.0, 2700.0, 16000.0]
 las.add_frequencies(arr1)
 arr2 = [5.0, -2.0, 0.0]

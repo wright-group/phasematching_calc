@@ -14,7 +14,7 @@ First, the files are loaded into an IsoSample object:
     tkcaf2=0.02 #cm
     tkwater=0.01 #cm
 
-    samp1=pc.IsoSample.IsoSample()
+    samp1=pc.IsoSample()
     desc="FWM cell"
     samp1.description=desc
     samp1.load_layer(lay1file, tkcaf2, label="caf2fw")
@@ -24,7 +24,7 @@ First, the files are loaded into an IsoSample object:
 Then, the Lasers object is created from the Python commands (as opposed to being loaded from file):
 
 .. plot::
-    las=pc.Lasers.Lasers()
+    las=pc.Lasers()
     arr1=[1800.0,2700.0,30000.0]
     las.add_frequencies(arr1)
     arr2=[20.0,7.0, 0.0]
@@ -80,14 +80,14 @@ in this case a `boxcars` geometry.
     tkcaf2 = 0.03
 
     # generation of a IsoSample
-    samp1 = pc.IsoSample.IsoSample()
+    samp1 = pc.IsoSample()
     desc = "caf2window300um"
     samp1.description = desc
     samp1.load_layer(lay1file, tkcaf2, label="caf2")
 
 
     # generation of a Lasers object.
-    las = pc.Lasers.Lasers()
+    las = pc.Lasers()
     arr1 = [1800.0, 2700.0, 18400.0]
     las.add_frequencies(arr1)
     arr2 = [8.0, 8.0, 8.0]
@@ -145,7 +145,7 @@ The double for loops shown can be consolidated if one sets up separate ``Lasers`
 
 
     # generation of a IsoSample
-    samp1 = pc.IsoSample.IsoSample()
+    samp1 = pc.IsoSample()
     desc = "FWM cell"
     samp1.description = desc
     samp1.load_layer(lay2file, tkcaf2, label="caf2")
@@ -154,7 +154,7 @@ The double for loops shown can be consolidated if one sets up separate ``Lasers`
 
 
     # generation of a Lasers object.
-    las = pc.Lasers.Lasers()
+    las = pc.Lasers()
     arr1 = [2600.0, 3150.0, 20000.0]
     las.add_frequencies(arr1)
     arr2 = [15.0, -6.0, 0.0]
@@ -282,7 +282,7 @@ The double for loops shown can be consolidated if one sets up separate ``Lasers`
     wt.artists.quick2D(data, channel=3)
     plt.show()
 
-.. image:: Figure_3.png
+.. image:: Figure_3a.png
 
 .. image:: Figure_3b.png
 
@@ -321,14 +321,14 @@ The code starts normally:
     tkcaf2=0.02
     tkacn=0.1
 
-    samp1=pc.IsoSample.IsoSample()
+    samp1=pc.IsoSample()
     desc="FWM cell"
     samp1.description=desc
     samp1.load_layer(lay5file, tkcaf2, label="caf2fw")
     samp1.load_layer(lay4file, tkacn, label="ACN")
     samp1.load_layer(lay3file, tkcaf2, label="caf2bw")
 
-    las4=pc.Lasers.Lasers()
+    las4=pc.Lasers()
     arr1=[3150.0,2250.0,20000.0]
     las4.add_frequencies(arr1)
     arr2=[5.0,10.0,0.0]
@@ -444,14 +444,14 @@ how much of either should be made to achieve phasematching for both points.
     tkcaf2 = 0.02  # cm
     tkacn = 0.01  # cm
 
-    samp1 = pc.IsoSample.IsoSample()
+    samp1 = pc.IsoSample()
     desc = "FWM cell"
     samp1.description = desc
     samp1.load_layer(lay3file, tkcaf2, label="caf2fw")
     samp1.load_layer(lay4file, tkacn, label="acn")
     samp1.load_layer(lay3file, tkcaf2, label="caf2bw")
 
-    las4 = pc.Lasers.Lasers()
+    las4 = pc.Lasers()
     arr1 = [3150.0, 2200.0, 17200.0]
     las4.add_frequencies(arr1)
     arr2 = [6.0, -13.20, 0.0]
@@ -485,13 +485,14 @@ how much of either should be made to achieve phasematching for both points.
 
 Results are:
 .. code-block:: python
-[-14.0000000000000, 15.5000000000000]
-[17180.0000000000]
-[17500.0000000000]
-[-13.5000000000000, 15.2000000000000]
 
-In this example, changing w3 by +320 cm-1 would result in the same phasematching as an angle change of -0.5 degrees
-for a -10 cm-1 change in the low frequency infrared input.  Changes in w3 in this range
+[-13.0500000000000, 14.9000000000000]
+[17190.0000000000]
+[17600.0000000000]
+[-12.5000000000000, 14.5000000000000]
+
+In this example, changing w3 by -410 cm-1 would result in the same phasematching as an angle change of -0.95 degrees
+for a -50 cm-1 change in the low frequency infrared input.  Changes in w3 in this range
 would result in very large wavelength changes needed over an entire scan.  On the other hand, phasematching angle
 changes may be restricted to a small range due to aberrations.  It is possible that the two can be modified in tandem
 in some studies...for example, moving w3 by 100 cm-1 and angle by -0.25 deg.  This kind of optimization method would
@@ -515,7 +516,7 @@ smaller relative to k3, and so phasemismatching becomes less problematic for DOV
 
 
     # generation of a IsoSample
-    samp1 = pc.IsoSample.IsoSample()
+    samp1 = pc.IsoSample()
     desc = "sapphwatersapph"
     samp1.description = desc
     samp1.load_layer(lay1file, tksap, label="saphfw")
@@ -524,7 +525,7 @@ smaller relative to k3, and so phasemismatching becomes less problematic for DOV
 
 
     # generation of a Lasers object.
-    las = pc.Lasers.Lasers()
+    las = pc.Lasers()
     arr1 = [1800.0, 2700.0, 30000.0]
     las.add_frequencies(arr1)
     arr2 = [-18.0, 8.0, 0.0]
@@ -626,7 +627,7 @@ the factor in the normal manner.   Both loops multiply by the effective thicknes
 essentially by dividing by the number of thinlayers) to obtain a value more appropriate for comparison.
 
 .. plot::
-    filepath = os.path.join(os.getcwd(), "tests")
+
     lay1file = os.path.join(filepath, "CaF2_Malitson.txt")
     lay2file = os.path.join(filepath, "H2O_1.txt")
     tkcaf2 = 0.02
@@ -636,7 +637,7 @@ essentially by dividing by the number of thinlayers) to obtain a value more appr
     thick = thins * tkwat
 
     # generation of a IsoSample
-    samp1 = pc.IsoSample.IsoSample()
+    samp1 = pc.IsoSample()
     desc = "water"
     samp1.description = desc
 
@@ -644,7 +645,7 @@ essentially by dividing by the number of thinlayers) to obtain a value more appr
     # use lay1file for a limit where absorbance is zero
 
     # generation of a Lasers object.
-    las = pc.Lasers.Lasers()
+    las = pc.Lasers()
     arr1 = [1800.0, 2700.0, 30000.0]
     las.add_frequencies(arr1)
     arr2 = [5.0, -2.0, 0.0]
@@ -761,7 +762,7 @@ fixed input angles but varying frequencies for w1 and w2.  This can be useful fo
 captured by collection optics for any change of inputs, and can extend to other changes such as angles and w3.
 
 .. plot::
-    # filepath = os.path.join(ROOT_DIR, "tests")
+
     filepath = os.path.join(os.getcwd(), "tests")
     # filepath=os.getcwd()
     lay1file = os.path.join(filepath, "sapphire1.txt")
@@ -770,7 +771,7 @@ captured by collection optics for any change of inputs, and can extend to other 
     tkwat = 0.01
 
     # generation of a IsoSample
-    samp1 = pc.IsoSample.IsoSample()
+    samp1 = pc.IsoSample()
     desc = "sapphire fw, water sample, sapphire bw"
     samp1.description = desc
     samp1.load_layer(lay1file, tksap, label="saphfw")
@@ -778,7 +779,7 @@ captured by collection optics for any change of inputs, and can extend to other 
     samp1.load_layer(lay1file, tksap, label="saphfw")
 
     # generation of a Lasers object.
-    las = pc.Lasers.Lasers()
+    las = pc.Lasers()
     arr1 = [1800.0, 2700.0, 16000.0]
     las.add_frequencies(arr1)
     arr2 = [5.0, -2.0, 0.0]
@@ -822,7 +823,7 @@ the create_layer w/ mole fraction method.   Note that the mole fractioned values
 sum correctly because mixtures can interact with each other to modify results.
 
 .. plot::
-    # filepath = os.path.join(ROOT_DIR, "tests")
+
     filepath = os.path.join(os.getcwd(), "tests")
     lay1file = os.path.join(filepath, "Ch2Cl2n_paste.txt")
     lay2file = os.path.join(filepath, "MeOH_kozma_ApplSpec_paste.txt")
@@ -832,7 +833,7 @@ sum correctly because mixtures can interact with each other to modify results.
     tksap = 0.02  # cm
 
     # generation of a IsoSample
-    samp1 = pc.IsoSample.IsoSample()
+    samp1 = pc.IsoSample()
     desc = "FWM cell with fw sapphire, sample dcm:meoh, and bw sapphire"
     samp1.description = desc
     samp1.load_layer(lay3file, tksap, label="sapfw")
@@ -846,7 +847,7 @@ sum correctly because mixtures can interact with each other to modify results.
     samp1.load_layer(lay2file, tksap, label="sapbw")
 
     # generation of a Lasers object.
-    las = pc.Lasers.Lasers()
+    las = pc.Lasers()
     arr1 = [2200.0, 3150.0, 19000.0]
     las.add_frequencies(arr1)
     arr2 = [15.0, -7.0, 0.0]

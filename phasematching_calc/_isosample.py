@@ -4,6 +4,8 @@ import numpy as np
 import json
 from types import SimpleNamespace
 
+__all__ = ["IsoSample"]
+
 
 class IsoSample:
     def __init__(self, description=None):

@@ -259,12 +259,13 @@ def _calculate_internals(Iso, Las, zerofreq=False, zerofreqnum=1):
     # These are 2D arrays where the 1st D is layer (1st and last are air) and 2nd are the input freqs
     anglex = list()
     angley = list()
-    nvec = list()
+
     # These are 2D arrays where the 1st D is layer (no air layers) and 2nd are the input freqs
     kx = list()
     ky = list()
     kz = list()
     avec = list()
+    nvec = list()
     # These are 1D arrays where the D is layer (1st and last are air)
     nout = list()
     angleoutx = list()
@@ -631,8 +632,8 @@ def m_calc(Iso, Las):
             kxtemp = kx[m]
 
             tktemp = tk[m]
-            anglextemp = anglex[m]
-            angleytemp = angley[m]
+            anglextemp = anglex[m + 1]  ## NOTE!! +1
+            angleytemp = angley[m + 1]  ##
             aouttemp = aout[m]
             angleoutxtemp = angleoutx[m]
             angleoutytemp = angleouty[m]
@@ -797,6 +798,13 @@ def angle(Iso, Las, layernum, freqnum, frequency=None):
         lasanglex = np.arcsin(nold / n * np.sin(lasanglex))
         lasangley = np.arcsin(nold / n * np.sin(lasangley))
     return lasanglex, lasangley
+
+    """
+    w, a, n = Iso["layers"][layernum-1].estimate(lasfreq)
+    lasanglex = np.arcsin(1.00/ n * np.sin(lasanglex))
+    lasangley = np.arcsin(1.00 / n * np.sin(lasangley))
+    return lasanglex, lasangley
+    """
 
 
 def solve_angle(Iso, Las, layernum, freqnum, frequency=None, isclose=False, amt=None):
@@ -1239,8 +1247,8 @@ def calculate_ts(Iso, Las):
         for i in range(numfreqs):
             dttemp = float(0.00)
             for m in range(numlayers):
-                anglextemp = anglex[m][i]
-                angleytemp = angley[m][i]
+                anglextemp = anglex[m + 1][i]  ##NOTE the +1
+                angleytemp = angley[m + 1][i]  ##
                 ntemp = nvec[m][i]
                 thick = tk[m]
                 if xmask[i] == 0:
@@ -1325,8 +1333,8 @@ def calculate_absorbances(Iso, Las):
 
     for i in range(numfreqs):
         for m in range(numlayers):
-            anglextemp = anglex[m][i]
-            angleytemp = angley[m][i]
+            anglextemp = anglex[m + 1][i]  ##NOTE the +1
+            angleytemp = angley[m + 1][i]  ##
             atemp = avec[m][i]
             thick = tk[m]
             if xmask[i] == 0:
