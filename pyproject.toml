@@ -26,7 +26,7 @@ Source = "https://github.com/wright-group/phasematching_calc"
 Issues = "https://github.com/wright-group/phasematching_calc/issues"
 
 [tool.flit.metadata.requires-extra]
-dev = ["black", "pre-commit"]
+dev = ["black", "pre-commit", "pytest", "pytest-cov"]
 
 [tool.black]
 line-length = 99
