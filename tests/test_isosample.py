@@ -1,18 +1,17 @@
 import phasematching_calc as pc
 import os
-from config.definitions import ROOT_DIR
 
 """Test Requires R/W permissions in tests folder."""
 
 
 def test_save_load():
-    # filepath = os.path.join(ROOT_DIR, "tests")
+
     filepath = os.path.join(os.getcwd(), "tests")
     jsonfile = os.path.join(filepath, "samp1.json")
     lay1file = os.path.join(filepath, "sapphire1.txt")
     lay2file = os.path.join(filepath, "H2O_1.txt")
 
-    samp1 = pc.IsoSample.IsoSample()
+    samp1 = pc.IsoSample()
     desc = "FWM cell"
     samp1.description = desc
     samp1.load_layer(lay1file, 0.02, label="sapphirefw")
@@ -23,7 +22,7 @@ def test_save_load():
 
     savefile = os.path.join(filepath, "testsum.txt")
 
-    samp2 = pc.IsoSample.IsoSample()
+    samp2 = pc.IsoSample()
     samp2.load(jsonfile)
     assert samp2["description"] == desc
 
@@ -38,7 +37,7 @@ def test_create_layer():
     laylist.append(lay2file)
     molfraclist = [0.75, 0.25]
 
-    samp1 = pc.IsoSample.IsoSample()
+    samp1 = pc.IsoSample()
     desc = "test sample"
     samp1.description = desc
     samp1.create_layer(laylist, molfraclist, wspacing=1.0, thickness=0.01, label="test layer")

@@ -1,14 +1,11 @@
 import phasematching_calc as pc
-import WrightTools as wt
-import matplotlib.pyplot as plt
 import numpy as np
 import os
-from config.definitions import ROOT_DIR
 from sympy import S, FiniteSet, Interval, oo
 
 
 def test_pm_mcalcs():
-    # filepath = os.path.join(ROOT_DIR, "tests")
+
     filepath = os.path.join(os.getcwd(), "tests")
     lay1file = os.path.join(filepath, "CaF2_Malitson.txt")
     lay2file = os.path.join(filepath, "H2O_1.txt")
@@ -17,7 +14,7 @@ def test_pm_mcalcs():
     tkwater = 0.01  # cm
 
     # generation of a IsoSample
-    samp1 = pc.IsoSample.IsoSample()
+    samp1 = pc.IsoSample()
     desc = "FWM cell"
     samp1.description = desc
     samp1.load_layer(lay1file, tkcaf2, label="caf2fw")
@@ -25,7 +22,7 @@ def test_pm_mcalcs():
     samp1.load_layer(lay1file, tkcaf2, label="caf2bw")
 
     # generation of a Lasers object.
-    las = pc.Lasers.Lasers()
+    las = pc.Lasers()
     arr1 = [2700.0, 1800.0, 1800.0]
     las.add_frequencies(arr1)
     arr2 = [10.0, 10.0, 10.0]
@@ -76,7 +73,6 @@ def test_pm_mcalcs():
 
 def test_emptyset():
     # new lasers object:  unphasematchable geometry TSF
-    # filepath = os.path.join(ROOT_DIR, "tests")
     filepath = os.path.join(os.getcwd(), "tests")
 
     lay1file = os.path.join(filepath, "CaF2_Malitson.txt")
@@ -86,14 +82,14 @@ def test_emptyset():
     tkwater = 0.01  # cm
 
     # generation of a IsoSample
-    samp1 = pc.IsoSample.IsoSample()
+    samp1 = pc.IsoSample()
     desc = "FWM cell"
     samp1.description = desc
     samp1.load_layer(lay1file, tkcaf2, label="caf2fw")
     samp1.load_layer(lay2file, tkwater, label="water")
     samp1.load_layer(lay1file, tkcaf2, label="caf2bw")
 
-    las2 = pc.Lasers.Lasers()
+    las2 = pc.Lasers()
     arr1 = [6200.0, 3000.0, 25000.0]
     las2.add_frequencies(arr1)
     arr2 = [15.0, 5.0, 10.0]
