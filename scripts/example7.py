@@ -3,21 +3,21 @@ import WrightTools as wt
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-from config.definitions import ROOT_DIR
 from sympy import *
 
 
-# filepath = os.path.join(ROOT_DIR, "tests")
 filepath = os.path.join(os.getcwd(), "tests")
 lay1file = os.path.join(filepath, "sapphire1.txt")
 lay2file = os.path.join(filepath, "H2O_1.txt")
 tksap = 0.02
 tkwat = 0.01
 
+tkwat2 = 0.0001
 
 # generation of a IsoSample
-samp1 = pc.IsoSample.IsoSample()
-desc = "sapphwatersapph"
+# samp1 = pc.IsoSample.IsoSample()
+samp1 = pc.IsoSample()
+desc = "FWM cell with fw sapphire, sample water, and bw sapphire"
 samp1.description = desc
 samp1.load_layer(lay1file, tksap, label="saphfw")
 samp1.load_layer(lay2file, tkwat, label="h2o")
@@ -25,7 +25,8 @@ samp1.load_layer(lay1file, tksap, label="saphfw")
 
 
 # generation of a Lasers object.
-las = pc.Lasers.Lasers()
+# las = pc.Lasers.Lasers()
+las = pc.Lasers()
 arr1 = [1800.0, 2700.0, 30000.0]
 las.add_frequencies(arr1)
 arr2 = [-18.0, 8.0, 0.0]
@@ -55,14 +56,32 @@ for m in range(len(var1)):
         Alist, Alistout = pc.phasematch.calculate_absorbances(samp1, las)
         Mlista = pc.phasematch.apply_absorbances(Mlist, Alist, Alistout)
         Mlistb = pc.phasematch.apply_trans(Mlista, Tdict)
-        samp1.change_layer(2, thickness=0.0001)
-        Mlist1a, Mphase1a, tklist1a, Tdict1a = pc.phasematch.m_calc(samp1, las)
         ch1[m, n] = Mlist[1]
+
+samp1 = pc.IsoSample()
+desc = "FWM cell with fw sapphire, sample water, and bw sapphire"
+samp1.description = desc
+samp1.load_layer(lay1file, tksap, label="saphfw")
+samp1.load_layer(lay2file, tkwat2, label="h2o")
+samp1.load_layer(lay1file, tksap, label="saphfw")
+
+for m in range(len(var1)):
+    for n in range(len(var2a)):
+        las.change_freq(1, var1[m])
+        las.change_freq(2, var2a[n])
+        Mlist1a, Mphase1a, tklist1a, Tdict1a = pc.phasematch.m_calc(samp1, las)
         ch1a[m, n] = Mlist1a[1]
-        samp1.change_layer(2, thickness=tkwat)
+
 
 vec2 = [1, 1, 1]
 las.add_k_coeffs(vec2)
+
+samp1 = pc.IsoSample()
+desc = "FWM cell with fw sapphire, sample water, and bw sapphire"
+samp1.description = desc
+samp1.load_layer(lay1file, tksap, label="saphfw")
+samp1.load_layer(lay2file, tkwat, label="h2o")
+samp1.load_layer(lay1file, tksap, label="saphfw")
 
 for m in range(len(var1)):
     for n in range(len(var2a)):
@@ -70,10 +89,21 @@ for m in range(len(var1)):
         las.change_freq(2, var2a[n])
         Mlist2, Mphase, tklist2, Tlist2 = pc.phasematch.m_calc(samp1, las)
         ch2[m, n] = Mlist2[1]
-        samp1.change_layer(2, thickness=0.0001)
+
+
+samp1 = pc.IsoSample()
+desc = "FWM cell with fw sapphire, sample water, and bw sapphire"
+samp1.description = desc
+samp1.load_layer(lay1file, tksap, label="saphfw")
+samp1.load_layer(lay2file, tkwat2, label="h2o")
+samp1.load_layer(lay1file, tksap, label="saphfw")
+
+for m in range(len(var1)):
+    for n in range(len(var2a)):
+        las.change_freq(1, var1[m])
+        las.change_freq(2, var2a[n])
         Mlist2a, Mphase2a, tklist2a, Tdict2a = pc.phasematch.m_calc(samp1, las)
         ch2a[m, n] = Mlist2a[1]
-        samp1.change_layer(2, thickness=tkwat)
 
 ch3 = ch1 / ch2
 ch3a = ch1a / ch2a

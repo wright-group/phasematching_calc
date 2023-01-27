@@ -1,6 +1,8 @@
 import numpy as np
 import json
 
+__all__ = ["Layer"]
+
 
 class Layer:
     def __init__(self):

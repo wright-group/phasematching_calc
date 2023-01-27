@@ -14,7 +14,7 @@ First, the files are loaded into an IsoSample object:
     tkcaf2=0.02 #cm
     tkwater=0.01 #cm
 
-    samp1=pc.IsoSample.IsoSample()
+    samp1=pc.IsoSample()
     desc="FWM cell"
     samp1.description=desc
     samp1.load_layer(lay1file, tkcaf2, label="caf2fw")
@@ -24,7 +24,7 @@ First, the files are loaded into an IsoSample object:
 Then, the Lasers object is created from the Python commands (as opposed to being loaded from file):
 
 .. plot::
-    las=pc.Lasers.Lasers()
+    las=pc.Lasers()
     arr1=[1800.0,2700.0,30000.0]
     las.add_frequencies(arr1)
     arr2=[20.0,7.0, 0.0]
@@ -80,14 +80,14 @@ in this case a `boxcars` geometry.
     tkcaf2 = 0.03
 
     # generation of a IsoSample
-    samp1 = pc.IsoSample.IsoSample()
+    samp1 = pc.IsoSample()
     desc = "caf2window300um"
     samp1.description = desc
     samp1.load_layer(lay1file, tkcaf2, label="caf2")
 
 
     # generation of a Lasers object.
-    las = pc.Lasers.Lasers()
+    las = pc.Lasers()
     arr1 = [1800.0, 2700.0, 18400.0]
     las.add_frequencies(arr1)
     arr2 = [8.0, 8.0, 8.0]
@@ -145,7 +145,7 @@ The double for loops shown can be consolidated if one sets up separate ``Lasers`
 
 
     # generation of a IsoSample
-    samp1 = pc.IsoSample.IsoSample()
+    samp1 = pc.IsoSample()
     desc = "FWM cell"
     samp1.description = desc
     samp1.load_layer(lay2file, tkcaf2, label="caf2")
@@ -154,7 +154,7 @@ The double for loops shown can be consolidated if one sets up separate ``Lasers`
 
 
     # generation of a Lasers object.
-    las = pc.Lasers.Lasers()
+    las = pc.Lasers()
     arr1 = [2600.0, 3150.0, 20000.0]
     las.add_frequencies(arr1)
     arr2 = [15.0, -6.0, 0.0]
@@ -282,7 +282,7 @@ The double for loops shown can be consolidated if one sets up separate ``Lasers`
     wt.artists.quick2D(data, channel=3)
     plt.show()
 
-.. image:: Figure_3.png
+.. image:: Figure_3a.png
 
 .. image:: Figure_3b.png
 
@@ -321,14 +321,14 @@ The code starts normally:
     tkcaf2=0.02
     tkacn=0.1
 
-    samp1=pc.IsoSample.IsoSample()
+    samp1=pc.IsoSample()
     desc="FWM cell"
     samp1.description=desc
     samp1.load_layer(lay5file, tkcaf2, label="caf2fw")
     samp1.load_layer(lay4file, tkacn, label="ACN")
     samp1.load_layer(lay3file, tkcaf2, label="caf2bw")
 
-    las4=pc.Lasers.Lasers()
+    las4=pc.Lasers()
     arr1=[3150.0,2250.0,20000.0]
     las4.add_frequencies(arr1)
     arr2=[5.0,10.0,0.0]
@@ -444,14 +444,14 @@ how much of either should be made to achieve phasematching for both points.
     tkcaf2 = 0.02  # cm
     tkacn = 0.01  # cm
 
-    samp1 = pc.IsoSample.IsoSample()
+    samp1 = pc.IsoSample()
     desc = "FWM cell"
     samp1.description = desc
     samp1.load_layer(lay3file, tkcaf2, label="caf2fw")
     samp1.load_layer(lay4file, tkacn, label="acn")
     samp1.load_layer(lay3file, tkcaf2, label="caf2bw")
 
-    las4 = pc.Lasers.Lasers()
+    las4 = pc.Lasers()
     arr1 = [3150.0, 2200.0, 17200.0]
     las4.add_frequencies(arr1)
     arr2 = [6.0, -13.20, 0.0]
@@ -485,13 +485,14 @@ how much of either should be made to achieve phasematching for both points.
 
 Results are:
 .. code-block:: python
-[-14.0000000000000, 15.5000000000000]
-[17180.0000000000]
-[17500.0000000000]
-[-13.5000000000000, 15.2000000000000]
 
-In this example, changing w3 by +320 cm-1 would result in the same phasematching as an angle change of -0.5 degrees
-for a -10 cm-1 change in the low frequency infrared input.  Changes in w3 in this range
+[-13.0500000000000, 14.9000000000000]
+[17190.0000000000]
+[17600.0000000000]
+[-12.5000000000000, 14.5000000000000]
+
+In this example, changing w3 by -410 cm-1 would result in the same phasematching as an angle change of -0.95 degrees
+for a -50 cm-1 change in the low frequency infrared input.  Changes in w3 in this range
 would result in very large wavelength changes needed over an entire scan.  On the other hand, phasematching angle
 changes may be restricted to a small range due to aberrations.  It is possible that the two can be modified in tandem
 in some studies...for example, moving w3 by 100 cm-1 and angle by -0.25 deg.  This kind of optimization method would
@@ -515,7 +516,7 @@ smaller relative to k3, and so phasemismatching becomes less problematic for DOV
 
 
     # generation of a IsoSample
-    samp1 = pc.IsoSample.IsoSample()
+    samp1 = pc.IsoSample()
     desc = "sapphwatersapph"
     samp1.description = desc
     samp1.load_layer(lay1file, tksap, label="saphfw")
@@ -524,7 +525,7 @@ smaller relative to k3, and so phasemismatching becomes less problematic for DOV
 
 
     # generation of a Lasers object.
-    las = pc.Lasers.Lasers()
+    las = pc.Lasers()
     arr1 = [1800.0, 2700.0, 30000.0]
     las.add_frequencies(arr1)
     arr2 = [-18.0, 8.0, 0.0]
@@ -626,7 +627,7 @@ the factor in the normal manner.   Both loops multiply by the effective thicknes
 essentially by dividing by the number of thinlayers) to obtain a value more appropriate for comparison.
 
 .. plot::
-    filepath = os.path.join(os.getcwd(), "tests")
+
     lay1file = os.path.join(filepath, "CaF2_Malitson.txt")
     lay2file = os.path.join(filepath, "H2O_1.txt")
     tkcaf2 = 0.02
@@ -636,7 +637,7 @@ essentially by dividing by the number of thinlayers) to obtain a value more appr
     thick = thins * tkwat
 
     # generation of a IsoSample
-    samp1 = pc.IsoSample.IsoSample()
+    samp1 = pc.IsoSample()
     desc = "water"
     samp1.description = desc
 
@@ -644,7 +645,7 @@ essentially by dividing by the number of thinlayers) to obtain a value more appr
     # use lay1file for a limit where absorbance is zero
 
     # generation of a Lasers object.
-    las = pc.Lasers.Lasers()
+    las = pc.Lasers()
     arr1 = [1800.0, 2700.0, 30000.0]
     las.add_frequencies(arr1)
     arr2 = [5.0, -2.0, 0.0]
@@ -754,3 +755,196 @@ is being processed from the back end of the sample, i.e., from where it emits.
 The errors between the two figures do not appear to be from the differences between discrete
 integrals and a single analytical function and could require some refinement of the m_calc
 method in the future.
+
+
+**Example 9**. The following example calculates the changes in launch angle of DOVE FWM signal for an x planar geometry input with
+fixed input angles but varying frequencies for w1 and w2.  This can be useful for making certain the full output is
+captured by collection optics for any change of inputs, and can extend to other changes such as angles and w3.
+
+.. plot::
+
+    filepath = os.path.join(os.getcwd(), "tests")
+    # filepath=os.getcwd()
+    lay1file = os.path.join(filepath, "sapphire1.txt")
+    lay2file = os.path.join(filepath, "H2O_1.txt")
+    tksap = 0.02
+    tkwat = 0.01
+
+    # generation of a IsoSample
+    samp1 = pc.IsoSample()
+    desc = "sapphire fw, water sample, sapphire bw"
+    samp1.description = desc
+    samp1.load_layer(lay1file, tksap, label="saphfw")
+    samp1.load_layer(lay2file, tkwat, label="h2o")
+    samp1.load_layer(lay1file, tksap, label="saphfw")
+
+    # generation of a Lasers object.
+    las = pc.Lasers()
+    arr1 = [1800.0, 2700.0, 16000.0]
+    las.add_frequencies(arr1)
+    arr2 = [5.0, -2.0, 0.0]
+    las.add_angles(arr2)
+    arr3 = [-1, 1, 1]
+    las.add_k_coeffs(arr3)
+    arr4 = [1, 1, 1]
+    las.add_pols(arr4)
+    las.change_geometry("planar")
+
+    var2 = np.linspace(2150.00, 3650.00, 151)[None, :]
+    var2a = np.linspace(2150.00, 3650.00, 151)
+    var1 = np.linspace(1200.0, 1900.0, 71)[:, None]
+    var1a = np.linspace(1200.0, 1900.0, 71)
+
+    ch1 = np.zeros([len(var1a), len(var2a)])
+
+
+    for m in range(len(var1a)):
+        for n in range(len(var2a)):
+            las.change_freq(1, var1a[m])
+            las.change_freq(2, var2a[n])
+            angleoutx, angleouty = pc.phasematch.launchangle(samp1, las)
+            ch1[m, n] = angleoutx
+
+    data = wt.Data(name="example 9")
+    data.create_variable(name="w1", units="wn", values=var1)
+    data.create_variable(name="w2", units="wn", values=var2)
+    data.create_channel(name="angleoutx(deg)", values=ch1)
+
+    data.transform("w1", "w2")
+    wt.artists.quick2D(data, channel=0)
+    plt.show()
+
+.. image:: Figure_9.png
+
+
+**Example 10**. Simulation of a map of expected angles to achieve phasematching in planar geometry in the liquid layer
+of a multilayer sapphire cell.   Positive solutions for w2 only, then M factor plotted for a single angle.   Test of
+the create_layer w/ mole fraction method.   Note that the mole fractioned values of n and alpha do not necssarily
+sum correctly because mixtures can interact with each other to modify results.
+
+.. plot::
+
+    filepath = os.path.join(os.getcwd(), "tests")
+    lay1file = os.path.join(filepath, "Ch2Cl2n_paste.txt")
+    lay2file = os.path.join(filepath, "MeOH_kozma_ApplSpec_paste.txt")
+    lay3file = os.path.join(filepath, "sapphire1.txt")
+
+    tkdcm = 0.01  # cm
+    tksap = 0.02  # cm
+
+    # generation of a IsoSample
+    samp1 = pc.IsoSample()
+    desc = "FWM cell with fw sapphire, sample dcm:meoh, and bw sapphire"
+    samp1.description = desc
+    samp1.load_layer(lay3file, tksap, label="sapfw")
+
+    layfilelist = list()
+    molfraclist = [0.75, 0.25]
+    layfilelist.append(lay1file)
+    layfilelist.append(lay2file)
+
+    samp1.create_layer(layfilelist, molfraclist, thickness=tkdcm, label="dcm_meoh")
+    samp1.load_layer(lay2file, tksap, label="sapbw")
+
+    # generation of a Lasers object.
+    las = pc.Lasers()
+    arr1 = [2200.0, 3150.0, 19000.0]
+    las.add_frequencies(arr1)
+    arr2 = [15.0, -7.0, 0.0]
+    las.add_angles(arr2)
+    arr3 = [-1, 1, 1]
+    las.add_k_coeffs(arr3)
+    arr4 = [1, 1, 1]
+    las.add_pols(arr4)
+    las.change_geometry("planar")
+
+    w1start = 1800.00
+    w1end = 2000.00
+    w2start = 2800.000
+    w2end = 3000.00
+
+    var1 = np.linspace(w1start, w1end, 41)[None, :]
+    var1a = np.linspace(w1start, w1end, 41)
+    var2 = np.linspace(w2start, w2end, 61)[:, None]
+    var2a = np.linspace(w2start, w2end, 61)
+
+    ch1 = np.zeros([len(var1a), len(var2a)])
+    ch2 = np.zeros([len(var1a), len(var2a)])
+    ch3 = np.zeros([len(var1a), len(var2a)])
+    test1 = np.zeros([len(var1a), len(var2a)])
+    test2 = np.zeros([len(var1a), len(var2a)])
+
+    mold = int(0)
+
+    data = wt.Data(name="angle solve positive")
+    data.create_variable(name="w1", units="wn", values=var1.T)
+    data.create_variable(name="w2", units="wn", values=var2.T)
+
+
+    #  positive solution.
+    for m in range(len(var1a)):
+        for n in range(len(var2a)):
+            las.change_freq(1, var1a[m])
+            las.change_freq(2, var2a[n])
+            if (m == 0) & (n == 0):
+                angleair2, amount = pc.phasematch.solve_angle(samp1, las, 2, 1, isclose=False)
+                angletemp = list(angleair2)[1]  # this needs to solve for remainder to work
+                if np.any(list(angleair2)):
+                    ch2[m, n] = angletemp
+                    las.change_angle(1, angletemp)
+            elif mold == m:
+                angleair2, amt = pc.phasematch.solve_angle(samp1, las, 2, 1, isclose=True, amt=amount)
+                if np.any(list(angleair2)):
+                    ch2[m, n] = list(angleair2)[0]
+                    las.change_angle(1, list(angleair2)[0])
+                else:
+                    ch2[m, n] = float("nan")
+            else:
+                las.change_angle(1, angletemp)
+                angleair2, amt = pc.phasematch.solve_angle(samp1, las, 2, 1, isclose=True)
+                mold = m
+                if np.any(list(angleair2)):
+                    ch2[m, n] = list(angleair2)[-1]
+                    angletemp = list(angleair2)[-1]
+                    las.change_angle(1, list(angleair2)[-1])
+                else:
+                    ch2[m, n] = float("nan")
+
+
+    # fixed angle M factor solver
+    angle1 = 10.5
+
+    las.change_angle(1, angle1)
+    las.change_angle(2, arr2[1])
+
+    for m in range(len(var1a)):
+        for n in range(len(var2a)):
+            las.change_freq(1, var1a[m])
+            las.change_freq(2, var2a[n])
+            Mlist, Mphase, tklist, Tlist = pc.phasematch.m_calc(samp1, las)
+            ch3[m, n] = np.abs(Mlist[1])
+
+    data.transform("w2", "w1")
+
+    data.create_channel(name="angleforw1_positive", values=ch2)
+    data.channels[0].null = np.min(ch2)
+
+    data.create_channel(name=f"Mfactor at angle1={angle1} deg", values=ch3)
+    data.channels[1].null = 0
+    # data.channels[0].null = 0
+
+    wt.artists.quick2D(data, channel=0)
+    plt.show()
+
+    wt.artists.quick2D(data, channel=1)
+    plt.show()
+
+.. image:: Figure_10a.png
+
+.. image:: Figure_10b.png
+
+As mentioned above, it is important to note that the effective refractive index and absorption coefficient does not
+necessarily equate with the mole fractions of the components of each mixture.   Hydrogen bonded liquids are an example
+where if made very dilute in an inert solvent would have greatly narrowed lineshapes and thus have a different spectrum.
+Nevertheless, there is a pretext for using this additive method to estimate
+phasematching geometries as it may give the user a location to which to begin experimentally finding optimal conditions.

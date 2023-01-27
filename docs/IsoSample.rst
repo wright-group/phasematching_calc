@@ -13,6 +13,7 @@ See Layer(below) for information on the Layers subclass.
 
 Public class methods are:
 
+
 `load_layer(csvfile, thickness, label="")`
 -------------------------
 Given a tab-delmited file on disk, the method loads the layer into memory as appended to the layers already
@@ -26,10 +27,18 @@ order.
 
 User then specifies thickness of the layer in cm.
 
-`change_layer(layernum, csvfile, thickness, label="")`
--------------------------
-Changes the layer specified by layernum to the csvfile on disk, and/or the thickness of the layer, and/or its label
 
+`create_layer(self, csvfilelist, molfraclist, wspacing=1.0, thickness=0.01, label="")`
+------------------------------
+Create a layer from a  string list of csvfiles, float list of mole fractions, and with a desired spacing in w for
+the resulting constructed layer.
+
+The list of w_points for the layer is found by the minimum frequency common to the components up to the maximum
+frequency common between them.
+
+Each tab-delimited file must be in the order of columns (w,a,n) where w is the frequency in (cm-1), a is
+the absorption coefficient in cm-1, and n is the real refractive index.  The rows must be arranged in ascending
+order.
 
 
 `save(file)`

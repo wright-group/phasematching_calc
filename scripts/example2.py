@@ -3,25 +3,25 @@ import WrightTools as wt
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-from config.definitions import ROOT_DIR
 from sympy import *
 
 
-# filepath = os.path.join(ROOT_DIR, "tests")
 filepath = os.path.join(os.getcwd(), "tests")
 lay1file = os.path.join(filepath, "CaF2_Malitson.txt")
 
 tkcaf2 = 0.03
 
 # generation of a IsoSample
-samp1 = pc.IsoSample.IsoSample()
+# samp1 = pc.IsoSample.IsoSample()
+samp1 = pc.IsoSample()
 desc = "caf2window300um"
 samp1.description = desc
 samp1.load_layer(lay1file, tkcaf2, label="caf2")
 
 
 # generation of a Lasers object.
-las = pc.Lasers.Lasers()
+# las = pc.Lasers.Lasers()
+las = pc.Lasers()
 arr1 = [1800.0, 2700.0, 18400.0]
 las.add_frequencies(arr1)
 arr2 = [8.0, 8.0, 8.0]

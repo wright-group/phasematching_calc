@@ -1,6 +1,8 @@
 import numpy as np
 import json
 
+__all__ = ["Lasers"]
+
 
 class Lasers:
     def __init__(self, description=None):

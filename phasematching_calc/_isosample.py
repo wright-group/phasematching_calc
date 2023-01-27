@@ -4,6 +4,8 @@ import numpy as np
 import json
 from types import SimpleNamespace
 
+__all__ = ["IsoSample"]
+
 
 class IsoSample:
     def __init__(self, description=None):
@@ -18,6 +20,78 @@ class IsoSample:
 
     def __setitem__(self, key):
         return setattr(self, key)
+
+    def create_layer(self, csvfilelist, molfraclist, wspacing=1.0, thickness=0.01, label=""):
+        """create layer from a list of csvfiles, each file must contain three columns (L-R):  freq (cm-1), absorption coeff (cm-1), n
+        Freqs should be in increasing order.
+
+        Parameters:
+        -----------
+        csvfilelist:  list (str)
+            list of string paths to tab-delimited spreadsheet files
+        molfraclist:  list (float)
+            mole fractions of each component, which should sum to 1.000 but is not checked as such
+        thickness: float
+           thickness of layer in cm
+        label: str
+           description of layer
+
+        """
+        wbeg = list()
+        wend = list()
+        wdatalist = list()
+        adatalist = list()
+        ndatalist = list()
+
+        for i in range(len(csvfilelist)):
+            csvfile = csvfilelist[i]
+            data = np.loadtxt(csvfile)
+            w_i = np.asarray(data[:, 0], dtype=float)
+            a_i = np.asarray(data[:, 1], dtype=float)
+            n_i = np.asarray(data[:, 2], dtype=float)
+
+            if w_i[0] > w_i[1]:
+                return IndexError(f"freqs for list object {i} must be increasing order")
+
+            wbeg.append(w_i[0])
+            wend.append(w_i[len(w_i) - 1])
+            wdatalist.append(w_i)
+            adatalist.append(a_i)
+            ndatalist.append(n_i)
+
+        wbegt = np.max(wbeg)
+        wendt = np.min(wend)
+        number = int((wendt - wbegt) / wspacing) + 1
+        wvec = np.linspace(wbegt, wendt, number)
+
+        a2array = np.zeros([len(wvec), i + 1], dtype=float)
+        n2array = np.zeros([len(wvec), i + 1], dtype=float)
+
+        for n in range(len(wvec)):
+            w = wvec[n]
+
+            for i in range(len(csvfilelist)):
+                wi = wdatalist[i]
+                ai = adatalist[i]
+                ni = ndatalist[i]
+
+                acalc1 = np.interp(w, wi, ai)
+                ncalc1 = np.interp(w, wi, ni)
+
+                a2array[n, i] = acalc1 * molfraclist[i]
+                n2array[n, i] = ncalc1 * molfraclist[i]
+
+        aout = np.sum(a2array, 1)
+        nout = np.sum(n2array, 1)
+
+        layer = Layer()
+        layer["label"] = label
+        layer["thickness"] = thickness
+        layer["w_points"] = wvec
+        layer["a_points"] = aout
+        layer["n_points"] = nout
+        self.layers.append(layer)
+        return 0
 
     def load_layer(self, csvfile, thickness, label=""):
         """load a layer from a tab-delimited spreadsheet file
@@ -45,40 +119,6 @@ class IsoSample:
         layer["a_points"] = np.asarray(data[:, 1], dtype=float)
         layer["n_points"] = np.asarray(data[:, 2], dtype=float)
         self.layers.append(layer)
-        return 0
-
-    def change_layer(self, layernum, csvfile=None, thickness=None, label=None):
-        """Replace a layer with the given number as per the csvfile, thickness, and label.
-
-        Parameters:
-        -----------
-        layernum : int
-           layer number to change
-        csvfile: path (optional)
-           path to tab-delimited spreadsheet file
-        thickness: float (optional)
-           thickness of layer in cm
-        label: str (optional)
-           description of layer (str)
-        """
-
-        if csvfile is not None:
-            data = np.loadtxt(csvfile)
-            wp = np.asarray(data[:, 0], dtype=float)
-
-            if wp[0] > wp[1]:
-                return IndexError("freqs must be increasing order")
-
-            self.layers[layernum - 1]["w_points"] = wp
-            self.layers[layernum - 1]["a_points"] = np.asarray(data[:, 1], dtype=float)
-            self.layers[layernum - 1]["n_points"] = np.asarray(data[:, 2], dtype=float)
-
-        if thickness is not None:
-            self.layers[layernum - 1]["thickness"] = thickness
-
-        if label is not None:
-            self.layers[layernum - 1]["label"] = label
-
         return 0
 
     def as_dict(self):
