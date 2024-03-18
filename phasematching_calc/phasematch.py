@@ -376,7 +376,8 @@ def _calculate_internals(Iso, Las, zerofreq=False, zerofreqnum=1):
 
 def _guess_output_pol(polsvec):
     """Guesses output polarization based on isotropic averaging, given the input polarizations and that they are linear and
-    aligned with either x or y but not a factor of both.  Returns a 1 or 0...1 means vertical, 0 means horizontal."""
+    aligned with either x or y but not a factor of both.  Returns a 1 or 0...1 means vertical, 0 means horizontal.
+    """
     temppolsvec = np.zeros(len(polsvec))
     for i in range(len(polsvec)):
         if polsvec[i] != 1:
