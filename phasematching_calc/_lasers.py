@@ -210,7 +210,8 @@ class Lasers:
     def calculate_masks(self):
         """Based on the supported geometry list, generate a 0,1 binary type array of x and ys. If 0, that element is
         not to be used in related phasematching calculations.  Binary values are based on whether the inputs
-        need that coordinate specified.  For example, on boxcars, input 2 would have a binary 0 for x and binary 1 for y."""
+        need that coordinate specified.  For example, on boxcars, input 2 would have a binary 0 for x and binary 1 for y.
+        """
         geom = self.geometry
         if geom == "boxcars":
             self.xmask = [1, 0, 0, 1]
