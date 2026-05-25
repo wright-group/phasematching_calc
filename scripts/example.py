@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-
 """ Following example shows how the phasematching (M) factors can be calculated in a 2_dimensional
 manner and converted to a WrightTools data object.  Other methods can be employed such as use
 in a WrightSim object or in other simulations.  The other methods found in the phasematching script

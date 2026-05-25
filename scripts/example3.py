@@ -5,7 +5,6 @@ import numpy as np
 import os
 from sympy import *
 
-
 """Example 3.  Simulation of a map of expected angles to achieve phasematching in the liquid layer
 of a multilayer cell.  Plots separate both possible solutions (negative and positive)."""
 
