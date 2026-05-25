@@ -5,7 +5,6 @@ import numpy as np
 import os
 from sympy import *
 
-
 filepath = os.path.join(os.getcwd(), "tests")
 lay1file = os.path.join(filepath, "CaF2_Malitson.txt")
 
