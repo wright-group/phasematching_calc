@@ -5,7 +5,6 @@ import numpy as np
 import os
 from sympy import *
 
-
 filepath = os.path.join(os.getcwd(), "tests")
 lay1file = os.path.join(filepath, "CH3CN_paste_1.txt")
 lay2file = os.path.join(filepath, "sapphire1.txt")
